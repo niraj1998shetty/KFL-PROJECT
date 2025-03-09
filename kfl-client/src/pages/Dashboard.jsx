@@ -166,9 +166,9 @@ const Dashboard = () => {
       
       setAllPredictions(newAllPredictions);
       
-      // Update userPredictions state
+       // Update userPredictions state
       const updatedUserPredictions = [...userPredictions];
-      const existingUserPredIndex = updatedUserPredictions.findIndex(p => p.match._id === matchId);
+      const existingUserPredIndex = updatedUserPredictions.findIndex(p => p.match && p.match._id === matchId);
       
       if (existingUserPredIndex !== -1) {
         // Update existing prediction
@@ -179,14 +179,18 @@ const Dashboard = () => {
         };
       } else {
         // Add new prediction
+        const match = todaysMatches.find((m) => m._id === matchId);
+        if (!match) {
+          console.error("Match not found:", matchId);
+          return;
+        }
         updatedUserPredictions.push({
           _id: res.data._id,
-          match: todaysMatches.find(m => m._id === matchId),
+          match: match,
           predictedWinner: winningTeam,
           playerOfTheMatch: potm
         });
       }
-      
       setUserPredictions(updatedUserPredictions);
       
       setActivePredictionModal(null);
