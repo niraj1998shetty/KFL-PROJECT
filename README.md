@@ -35,7 +35,7 @@ VITE_API_URL=
 
 
 #Backend .env
-create a folder called .env at root of react (kfl-client)
+create a folder called .env at root of backend (kfl-server)
 and Copy paste this
 NODE_ENV=development
 PORT=5000
