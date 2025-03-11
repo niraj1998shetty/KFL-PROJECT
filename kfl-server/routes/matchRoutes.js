@@ -4,6 +4,7 @@ const {
   getMatches,
   getTodayMatches,
   getMatchById,
+  getMatchesByDate,
   createMatch,
   updateMatchResult
 } = require('../controllers/matchController');
@@ -15,6 +16,7 @@ router.use(protect);
 // Get all matches and today's matches
 router.get('/', getMatches);
 router.get('/today', getTodayMatches);
+router.get('/date/:date', getMatchesByDate);
 router.get('/:id', getMatchById);
 
 // Admin-only routes for creating and updating matches
