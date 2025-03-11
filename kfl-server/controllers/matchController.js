@@ -25,6 +25,24 @@ const getTodayMatches = asyncHandler(async (req, res) => {
   res.status(200).json(matches);
 });
 
+// @desc    Get matches by specific date
+// @route   GET /api/matches/date/:date
+// @access  Private
+const getMatchesByDate = asyncHandler(async (req, res) => {
+  const { date } = req.params;
+  
+  // Verify date format (DD/MM/YYYY)
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+    res.status(400);
+    throw new Error('Invalid date format. Use DD/MM/YYYY');
+  }
+  
+  const matches = await Match.find({ date }).sort({ time: 1 });
+  
+  // Return empty array instead of 404 when no matches found
+  res.status(200).json(matches);
+});
+
 // @desc    Get match by ID
 // @route   GET /api/matches/:id
 // @access  Private
@@ -113,6 +131,7 @@ module.exports = {
   getMatches,
   getTodayMatches,
   getMatchById,
+  getMatchesByDate,
   createMatch,
   updateMatchResult
 };
