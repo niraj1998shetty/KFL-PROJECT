@@ -12,7 +12,6 @@ clone the repo into your local
 #To run React  
 cd ./kfl-client  
 run--> npm ci  
-if not properly installed then do run--> npm i  
 to run the app do --> npm run dev  
 if error occurs regarding package installation see package.json file (dependecies) and do individual installation( i.e --> npm i react react-router-dom lucide-react axios etc)  
 
@@ -22,7 +21,6 @@ create on folder in local and initialize git there
 clone the repo into your local  
 cd ./kfl-server  
 run--> npm ci  
-if not properly installed then do run--> npm i  
 to run the app do --> npm run start  
 if error occurs regarding package installation see package.json file (dependecies) and do individual installation( i.e --> npm i express mongoose cors jsonwebtoken etc)  
   
