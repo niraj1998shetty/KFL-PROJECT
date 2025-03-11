@@ -479,40 +479,40 @@ const Dashboard = () => {
   const renderDateNavigation = () => {
     return (
       <div className="flex justify-center items-center mb-6 space-x-4">
-        <button 
-          onClick={goToPreviousDay}
-          disabled={dateLoading || isPreviousDisabled()}
-          className={`bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-l flex items-center ${
-            isPreviousDisabled() ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-          Previous
-        </button>
-        
-        <button
-          onClick={goToToday}
-          disabled={dateLoading || isToday(currentDate)}
-          className={`${isToday(currentDate) ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'} text-white font-bold py-2 px-6 rounded ${
-            isToday(currentDate) ? 'opacity-50' : ''
-          }`}
-        >
-          Today
-        </button>
-        
-        <button 
-          onClick={goToNextDay}
-          disabled={dateLoading}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-r flex items-center"
-        >
-          Next
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-          </svg>
-        </button>
-      </div>
+      <button 
+        onClick={goToPreviousDay}
+        disabled={dateLoading || isPreviousDisabled()}
+        className={`bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-3 rounded-l flex items-center text-sm ${
+          isPreviousDisabled() ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+        Previous
+      </button>
+      
+      <button
+        onClick={goToToday}
+        disabled={dateLoading || isToday(currentDate)}
+        className={`${isToday(currentDate) ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'} text-white font-bold py-1 px-4 rounded text-sm ${
+          isToday(currentDate) ? 'opacity-50' : ''
+        }`}
+      >
+        Back to Today
+      </button>
+      
+      <button 
+        onClick={goToNextDay}
+        disabled={dateLoading}
+        className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-3 rounded-r flex items-center text-sm"
+      >
+        Next
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+        </svg>
+      </button>
+    </div>
     );
   };
 
