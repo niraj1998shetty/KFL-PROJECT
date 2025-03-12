@@ -6,6 +6,7 @@ const {
   getMatchById,
   getMatchesByDate,
   createMatch,
+  isMatchStarted,
   updateMatchResult
 } = require('../controllers/matchController');
 const { protect, admin } = require('../middleware/authMiddleware');
@@ -18,6 +19,7 @@ router.get('/', getMatches);
 router.get('/today', getTodayMatches);
 router.get('/date/:date', getMatchesByDate);
 router.get('/:id', getMatchById);
+router.get('/:id/started', isMatchStarted);
 
 // Admin-only routes for creating and updating matches
 router.post('/', admin, createMatch);
