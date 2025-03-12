@@ -23,6 +23,8 @@ const Dashboard = () => {
   // For date navigation
   const [currentDate, setCurrentDate] = useState(new Date());
   const [displayDate, setDisplayDate] = useState('');
+  const [matchStatus, setMatchStatus] = useState({});
+
   
   const API_URL = 'http://localhost:5000/api';
 
@@ -49,12 +51,12 @@ const Dashboard = () => {
   };
   
   // to check match has started or not
-  const hasMatchStarted = (match) => {
-    const matchDate = match.date.split('/').reverse().join('-');
-    const matchTime = match.time.split(' ')[0];
-    const matchDateTime = new Date(`${matchDate}T${matchTime}`);
-    return new Date() > matchDateTime;
-  };
+  // const hasMatchStarted = (match) => {
+  //   const matchDate = match.date.split('/').reverse().join('-');
+  //   const matchTime = match.time.split(' ')[0];
+  //   const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+  //   return new Date() > matchDateTime;
+  // };
 
   // Function to navigate to previous day
   const goToPreviousDay = () => {
@@ -132,6 +134,16 @@ const Dashboard = () => {
       setAllPredictions(allMatchPredictions);
     } catch (error) {
       console.error('Error fetching predictions for matches:', error);
+    }
+  };
+
+  const fetchMatchStatus = async (matchId) => {
+    try {
+      const res = await axios.get(`${API_URL}/matches/${matchId}/started`);
+      return res.data.started;
+    } catch (error) {
+      console.error('Error checking match status:', error);
+      return false;
     }
   };
 
@@ -283,6 +295,20 @@ const Dashboard = () => {
     setIsEditing(true);
   };
 
+  useEffect(() => {
+    const loadMatchStatuses = async () => {
+      const statuses = {};
+      for (const match of matches) {
+        statuses[match._id] = await fetchMatchStatus(match._id);
+      }
+      setMatchStatus(statuses);
+    };
+    
+    if (matches.length > 0) {
+      loadMatchStatuses();
+    }
+  }, [matches]);
+
   const handlePredictionSubmit = async (matchId, winningTeam, potm) => {
     try {
       const predictionData = {
@@ -378,7 +404,7 @@ const Dashboard = () => {
   // render prediction tables based on match status
   const renderPredictionTable = (match) => {
     const matchPredictions = allPredictions[match._id] || [];
-    const matchStarted = hasMatchStarted(match);
+    const matchStarted = matchStatus[match._id];
     
     // list of all users with their predictions (if any)
     const userPredictionsList = allUsers.map(user => {
@@ -564,7 +590,7 @@ const Dashboard = () => {
           {!dateLoading && matches.length > 0 && (
             <div className="mb-8">
               {matches.map((match) => {
-                const matchStarted = hasMatchStarted(match);
+                const matchStarted = matchStatus[match._id];
                 const userPrediction = predictions[match._id];
                 
                 return (
