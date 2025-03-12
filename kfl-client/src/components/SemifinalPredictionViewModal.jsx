@@ -6,17 +6,13 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
   const [loading, setLoading] = useState(true);
   const API_URL = 'http://localhost:5000/api';
 
-  // Team name lookup object (for display purposes)
-
   useEffect(() => {
     const fetchPredictions = async () => {
       try {
         setLoading(true);
-        // This endpoint returns either all predictions or just the current user's
-        // depending on the current date (before or after visibility date)
         const response = await axios.get(`${API_URL}/semifinals/all`);
         
-        // Format the predictions for display
+        // Format the prediction
         const formattedPredictions = response.data.map(prediction => ({
           user: prediction.user.name,
           mobile: prediction.user.mobile,
