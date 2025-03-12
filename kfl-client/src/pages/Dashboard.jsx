@@ -28,12 +28,12 @@ const Dashboard = () => {
   
   const API_URL = 'http://localhost:5000/api';
 
-  // Format date as DD/MM/YYYY
+  // DD/MM/YYYY
   const formatDate = (date) => {
     return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
   };
   
-  // Check if date is today
+  // today
   const isToday = (date) => {
     const today = new Date();
     return date.getDate() === today.getDate() && 
@@ -41,7 +41,7 @@ const Dashboard = () => {
            date.getFullYear() === today.getFullYear();
   };
   
-  // Check if we should disable the previous button
+  //disable the previous btn
   const isPreviousDisabled = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -50,25 +50,16 @@ const Dashboard = () => {
     return currentDateCopy <= today;
   };
   
-  // to check match has started or not
-  // const hasMatchStarted = (match) => {
-  //   const matchDate = match.date.split('/').reverse().join('-');
-  //   const matchTime = match.time.split(' ')[0];
-  //   const matchDateTime = new Date(`${matchDate}T${matchTime}`);
-  //   return new Date() > matchDateTime;
-  // };
-
-  // Function to navigate to previous day
+  // navigate to previous
   const goToPreviousDay = () => {
-    if (isPreviousDisabled()) return;
-    
+    if (isPreviousDisabled()) return; 
     setDateLoading(true);
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() - 1);
     setCurrentDate(newDate);
   };
 
-  // Function to navigate to next day
+  // navigate to next
   const goToNextDay = () => {
     setDateLoading(true);
     const newDate = new Date(currentDate);
@@ -76,19 +67,18 @@ const Dashboard = () => {
     setCurrentDate(newDate);
   };
 
-  // Function to go back to today
+  // go back to today
   const goToToday = () => {
     if (isToday(currentDate)) return;
     
     setDateLoading(true);
     setCurrentDate(new Date());
     
-    // Directly fetch today's matches to ensure consistency
+    // fetch today's matches directly
     axios.get(`${API_URL}/matches/today`)
       .then(res => {
         setMatches(res.data);
         
-        // Then fetch all predictions for these matches
         fetchPredictionsForMatches(res.data);
       })
       .catch(error => {
@@ -100,10 +90,10 @@ const Dashboard = () => {
       });
   };
 
-  // Helper function to fetch predictions for a list of matches
+  // Helper functions to fetch
   const fetchPredictionsForMatches = async (matchesList) => {
     try {
-      // Fetch all users' predictions for each match
+      //  all users' predictions for each macth
       const allMatchPredictions = {};
       for (const match of matchesList) {
         try {
@@ -115,7 +105,7 @@ const Dashboard = () => {
         }
       }
       
-      // Format predictions for easier access
+      // Format
       const formattedPredictions = {};
       for (const match of matchesList) {
         const userPred = userPredictions.find(p => p.match && p.match._id === match._id);
@@ -147,33 +137,29 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch matches for the specified date
   const fetchMatchesForDate = async (date) => {
     try {
       setDateLoading(true);
       const formattedDate = formatDate(date);
       setDisplayDate(formattedDate);
       
-      // Properly encode the date for the URL to handle slashes
       const encodedDate = encodeURIComponent(formattedDate);
       
       let matchesData = [];
       
-      // For today's date, try both endpoints in case of issues
       if (isToday(date)) {
         try {
-          // First try the today endpoint since it's more reliable
+          
           const todayRes = await axios.get(`${API_URL}/matches/today`);
           matchesData = todayRes.data;
           
-          // If no matches returned, try the date endpoint as fallback
           if (matchesData.length === 0) {
             const dateRes = await axios.get(`${API_URL}/matches/date/${encodedDate}`);
             matchesData = dateRes.data;
           }
         } catch (todayError) {
           console.error('Error fetching today\'s matches:', todayError);
-          // Fall back to date-based query
+         
           try {
             const dateRes = await axios.get(`${API_URL}/matches/date/${encodedDate}`);
             matchesData = dateRes.data;
@@ -182,18 +168,15 @@ const Dashboard = () => {
           }
         }
       } else {
-        // For other dates, use the date endpoint
         const res = await axios.get(`${API_URL}/matches/date/${encodedDate}`);
         matchesData = res.data;
       }
       
       setMatches(matchesData);
       
-      // Fetch all predictions if we have matches
       if (matchesData.length > 0) {
         await fetchPredictionsForMatches(matchesData);
       } else {
-        // Clear predictions if no matches
         setPredictions({});
         setAllPredictions({});
       }
@@ -209,7 +192,6 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // Only fetch data if currentUser is available
     if (!currentUser) {
       return;
     }
@@ -218,27 +200,21 @@ const Dashboard = () => {
       try {
         setLoading(true);
         
-        // Set the display date
         const today = new Date();
         setDisplayDate(formatDate(today));
         
-        // Fetch all players for prediction modal
         const playersRes = await axios.get(`${API_URL}/players`);
         setPlayers(playersRes.data);
         
-        // Fetch user's predictions
         const predictionsRes = await axios.get(`${API_URL}/predictions/user`);
         setUserPredictions(predictionsRes.data);
         
-        // Fetch all users
         const usersRes = await axios.get(`${API_URL}/auth/allUsers`);
         setAllUsers(usersRes.data);
         
-        // Fetch today's matches
         const todayMatches = await axios.get(`${API_URL}/matches/today`);
         setMatches(todayMatches.data);
         
-        // Format predictions for easier access
         const formattedPredictions = {};
         predictionsRes.data.forEach((pred) => {
           if (pred.match) {
@@ -319,7 +295,6 @@ const Dashboard = () => {
       
       const res = await axios.post(`${API_URL}/predictions`, predictionData);
       
-      // Update local predictions
       const newPredictions = { ...predictions };
       newPredictions[matchId] = {
         id: res.data._id,
@@ -331,10 +306,8 @@ const Dashboard = () => {
       
       setPredictions(newPredictions);
       
-      // Update all predictions state
       const newAllPredictions = { ...allPredictions };
-      
-      // Checking if this is a new prediction or an update
+     
       const existingPredictionIndex = newAllPredictions[matchId]?.findIndex(
         p => p.user?._id === currentUser._id
       );
@@ -366,19 +339,19 @@ const Dashboard = () => {
       
       setAllPredictions(newAllPredictions);
       
-      // Update userPredictions state
+    
       const updatedUserPredictions = [...userPredictions];
       const existingUserPredIndex = updatedUserPredictions.findIndex(p => p.match && p.match._id === matchId);
       
       if (existingUserPredIndex !== -1) {
-        // Update existing prediction
+       
         updatedUserPredictions[existingUserPredIndex] = {
           ...updatedUserPredictions[existingUserPredIndex],
           predictedWinner: winningTeam,
           playerOfTheMatch: potm
         };
       } else {
-        // Add new prediction
+       
         const match = matches.find((m) => m._id === matchId);
         if (!match) {
           console.error("Match not found:", matchId);
@@ -401,14 +374,13 @@ const Dashboard = () => {
     }
   };
 
-  // render prediction tables based on match status
   const renderPredictionTable = (match) => {
     const matchPredictions = allPredictions[match._id] || [];
     const matchStarted = matchStatus[match._id];
     
-    // list of all users with their predictions (if any)
+    
     const userPredictionsList = allUsers.map(user => {
-      // Find this user's prediction for this match
+      
       const prediction = matchPredictions.find(p => p.user?._id === user._id);
       
       return {
@@ -447,7 +419,6 @@ const Dashboard = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {userPredictionsList.length > 0 ? (
                 userPredictionsList
-                  // Filter to show only current user if match hasn't started
                   .filter(userPred => matchStarted || userPred.isCurrentUser)
                   .map((userPred) => {
                     return (
@@ -501,7 +472,6 @@ const Dashboard = () => {
     );
   };
 
-  // Navigation controls
   const renderDateNavigation = () => {
     return (
       <div className="flex justify-center items-center mb-6 space-x-4">
