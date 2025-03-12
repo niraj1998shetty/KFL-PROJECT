@@ -75,6 +75,22 @@ const createMatch = asyncHandler(async (req, res) => {
   res.status(201).json(match);
 });
 
+const isMatchStarted = asyncHandler(async (req, res) => {
+  const match = await Match.findById(req.params.id);
+  
+  if (!match) {
+    res.status(404);
+    throw new Error('Match not found');
+  }
+  
+  const serverTime = new Date();
+  const matchDate = match.date.split('/').reverse().join('-');
+  const matchTime = match.time.split(' ')[0];
+  const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+  
+  res.json({ started: serverTime > matchDateTime });
+});
+
 // @desc    Update match result
 // @route   PUT /api/matches/:id/result
 // @access  Private (Admin only)
@@ -133,5 +149,6 @@ module.exports = {
   getMatchById,
   getMatchesByDate,
   createMatch,
+  isMatchStarted,
   updateMatchResult
 };
