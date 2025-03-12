@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { User, LogOut } from 'lucide-react';
 import SemifinalPredictionModal from './SemifinalPredictionModal';
 import SemifinalPredictionViewModal from './SemifinalPredictionViewModal';
-import axios from 'axios'; // Add axios import
+import axios from 'axios';
 
 const TopBar = () => {
   const { currentUser, logout } = useAuth();
@@ -19,13 +19,11 @@ const TopBar = () => {
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   
-  // Add API URL constant
   const API_URL = 'http://localhost:5000/api';
 
   useEffect(() => {
-    // Check if user has already made a semifinal prediction using API
     const checkSemifinalPrediction = async () => {
-      if (!currentUser) return; // Guard clause to prevent API calls without a user
+      if (!currentUser) return;
       
       try {
         const response = await axios.get(`${API_URL}/semifinals/me`);
