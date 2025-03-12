@@ -12,24 +12,200 @@ const Dashboard = () => {
   const [predictions, setPredictions] = useState({});
   const [activePredictionModal, setActivePredictionModal] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [todaysMatches, setTodaysMatches] = useState([]);
+  const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState([]);
   const [userPredictions, setUserPredictions] = useState([]);
   const [allPredictions, setAllPredictions] = useState({});
   const [allUsers, setAllUsers] = useState([]);
+  const [dateLoading, setDateLoading] = useState(false);
+  
+  // For date navigation
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [displayDate, setDisplayDate] = useState('');
+  const [matchStatus, setMatchStatus] = useState({});
 
-  const today = new Date();
-  const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
   
   const API_URL = 'http://localhost:5000/api';
 
-  // to check match has started or not--
-  const hasMatchStarted = (match) => {
-    const matchDate = match.date.split('/').reverse().join('-');
-    const matchTime = match.time.split(' ')[0];
-    const matchDateTime = new Date(`${matchDate}T${matchTime}`);
-    return new Date() > matchDateTime;
+  // Format date as DD/MM/YYYY
+  const formatDate = (date) => {
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+  };
+  
+  // Check if date is today
+  const isToday = (date) => {
+    const today = new Date();
+    return date.getDate() === today.getDate() && 
+           date.getMonth() === today.getMonth() && 
+           date.getFullYear() === today.getFullYear();
+  };
+  
+  // Check if we should disable the previous button
+  const isPreviousDisabled = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const currentDateCopy = new Date(currentDate);
+    currentDateCopy.setHours(0, 0, 0, 0);
+    return currentDateCopy <= today;
+  };
+  
+  // to check match has started or not
+  // const hasMatchStarted = (match) => {
+  //   const matchDate = match.date.split('/').reverse().join('-');
+  //   const matchTime = match.time.split(' ')[0];
+  //   const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+  //   return new Date() > matchDateTime;
+  // };
+
+  // Function to navigate to previous day
+  const goToPreviousDay = () => {
+    if (isPreviousDisabled()) return;
+    
+    setDateLoading(true);
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() - 1);
+    setCurrentDate(newDate);
+  };
+
+  // Function to navigate to next day
+  const goToNextDay = () => {
+    setDateLoading(true);
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + 1);
+    setCurrentDate(newDate);
+  };
+
+  // Function to go back to today
+  const goToToday = () => {
+    if (isToday(currentDate)) return;
+    
+    setDateLoading(true);
+    setCurrentDate(new Date());
+    
+    // Directly fetch today's matches to ensure consistency
+    axios.get(`${API_URL}/matches/today`)
+      .then(res => {
+        setMatches(res.data);
+        
+        // Then fetch all predictions for these matches
+        fetchPredictionsForMatches(res.data);
+      })
+      .catch(error => {
+        console.error('Error fetching today\'s matches:', error);
+        setMatches([]);
+      })
+      .finally(() => {
+        setDateLoading(false);
+      });
+  };
+
+  // Helper function to fetch predictions for a list of matches
+  const fetchPredictionsForMatches = async (matchesList) => {
+    try {
+      // Fetch all users' predictions for each match
+      const allMatchPredictions = {};
+      for (const match of matchesList) {
+        try {
+          const allPredictionsRes = await axios.get(`${API_URL}/predictions/match/${match._id}/all`);
+          allMatchPredictions[match._id] = allPredictionsRes.data;
+        } catch (error) {
+          console.error(`Error fetching predictions for match ${match._id}:`, error);
+          allMatchPredictions[match._id] = [];
+        }
+      }
+      
+      // Format predictions for easier access
+      const formattedPredictions = {};
+      for (const match of matchesList) {
+        const userPred = userPredictions.find(p => p.match && p.match._id === match._id);
+        if (userPred) {
+          formattedPredictions[match._id] = {
+            id: userPred._id,
+            user: currentUser.name,
+            mobile: currentUser.mobile,
+            winningTeam: userPred.predictedWinner,
+            potm: userPred.playerOfTheMatch,
+          };
+        }
+      }
+      
+      setPredictions(formattedPredictions);
+      setAllPredictions(allMatchPredictions);
+    } catch (error) {
+      console.error('Error fetching predictions for matches:', error);
+    }
+  };
+
+  const fetchMatchStatus = async (matchId) => {
+    try {
+      const res = await axios.get(`${API_URL}/matches/${matchId}/started`);
+      return res.data.started;
+    } catch (error) {
+      console.error('Error checking match status:', error);
+      return false;
+    }
+  };
+
+  // Fetch matches for the specified date
+  const fetchMatchesForDate = async (date) => {
+    try {
+      setDateLoading(true);
+      const formattedDate = formatDate(date);
+      setDisplayDate(formattedDate);
+      
+      // Properly encode the date for the URL to handle slashes
+      const encodedDate = encodeURIComponent(formattedDate);
+      
+      let matchesData = [];
+      
+      // For today's date, try both endpoints in case of issues
+      if (isToday(date)) {
+        try {
+          // First try the today endpoint since it's more reliable
+          const todayRes = await axios.get(`${API_URL}/matches/today`);
+          matchesData = todayRes.data;
+          
+          // If no matches returned, try the date endpoint as fallback
+          if (matchesData.length === 0) {
+            const dateRes = await axios.get(`${API_URL}/matches/date/${encodedDate}`);
+            matchesData = dateRes.data;
+          }
+        } catch (todayError) {
+          console.error('Error fetching today\'s matches:', todayError);
+          // Fall back to date-based query
+          try {
+            const dateRes = await axios.get(`${API_URL}/matches/date/${encodedDate}`);
+            matchesData = dateRes.data;
+          } catch (dateError) {
+            console.error(`Error fetching matches by date (${formattedDate}):`, dateError);
+          }
+        }
+      } else {
+        // For other dates, use the date endpoint
+        const res = await axios.get(`${API_URL}/matches/date/${encodedDate}`);
+        matchesData = res.data;
+      }
+      
+      setMatches(matchesData);
+      
+      // Fetch all predictions if we have matches
+      if (matchesData.length > 0) {
+        await fetchPredictionsForMatches(matchesData);
+      } else {
+        // Clear predictions if no matches
+        setPredictions({});
+        setAllPredictions({});
+      }
+      
+      setDateLoading(false);
+    } catch (error) {
+      console.error(`Error fetching matches for date ${formatDate(date)}:`, error);
+      setMatches([]);
+      setPredictions({});
+      setAllPredictions({});
+      setDateLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -38,11 +214,13 @@ const Dashboard = () => {
       return;
     }
 
-    const fetchTodaysMatches = async () => {
+    const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_URL}/matches/today`);
-        setTodaysMatches(res.data);
+        
+        // Set the display date
+        const today = new Date();
+        setDisplayDate(formatDate(today));
         
         // Fetch all players for prediction modal
         const playersRes = await axios.get(`${API_URL}/players`);
@@ -50,19 +228,20 @@ const Dashboard = () => {
         
         // Fetch user's predictions
         const predictionsRes = await axios.get(`${API_URL}/predictions/user`);
-        console.log('predictionsRes:', predictionsRes.data);
- 
         setUserPredictions(predictionsRes.data);
         
         // Fetch all users
         const usersRes = await axios.get(`${API_URL}/auth/allUsers`);
         setAllUsers(usersRes.data);
         
+        // Fetch today's matches
+        const todayMatches = await axios.get(`${API_URL}/matches/today`);
+        setMatches(todayMatches.data);
+        
         // Format predictions for easier access
         const formattedPredictions = {};
         predictionsRes.data.forEach((pred) => {
           if (pred.match) {
-            // Check if pred.match is not null or undefined
             formattedPredictions[pred.match._id] = {
               id: pred._id,
               user: currentUser.name,
@@ -78,7 +257,7 @@ const Dashboard = () => {
         
         // Fetch all users' predictions for each match
         const allMatchPredictions = {};
-        for (const match of res.data) {
+        for (const match of todayMatches.data) {
           try {
             const allPredictionsRes = await axios.get(`${API_URL}/predictions/match/${match._id}/all`);
             allMatchPredictions[match._id] = allPredictionsRes.data;
@@ -91,13 +270,20 @@ const Dashboard = () => {
         setAllPredictions(allMatchPredictions);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching today\'s matches:', error);
+        console.error('Error fetching initial data:', error);
         setLoading(false);
       }
     };
 
-    fetchTodaysMatches();
+    fetchInitialData();
   }, [currentUser]);  // Only depend on currentUser, not API_URL
+
+  // Effect to fetch matches when the date changes
+  useEffect(() => {
+    if (currentUser) {
+      fetchMatchesForDate(currentDate);
+    }
+  }, [currentDate, currentUser]);
 
   const handlePredictionClick = (matchId) => {
     setActivePredictionModal(matchId);
@@ -108,6 +294,20 @@ const Dashboard = () => {
     setActivePredictionModal(matchId);
     setIsEditing(true);
   };
+
+  useEffect(() => {
+    const loadMatchStatuses = async () => {
+      const statuses = {};
+      for (const match of matches) {
+        statuses[match._id] = await fetchMatchStatus(match._id);
+      }
+      setMatchStatus(statuses);
+    };
+    
+    if (matches.length > 0) {
+      loadMatchStatuses();
+    }
+  }, [matches]);
 
   const handlePredictionSubmit = async (matchId, winningTeam, potm) => {
     try {
@@ -166,7 +366,7 @@ const Dashboard = () => {
       
       setAllPredictions(newAllPredictions);
       
-       // Update userPredictions state
+      // Update userPredictions state
       const updatedUserPredictions = [...userPredictions];
       const existingUserPredIndex = updatedUserPredictions.findIndex(p => p.match && p.match._id === matchId);
       
@@ -179,7 +379,7 @@ const Dashboard = () => {
         };
       } else {
         // Add new prediction
-        const match = todaysMatches.find((m) => m._id === matchId);
+        const match = matches.find((m) => m._id === matchId);
         if (!match) {
           console.error("Match not found:", matchId);
           return;
@@ -204,7 +404,7 @@ const Dashboard = () => {
   // render prediction tables based on match status
   const renderPredictionTable = (match) => {
     const matchPredictions = allPredictions[match._id] || [];
-    const matchStarted = hasMatchStarted(match);
+    const matchStarted = matchStatus[match._id];
     
     // list of all users with their predictions (if any)
     const userPredictionsList = allUsers.map(user => {
@@ -301,6 +501,47 @@ const Dashboard = () => {
     );
   };
 
+  // Navigation controls
+  const renderDateNavigation = () => {
+    return (
+      <div className="flex justify-center items-center mb-6 space-x-4">
+      <button 
+        onClick={goToPreviousDay}
+        disabled={dateLoading || isPreviousDisabled()}
+        className={`bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-3 rounded-l flex items-center text-sm ${
+          isPreviousDisabled() ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+        Previous
+      </button>
+      
+      <button
+        onClick={goToToday}
+        disabled={dateLoading || isToday(currentDate)}
+        className={`${isToday(currentDate) ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'} text-white font-bold py-1 px-4 rounded text-sm ${
+          isToday(currentDate) ? 'opacity-50' : ''
+        }`}
+      >
+        Back to Today
+      </button>
+      
+      <button 
+        onClick={goToNextDay}
+        disabled={dateLoading}
+        className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-3 rounded-r flex items-center text-sm"
+      >
+        Next
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+        </svg>
+      </button>
+    </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen min-w-full">
@@ -324,23 +565,32 @@ const Dashboard = () => {
         <Sidebar />
         
         <main className="flex-1 p-6 bg-gray-100">
+          {/* Date navigation controls */}
+          {renderDateNavigation()}
+          
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold">Date: {formattedDate}</h2>
-            {todaysMatches.length > 0 ? (
+            <h2 className="text-2xl font-bold">
+              Date: {displayDate}
+              {isToday(currentDate) && <span className="ml-2 text-blue-500">(Today)</span>}
+            </h2>
+            
+            {dateLoading ? (
+              <p className="text-lg text-gray-600 mt-2">Loading matches...</p>
+            ) : matches.length > 0 ? (
               <p className="text-lg text-gray-600 mt-2">
-                {todaysMatches.length === 1 
-                  ? `Today's Match: ${todaysMatches[0].team1} vs ${todaysMatches[0].team2}` 
-                  : `Today's Matches: ${todaysMatches.length}`}
+                {matches.length === 1 
+                  ? `Match: ${matches[0].team1} vs ${matches[0].team2}` 
+                  : `Matches: ${matches.length}`}
               </p>
             ) : (
-              <p className="text-lg text-gray-600 mt-2">No matches scheduled for today</p>
+              <p className="text-lg text-gray-600 mt-2">No matches scheduled for this date</p>
             )}
           </div>
           
-          {todaysMatches.length > 0 && (
+          {!dateLoading && matches.length > 0 && (
             <div className="mb-8">
-              {todaysMatches.map((match) => {
-                const matchStarted = hasMatchStarted(match);
+              {matches.map((match) => {
+                const matchStarted = matchStatus[match._id];
                 const userPrediction = predictions[match._id];
                 
                 return (
@@ -378,11 +628,11 @@ const Dashboard = () => {
             </div>
           )}
           
-          {todaysMatches.length > 0 && todaysMatches.map((match) => renderPredictionTable(match))}
+          {!dateLoading && matches.length > 0 && matches.map((match) => renderPredictionTable(match))}
           
-          {todaysMatches.length === 0 && (
+          {!dateLoading && matches.length === 0 && (
             <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-center text-lg text-gray-600">No matches scheduled for today. Check back tomorrow!</p>
+              <p className="text-center text-lg text-gray-600">No matches scheduled for this date. Try another day!</p>
             </div>
           )}
         </main>
@@ -390,9 +640,9 @@ const Dashboard = () => {
       
       <Footer />
       
-      {activePredictionModal !== null && todaysMatches.find(match => match._id === activePredictionModal) && (
+      {activePredictionModal !== null && matches.find(match => match._id === activePredictionModal) && (
         <MatchPredictionModal 
-          match={todaysMatches.find(match => match._id === activePredictionModal)}
+          match={matches.find(match => match._id === activePredictionModal)}
           onClose={() => {
             setActivePredictionModal(null);
             setIsEditing(false);
