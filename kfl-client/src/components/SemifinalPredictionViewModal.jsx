@@ -4,7 +4,7 @@ import axios from 'axios';
 const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_URL = 'http://localhost:5000/api';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
   useEffect(() => {
     const fetchPredictions = async () => {
