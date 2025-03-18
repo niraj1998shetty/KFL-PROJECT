@@ -23,9 +23,25 @@ app.use((req, res, next) => {
   next();
 
 });
- 
+const allowedOrigins = [
+  'https://katthegangfantasyleague.com',
+  'http://localhost:5000/api',
+  'http://localhost:5173'
+];
 // Middleware
-app.use(cors());
+//app.use(cors({ origin: 'https://katthegangfantasyleague.com', credentials: true }));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+
 app.use(express.json());
 
 // Routes
