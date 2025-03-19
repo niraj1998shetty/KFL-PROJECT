@@ -1,32 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 const RegisterPage = () => {
-  const [name, setName] = useState('');
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validating mobile number format (10 dig)
     if (!/^[6-9]\d{9}$/.test(mobileNumber)) {
-      setError('Please enter a valid 10-digit Indian mobile number');
+      setError("Please enter a valid 10-digit Indian mobile number");
       return;
     }
-    
+
     try {
-      setError('');
+      setError("");
       setLoading(true);
       await register({ name, mobile: mobileNumber, password });
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (error) {
       setError(error.message);
     } finally {
@@ -35,24 +35,36 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat" 
-         style={{ backgroundImage: "linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.7)), url('/api/placeholder/1200/800')" }}>
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.7)), url('/api/placeholder/1200/800')",
+      }}
+    >
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-800">KattheGang Fantasy League</h1>
-          <p className="text-gray-600 mt-2">Create an account to join the league</p>
+          <h1 className="text-3xl font-bold text-blue-800">
+            KattheGang Fantasy League
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Create an account to join the league
+          </p>
         </div>
-        
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-              Full Name
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="name"
+            >
+              Name
             </label>
             <input
               id="name"
@@ -64,9 +76,12 @@ const RegisterPage = () => {
               required
             />
           </div>
-          
+
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mobile">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="mobile"
+            >
               Mobile Number
             </label>
             <input
@@ -80,11 +95,16 @@ const RegisterPage = () => {
               maxLength="10"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">Format: 10 digits starting with 6-9</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Enter ypur whatsapp number
+            </p>
           </div>
-          
+
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="password"
+            >
               Password
             </label>
             <div className="relative">
@@ -110,7 +130,7 @@ const RegisterPage = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="mb-6">
             <button
               type="submit"
@@ -127,10 +147,10 @@ const RegisterPage = () => {
               )}
             </button>
           </div>
-          
+
           <div className="text-center">
             <p className="text-gray-600">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <Link to="/login" className="text-blue-600 hover:text-blue-800">
                 Sign In
               </Link>

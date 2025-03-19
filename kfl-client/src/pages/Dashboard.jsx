@@ -594,7 +594,9 @@ const Dashboard = () => {
         <div className="flex flex-1">
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <main className="flex-1 p-4 md:p-6 bg-gray-100 flex items-center justify-center">
-            <p className="text-xl">Loading...</p>
+            <span className="flex items-center justify-center">
+              <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-primary rounded-full"></span>
+            </span>
           </main>
         </div>
         <Footer />
@@ -623,7 +625,9 @@ const Dashboard = () => {
 
             {dateLoading ? (
               <p className="text-base md:text-lg text-gray-600 mt-2">
-                Loading matches...
+                <span className="flex items-center justify-center">
+                  <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-primary rounded-full"></span>
+                </span>
               </p>
             ) : matches.length > 0 ? (
               <p className="text-base md:text-lg text-gray-600 mt-2">
