@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { 
   createSemifinalPrediction,
+  isEditingAllowed,
   updateSemifinalPrediction,
   getUserSemifinalPrediction,
   getAllSemifinalPredictions
@@ -12,5 +13,6 @@ router.post('/', protect, createSemifinalPrediction);
 router.put('/', protect, updateSemifinalPrediction);
 router.get('/me', protect, getUserSemifinalPrediction);
 router.get('/all', protect, getAllSemifinalPredictions);
+router.get('/editing-allowed', protect, isEditingAllowed);
 
 module.exports = router;
