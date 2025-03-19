@@ -83,24 +83,36 @@ const isMatchStarted = asyncHandler(async (req, res) => {
     throw new Error('Match not found');
   }
   
-  // Get current server time in UTC
+  // Get current time in UTC
   const serverTimeUTC = new Date();
   
-  // Convert server time to IST (UTC+5:30)
-  const serverTimeIST = new Date(serverTimeUTC.getTime() + (5.5 * 60 * 60 * 1000));
-  
-  // Parse match date and time
+  // Parse match date (format: "DD/MM/YYYY" or "19/03/2025")
   const [day, month, year] = match.date.split('/');
-  const matchTimeStr = match.time.split(' ')[0]; // Extract time portion (e.g., "18:30")
   
-  // Create match datetime string in IST format
-  const matchDateTimeStr = `${year}-${month}-${day}T${matchTimeStr}:00+05:30`;
-  const matchTimeIST = new Date(matchDateTimeStr);
+  // Parse match time, removing "IST" part (format: "11:40 IST")
+  const timeString = match.time.split(' ')[0]; // Get just the time part
+  const [hours, minutes] = timeString.split(':').map(num => parseInt(num, 10));
   
-  console.log('Server time (IST):', serverTimeIST);
-  console.log('Match time (IST):', matchTimeIST);
+  // Create match date in UTC first
+  // Note: Months in JavaScript Date are 0-based (0-11)
+  const matchTimeUTC = new Date(Date.UTC(
+    parseInt(year, 10),
+    parseInt(month, 10) - 1, // Subtract 1 from month
+    parseInt(day, 10),
+    hours - 5, // Convert IST to UTC (subtract 5 hours)
+    minutes - 30 // Convert IST to UTC (subtract 30 minutes)
+  ));
+
+  // Create IST times for logging (just for display purposes)
+  const serverTimeIST = new Date(serverTimeUTC.getTime() + (5.5 * 60 * 60 * 1000));
+  const matchTimeIST = new Date(matchTimeUTC.getTime() + (5.5 * 60 * 60 * 1000));
   
-  res.json({ started: serverTimeIST > matchTimeIST });
+  // Compare UTC times to determine if match has started
+  res.json({ 
+    started: serverTimeUTC > matchTimeUTC,
+    serverTime: serverTimeUTC,
+    matchTime: matchTimeUTC
+  });
 });
 
 // @desc    Update match result
