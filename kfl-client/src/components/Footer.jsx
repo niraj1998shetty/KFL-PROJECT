@@ -1,6 +1,17 @@
-import React from 'react';
+import React,{ useState } from 'react';
 
 const Footer = () => {
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+
+  const openRulesModal = (e) => {
+    e.preventDefault();
+    setIsRulesModalOpen(true);
+  };
+
+  const closeRulesModal = () => {
+    setIsRulesModalOpen(false);
+  };
+
   return (
     <footer className="bg-gray-800 text-white p-6">
       <div className="max-w-7xl mx-auto">
@@ -15,8 +26,14 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">Rules</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">Leaderboard</a></li>
+              <li> <a 
+                  href="#" 
+                  className="text-gray-400 hover:text-white transition duration-300"
+                  onClick={openRulesModal}
+                >
+                  Rules
+                </a></li>
+              <li><a href="https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing" className="text-gray-400 hover:text-white transition duration-300" target="_blank" rel="noopener noreferrer">Leaderboard</a></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">Prize Pool</a></li>
             </ul>
           </div>
@@ -50,6 +67,95 @@ const Footer = () => {
           <p>© 2025 Cricket Prediction League. All rights reserved.</p>
         </div>
       </div>
+
+
+      {isRulesModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          {/* Modal Overlay */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={closeRulesModal}
+          ></div>
+          
+          {/* Modal Content */}
+          <div className="bg-white text-gray-800 rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 z-10 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Rules</h2>
+              <button 
+                onClick={closeRulesModal}
+                className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold">1️⃣ Basic Scoring:</h3>
+                <ul className="list-disc pl-6 text-gray-700">
+                  <li>Predicting the correct winning team earns 5 points.</li>
+                  <li>Predicting the correct Man of the Match (MOM) earns 4 points.</li>
+                  <li>If the prediction is wrong, no points are awarded.</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold">2️⃣ Weekly Bonus Points:</h3>
+                <ul className="list-disc pl-6 text-gray-700">
+                  <li>The participant with the highest points in a week earns +2 bonus points.</li>
+                  <li>The participant with the lowest points in a week loses -2 bonus points.</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold">3️⃣ Extra Bonus Points:</h3>
+                <ul className="list-disc pl-6 text-gray-700">
+                  <li>If there is only one correct predictor in a match (out of All players), that person earns +4 extra points.</li>
+                  <li>If a team wins by more than 100 runs, predictors of that team earn +2 extra points.</li>
+                  <li>If a team wins with all 10 wickets in hand, predictors of that team earn +2 extra points.</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold">4️⃣ Semi-Final Qualification Prediction Bonus:</h3>
+                <ul className="list-disc pl-6 text-gray-700">
+                  <li>If you correctly predict 4 out of 5 teams that qualify for the semi-finals, you win 10 BONUS POINTS.</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold">5️⃣ Semifinal Match Points:</h3>
+                <ul className="list-disc pl-6 text-gray-700">
+                  <li>Correct winning team prediction: 7 points</li>
+                  <li>Correct MOM prediction: 5 points</li>
+                  <li>If only one participant predicts correctly, they earn 5 bonus points.</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="font-semibold">6️⃣ Final Match Points:</h3>
+                <ul className="list-disc pl-6 text-gray-700">
+                  <li>Correct winning team prediction: 10 points</li>
+                  <li>Correct MOM prediction: 7 points</li>
+                  <li>If only one participant predicts correctly, they earn 5 bonus points.</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="mt-6 text-center">
+              <button 
+                onClick={closeRulesModal}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition duration-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </footer>
   );
 };
