@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { User, LogOut } from 'lucide-react';
@@ -18,14 +18,21 @@ const TopBar = () => {
   const [predictionTeams, setPredictionTeams] = useState(['', '', '', '', '']);
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
+  const [editingAllowed, setEditingAllowed] = useState(false);
   
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+  // Add refs for the dropdown menus
+  const profileMenuRef = useRef(null);
+  const semifinalOptionsRef = useRef(null);
+  
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
   useEffect(() => {
     const checkSemifinalPrediction = async () => {
       if (!currentUser) return;
       
       try {
+        await checkEditingAllowed();
+
         const response = await axios.get(`${API_URL}/semifinals/me`);
         if (response.status === 200) {
           setHasSemifinalPrediction(true);
@@ -47,9 +54,41 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.id || currentUser?.mobile, showSemifinalPredictionModal]);
 
+  // Add click outside handler effect
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+      if (semifinalOptionsRef.current && !semifinalOptionsRef.current.contains(event.target)) {
+        setShowSemifinalOptions(false);
+      }
+    }
+
+    // Add event listener when dropdowns are open
+    if (showProfileMenu || showSemifinalOptions) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    // Clean up the event listener
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileMenu, showSemifinalOptions]);
+
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const checkEditingAllowed = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/semifinals/editing-allowed`);
+      setEditingAllowed(response.data.allowed);
+    } catch (error) {
+      console.error('Error checking if editing is allowed:', error);
+      setEditingAllowed(false);
+    }
   };
 
   const handleSemifinalPredictionSubmit = async (selectedTeams) => {
@@ -103,7 +142,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
             <div className="font-bold text-xl">KattheGang Fantasy League</div>
             
             <div className="flex items-center space-x-4">
-              <div className="relative">
+              <div className="relative" ref={semifinalOptionsRef}>
                 <button 
                   className="px-3 py-2 rounded-md text-sm font-medium hover:bg-indigo-600 transition duration-300"
                   onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
@@ -113,7 +152,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
                 
                 {showSemifinalOptions && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-10">
-                    {!hasSemifinalPrediction && (
+                    {!hasSemifinalPrediction && editingAllowed &&(
                       <button
                         onClick={() => {
                           setPredictionTeams(['', '', '', '', '']);
@@ -125,7 +164,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
                         Give Semifinal Prediction
                       </button>
                     )}
-                    {hasSemifinalPrediction && (
+                    {hasSemifinalPrediction && editingAllowed && (
                       <button
                         onClick={() => {
                           handleEditPrediction();
@@ -149,7 +188,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
                 )}
               </div>
               
-              <div className="relative">
+              <div className="relative" ref={profileMenuRef}>
                 <button
                   className="p-2 rounded-full hover:bg-indigo-600 transition duration-300 focus:outline-none"
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
