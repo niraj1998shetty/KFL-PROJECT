@@ -35,10 +35,39 @@ const createSemifinalPrediction = asyncHandler(async (req, res) => {
   res.status(201).json(prediction);
 });
 
+const isEditingAllowed = asyncHandler(async (req, res) => {
+  // Get current UTC time
+  const currentUTCDate = new Date();
+  
+  // Convert to IST by adding 5 hours and 30 minutes
+  const currentISTDate = new Date(currentUTCDate.getTime() + (5.5 * 60 * 60 * 1000));
+  
+  // Set deadline date in IST (March 21, 2025 at midnight IST)
+  const editDeadlineIST = new Date('2025-03-22T00:00:00+05:30');
+  
+  const allowed = currentISTDate < editDeadlineIST;
+  
+  res.status(200).json({ allowed });
+});
+
 // @desc    Update user's semifinal prediction
 // @route   PUT /api/semifinals
 // @access  Private
 const updateSemifinalPrediction = asyncHandler(async (req, res) => {
+  
+  const currentUTCDate = new Date();
+  
+  // Convert to IST by adding 5 hours and 30 minutes
+  const currentISTDate = new Date(currentUTCDate.getTime() + (5.5 * 60 * 60 * 1000));
+  
+  // Set deadline date in IST (March 21, 2025 at midnight IST)
+  const editDeadlineIST = new Date('2025-03-22T00:00:00+05:30');
+  
+  if (currentISTDate >= editDeadlineIST) {
+    res.status(403);
+    throw new Error('Semifinal predictions can no longer be edited after March 21, 2025 (IST)');
+  }
+
   const { teams } = req.body;
 
   // Check if teams array is valid
@@ -81,11 +110,16 @@ const getUserSemifinalPrediction = asyncHandler(async (req, res) => {
 // @access  Private
 const getAllSemifinalPredictions = asyncHandler(async (req, res) => {
   // Current date check for prediction visibility
-  const currentDate = new Date();
-  const visibilityDate = new Date('2025-03-21');
+  const currentUTCDate = new Date();
+  
+  // Convert to IST by adding 5 hours and 30 minutes
+  const currentISTDate = new Date(currentUTCDate.getTime() + (5.5 * 60 * 60 * 1000));
+  
+  // Set visibility date in IST (March 21, 2025 at midnight IST)
+  const visibilityDateIST = new Date('2025-03-22T00:00:00+05:30');
   
   // Before visibility date, only return current user's prediction
-  if (currentDate < visibilityDate) {
+  if (currentISTDate < visibilityDateIST) {
     const prediction = await SemifinalPrediction.findOne({ user: req.user._id })
       .populate('user', 'name mobile');
     
@@ -102,6 +136,7 @@ const getAllSemifinalPredictions = asyncHandler(async (req, res) => {
 
 module.exports = {
   createSemifinalPrediction,
+  isEditingAllowed,
   updateSemifinalPrediction,
   getUserSemifinalPrediction,
   getAllSemifinalPredictions
