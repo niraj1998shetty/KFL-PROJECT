@@ -83,12 +83,24 @@ const isMatchStarted = asyncHandler(async (req, res) => {
     throw new Error('Match not found');
   }
   
-  const serverTime = new Date();
-  const matchDate = match.date.split('/').reverse().join('-');
-  const matchTime = match.time.split(' ')[0];
-  const matchDateTime = new Date(`${matchDate}T${matchTime}`);
+  // Get current server time in UTC
+  const serverTimeUTC = new Date();
   
-  res.json({ started: serverTime > matchDateTime });
+  // Convert server time to IST (UTC+5:30)
+  const serverTimeIST = new Date(serverTimeUTC.getTime() + (5.5 * 60 * 60 * 1000));
+  
+  // Parse match date and time
+  const [day, month, year] = match.date.split('/');
+  const matchTimeStr = match.time.split(' ')[0]; // Extract time portion (e.g., "18:30")
+  
+  // Create match datetime string in IST format
+  const matchDateTimeStr = `${year}-${month}-${day}T${matchTimeStr}:00+05:30`;
+  const matchTimeIST = new Date(matchDateTimeStr);
+  
+  console.log('Server time (IST):', serverTimeIST);
+  console.log('Match time (IST):', matchTimeIST);
+  
+  res.json({ started: serverTimeIST > matchTimeIST });
 });
 
 // @desc    Update match result
