@@ -43,7 +43,7 @@ const isEditingAllowed = asyncHandler(async (req, res) => {
   const currentISTDate = new Date(currentUTCDate.getTime() + (5.5 * 60 * 60 * 1000));
   
   // Set deadline date in IST (March 21, 2025 at midnight IST)
-  const editDeadlineIST = new Date('2025-03-22T00:00:00+05:30');
+  const editDeadlineIST = new Date('2025-03-23T00:00:00+05:30');
   
   const allowed = currentISTDate < editDeadlineIST;
   
@@ -61,7 +61,7 @@ const updateSemifinalPrediction = asyncHandler(async (req, res) => {
   const currentISTDate = new Date(currentUTCDate.getTime() + (5.5 * 60 * 60 * 1000));
   
   // Set deadline date in IST (March 21, 2025 at midnight IST)
-  const editDeadlineIST = new Date('2025-03-22T00:00:00+05:30');
+  const editDeadlineIST = new Date('2025-03-23T00:00:00+05:30');
   
   if (currentISTDate >= editDeadlineIST) {
     res.status(403);
@@ -116,7 +116,7 @@ const getAllSemifinalPredictions = asyncHandler(async (req, res) => {
   const currentISTDate = new Date(currentUTCDate.getTime() + (5.5 * 60 * 60 * 1000));
   
   // Set visibility date in IST (March 21, 2025 at midnight IST)
-  const visibilityDateIST = new Date('2025-03-22T00:00:00+05:30');
+  const visibilityDateIST = new Date('2025-03-23T00:00:00+05:30');
   
   // Before visibility date, only return current user's prediction
   if (currentISTDate < visibilityDateIST) {
