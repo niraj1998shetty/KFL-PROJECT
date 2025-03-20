@@ -443,9 +443,11 @@ const Dashboard = () => {
                 <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   POTM
                 </th>
-                <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                {!matchStarted && (
+                  <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -474,32 +476,31 @@ const Dashboard = () => {
                             ? userPred.prediction.playerOfTheMatch
                             : "--"}
                         </td>
-                        <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
-                          {userPred.isCurrentUser &&
-                            !matchStarted &&
-                            (userPred.prediction ? (
-                              <button
-                                onClick={() => handleEditPrediction(match._id)}
-                                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                              >
-                                Edit
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handlePredictionClick(match._id)}
-                                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                              >
-                                Give Prediction
-                              </button>
-                            ))}
-                          {matchStarted &&
-                            userPred.isCurrentUser &&
-                            !userPred.prediction && (
-                              <span className="text-red-500 text-sm">
-                                Not predicted
-                              </span>
-                            )}
-                        </td>
+                        {!matchStarted && (
+                          <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
+                            {userPred.isCurrentUser &&
+                              !matchStarted &&
+                              (userPred.prediction ? (
+                                <button
+                                  onClick={() =>
+                                    handleEditPrediction(match._id)
+                                  }
+                                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                >
+                                  Edit
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() =>
+                                    handlePredictionClick(match._id)
+                                  }
+                                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                >
+                                  Give Prediction
+                                </button>
+                              ))}
+                          </td>
+                        )}
                       </tr>
                     );
                   })
@@ -556,7 +557,7 @@ const Dashboard = () => {
             isToday(currentDate) ? "opacity-50" : ""
           }`}
         >
-          Today
+          Go to today
         </button>
 
         <button
@@ -594,7 +595,9 @@ const Dashboard = () => {
         <div className="flex flex-1">
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <main className="flex-1 p-4 md:p-6 bg-gray-100 flex items-center justify-center">
-            <p className="text-xl">Loading...</p>
+            <span className="flex items-center justify-center">
+              <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-primary rounded-full"></span>
+            </span>
           </main>
         </div>
         <Footer />
@@ -623,7 +626,9 @@ const Dashboard = () => {
 
             {dateLoading ? (
               <p className="text-base md:text-lg text-gray-600 mt-2">
-                Loading matches...
+                <span className="flex items-center justify-center">
+                  <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-primary rounded-full"></span>
+                </span>
               </p>
             ) : matches.length > 0 ? (
               <p className="text-base md:text-lg text-gray-600 mt-2">
