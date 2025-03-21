@@ -656,11 +656,15 @@ const Dashboard = () => {
                   >
                     <div className="font-semibold text-sm md:text-base mb-2 md:mb-0">
                       Match {match.matchNumber}: {match.team1} vs {match.team2}
-                      {matchStarted && (
-                        <span className="text-orange-500 ml-2 block md:inline mt-1 md:mt-0">
+                      {matchStarted ? (
+                        <span className="text-orange-500 md:ml-2 block md:inline mt-1 md:mt-0">
                           (Match started)
                         </span>
-                      )}
+                      ) :
+                      (<span className="text-orange-500 md:ml-2 block md:inline mt-1 md:mt-0">
+                        (You can't predict after {match.time})
+                      </span>)
+                      }
                     </div>
                     {userPrediction ? (
                       <button
