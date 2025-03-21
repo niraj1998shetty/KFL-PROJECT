@@ -42,7 +42,7 @@ const SemifinalPredictionModal = ({ onClose, onSubmit, initialTeams }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-screen flex flex-col">
         <div className="bg-indigo-700 text-white p-4 rounded-t-lg">
           <h3 className="text-lg font-semibold">
             {isEditing ? "Edit Semifinal Team Predictions" : "Semifinal Team Predictions"}
@@ -52,29 +52,33 @@ const SemifinalPredictionModal = ({ onClose, onSubmit, initialTeams }) => {
           </p>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6">
-          {[0, 1, 2, 3, 4].map((index) => (
-            <div key={index} className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Team {index + 1}
-              </label>
-              <select
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                value={selectedTeams[index]}
-                onChange={(e) => handleTeamChange(index, e.target.value)}
-                required
-              >
-                <option value="">-- Select Team --</option>
-                {getAvailableTeams(index).map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.id}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-          
-          <div className="flex justify-end space-x-3 mt-6">
+        <div className="overflow-y-auto p-6 flex-grow">
+          <form onSubmit={handleSubmit}>
+            {[0, 1, 2, 3, 4].map((index) => (
+              <div key={index} className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Team {index + 1}
+                </label>
+                <select
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={selectedTeams[index]}
+                  onChange={(e) => handleTeamChange(index, e.target.value)}
+                  required
+                >
+                  <option value="">-- Select Team --</option>
+                  {getAvailableTeams(index).map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </form>
+        </div>
+        
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-3">
             <button
               type="button"
               onClick={onClose}
@@ -83,14 +87,15 @@ const SemifinalPredictionModal = ({ onClose, onSubmit, initialTeams }) => {
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               className="px-4 py-2 bg-indigo-600 text-white rounded shadow-sm hover:bg-indigo-700 focus:outline-none disabled:bg-indigo-300"
               disabled={!selectedTeams.every(team => team !== '')}
             >
               {isEditing ? "Update Prediction" : "Submit Prediction"}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
