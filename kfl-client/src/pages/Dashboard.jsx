@@ -661,7 +661,7 @@ const Dashboard = () => {
                           (Match started)
                         </span>
                       ) :
-                      (<span className="text-orange-500 md:ml-2 block md:inline mt-1 md:mt-0">
+                      (<span className="text-gray-500 text-xs md:ml-2 block md:inline mt-1 md:mt-0">
                         (You can't predict after {match.time})
                       </span>)
                       }
