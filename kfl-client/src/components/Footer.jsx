@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect, useRef } from "react";
+import prizePoolImage from '../assets/prize-pool-image.jpg';
+import Fireworks from "fireworks-js";
 const Footer = () => {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
 
@@ -11,6 +12,34 @@ const Footer = () => {
   const closeRulesModal = () => {
     setIsRulesModalOpen(false);
   };
+
+  const [isPrizeModalOpen, setIsPrizeModalOpen] = useState(false);
+
+  const openPrizeModal = (e) => {
+    e.preventDefault();
+    setIsPrizeModalOpen(true);
+  };
+
+  const closePrizeModal = () => {
+    setIsPrizeModalOpen(false);
+  };
+  const fireworksContainerRef = useRef(null); // Declare the ref
+
+
+  useEffect(() => {
+    if (isPrizeModalOpen && fireworksContainerRef.current) {
+      // Ensure the container is available and initialize fireworks
+      const container = fireworksContainerRef.current;
+      const fireworks = new Fireworks(container);
+      fireworks.start();
+
+      // Cleanup fireworks when the modal closes
+      return () => fireworks.stop();
+    }
+  }, [isPrizeModalOpen]);
+
+
+
 
   return (
     <footer className="bg-gray-800 text-white p-6">
@@ -50,9 +79,10 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a
+              <a
                   href="#"
                   className="text-gray-400 hover:text-white transition duration-300"
+                  onClick={openPrizeModal}
                 >
                   Prize Pool
                 </a>
@@ -236,6 +266,77 @@ const Footer = () => {
           </div>
         </div>
       )}
+      
+{isPrizeModalOpen && (
+  <div className="fixed inset-0 flex items-center justify-center z-50">
+    {/* Fireworks Container */}
+
+    
+    {/* Modal Overlay */}
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50"
+      onClick={closePrizeModal}
+    >
+      <div
+              ref={fireworksContainerRef} // Attach the ref to the container div
+              
+            ></div>
+    </div>
+    
+
+    {/* Modal Content */}
+  
+    <div className="bg-white text-gray-800 rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 z-10 max-h-[90vh] overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Prize Pool</h2>
+        <button
+          onClick={closePrizeModal}
+          className="text-gray-500 hover:text-gray-700 focus:outline-none"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+  
+      <div className="space-y-4" >
+        {/* Prize Pool Image */}
+        
+        <div className="text-center mb-4">
+        <img
+          src={prizePoolImage}
+          alt="Prize Pool"
+          className="rounded-lg shadow-lg max-w-full h-auto"
+        /> 
+      </div>
+      
+      </div>
+
+      <div className="mt-6 text-center">
+        <button
+          onClick={closePrizeModal}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition duration-300"
+        >
+          Close
+        </button>
+      </div>
+     
+      
+    </div>
+  </div>
+  
+)}
     </footer>
   );
 };
