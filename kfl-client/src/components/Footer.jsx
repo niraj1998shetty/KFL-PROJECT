@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
@@ -39,7 +40,7 @@ const Footer = () => {
                   Rules
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   href="https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing"
                   className="text-gray-400 hover:text-white transition duration-300"
@@ -48,6 +49,14 @@ const Footer = () => {
                 >
                   Leaderboard
                 </a>
+              </li> */}
+              <li>
+                <Link
+                  to="/leaderboard"
+                  className="text-gray-400 hover:text-white transition duration-300"
+                >
+                  Leaderboard
+                </Link>
               </li>
               <li>
                 <a

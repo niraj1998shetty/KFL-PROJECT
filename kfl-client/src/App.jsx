@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import LeaderboardPage from './pages/LeaderboardPage';
 import AuthGuard from './guards/AuthGuard';
 
 const App = () => {
@@ -18,6 +19,14 @@ const App = () => {
             element={
               <AuthGuard>
                 <Dashboard />
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/leaderboard" 
+            element={
+              <AuthGuard>
+                <LeaderboardPage />
               </AuthGuard>
             } 
           />
