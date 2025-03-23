@@ -49,6 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       mobile: user.mobile,
+      points: user.points,
       token: generateToken(user._id)
     });
   } else {
@@ -83,6 +84,7 @@ const loginUser = asyncHandler(async (req, res) => {
     _id: user._id,
     name: user.name,
     mobile: user.mobile,
+    points: user.points,
     isAdmin: user.isAdmin,
     token: generateToken(user._id)
   });
@@ -98,6 +100,7 @@ const getMe = asyncHandler(async (req, res) => {
     _id: user._id,
     name: user.name,
     mobile: user.mobile,
+    points: user.points,
     isAdmin: user.isAdmin
   });
 }); 
