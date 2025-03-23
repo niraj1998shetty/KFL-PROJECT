@@ -6,11 +6,13 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import LeaderboardPage from './pages/LeaderboardPage';
 import AuthGuard from './guards/AuthGuard';
+import ScrollToTop from './components/ScrollToTop';
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
+      <ScrollToTop />
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

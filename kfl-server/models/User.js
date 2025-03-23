@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
   },
+  points: {
+    type: Number,
+    default: 0
+  },
   isAdmin: {
     type: Boolean,
     default: false
@@ -43,7 +47,6 @@ userSchema.pre('save', async function(next) {
 
 // Match user entered password to hashed password in database
 userSchema.methods.matchPassword = async function(enteredPassword) {
-  
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
