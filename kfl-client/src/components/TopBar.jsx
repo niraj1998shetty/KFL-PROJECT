@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { User, LogOut } from "lucide-react";
 import SemifinalPredictionModal from "./SemifinalPredictionModal";
 import SemifinalPredictionViewModal from "./SemifinalPredictionViewModal";
+import logo from '../assets/logo.png';
 import axios from "axios";
 
 const TopBar = () => {
@@ -159,7 +160,7 @@ const TopBar = () => {
               {/* Logo - Larger size */}
               <div className="h-12 w-12">
                 <img
-                  src="/../../src/assets/logo.png"
+                  src={logo}
                   alt="KattheGang Logo"
                   className="h-full w-full object-contain"
                 />
