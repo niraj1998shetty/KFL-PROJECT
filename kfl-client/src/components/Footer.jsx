@@ -69,16 +69,6 @@ const Footer = () => {
                   Rules
                 </a>
               </li>
-              {/* <li>
-                <a
-                  href="https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing"
-                  className="text-gray-400 hover:text-white transition duration-300"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Leaderboard
-                </a>
-              </li> */}
               <li>
                 <Link
                   to="/leaderboard"
@@ -86,6 +76,16 @@ const Footer = () => {
                 >
                   Leaderboard
                 </Link>
+              </li>
+               <li>
+                <a
+                  href="https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing"
+                  className="text-gray-400 hover:text-white transition duration-300"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Excel sheet leaderboard
+                </a>
               </li>
               <li>
               <a
