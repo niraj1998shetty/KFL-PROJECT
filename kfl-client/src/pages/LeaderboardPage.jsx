@@ -306,7 +306,7 @@ const LeaderboardPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <TopBar />
-      
+
       <main className="flex-grow bg-gray-100 py-8 min-h-screen">
         <div className="max-w-6xl mx-auto px-4">
           {/* Back button */}
@@ -315,18 +315,18 @@ const LeaderboardPage = () => {
               onClick={handleBackToDashboard}
               className="flex items-center text-blue-600 hover:text-blue-800 transition duration-300"
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-5 w-5 mr-1" 
-                fill="none" 
-                viewBox="0 0 24 24" 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-1"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
               Back
@@ -335,7 +335,7 @@ const LeaderboardPage = () => {
 
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
             <div className="p-4 sm:p-6 bg-blue-600 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
-              <h1 className="text-lg sm:text-xl font-semibold">Points Standings</h1>
+              <h1 className="text-lg sm:text-xl font-semibold">Leader Board</h1>
               {currentUser && currentUser.isAdmin && (
                 <button
                   onClick={openUpdateModal}
@@ -345,7 +345,7 @@ const LeaderboardPage = () => {
                 </button>
               )}
             </div>
-            
+
             {loading ? (
               <div className="flex justify-center items-center p-8">
                 <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-blue-600 rounded-full"></div>
@@ -369,24 +369,29 @@ const LeaderboardPage = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {leaderboardData.length > 0 ? (
                       leaderboardData.map((entry, index) => {
-                        const prevPoints = index > 0 ? leaderboardData[index - 1].totalPoints : null;
+                        const prevPoints =
+                          index > 0
+                            ? leaderboardData[index - 1].totalPoints
+                            : null;
                         let rank = index + 1;
-                        
+
                         if (prevPoints === entry.totalPoints) {
-                          rank = index; 
+                          rank = index;
                         }
-                        
+
                         const isInTop3 = rank <= 3;
-                        
+
                         return (
-                          <tr 
+                          <tr
                             key={entry.id}
                             className={isInTop3 ? "bg-blue-50" : ""}
                           >
                             <td className="px-4 sm:px-6 py-4">
                               <div className="text-sm font-medium text-gray-900 flex items-center">
                                 <span className="mr-1">{rank}</span>
-                                <span className="text-lg">{getRankMedal(index, entry)}</span>
+                                <span className="text-lg">
+                                  {getRankMedal(index, entry)}
+                                </span>
                               </div>
                             </td>
                             <td className="px-4 sm:px-6 py-4">
@@ -404,7 +409,10 @@ const LeaderboardPage = () => {
                       })
                     ) : (
                       <tr>
-                        <td colSpan="3" className="px-4 sm:px-6 py-8 text-center text-gray-500">
+                        <td
+                          colSpan="3"
+                          className="px-4 sm:px-6 py-8 text-center text-gray-500"
+                        >
                           No user data available
                         </td>
                       </tr>
@@ -455,7 +463,7 @@ const LeaderboardPage = () => {
                   {updateError}
                 </div>
               )}
-              
+
               {updateSuccess && (
                 <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-md">
                   {updateSuccess}
@@ -478,11 +486,16 @@ const LeaderboardPage = () => {
                     required
                   >
                     <option value="">Select Match Number</option>
-                    {matches.map(match => (
-                      <option key={match._id} value={match.matchNumber}>
-                        Match {match.matchNumber}: {match.team1} vs {match.team2} - {match.date}
-                      </option>
-                    ))}
+                    {matches
+                      .filter(
+                        (match) => !match.result || !match.result.completed
+                      ) // Filter out completed matches
+                      .map((match) => (
+                        <option key={match._id} value={match.matchNumber}>
+                          Match {match.matchNumber}: {match.team1} vs{" "}
+                          {match.team2} - {match.date}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
@@ -490,132 +503,150 @@ const LeaderboardPage = () => {
                   <div className="flex justify-center items-center py-4">
                     <div className="animate-spin h-6 w-6 border-t-2 border-b-2 border-blue-600 rounded-full"></div>
                   </div>
-                ) : selectedMatch && (
-                  <>
-                    <div className="mb-4">
-                      <label className="block text-gray-700 font-medium mb-2">
-                        Match Type*
-                      </label>
-                      <div className="flex flex-wrap gap-4">
-                        <label className="inline-flex items-center">
-                          <input
-                            type="radio"
-                            name="matchType"
-                            value="league"
-                            checked={formData.matchType === "league"}
-                            onChange={handleRadioChange}
-                            className="form-radio h-4 w-4 text-blue-600"
-                          />
-                          <span className="ml-2 text-gray-700">League Match</span>
+                ) : (
+                  selectedMatch && (
+                    <>
+                      <div className="mb-4">
+                        <label className="block text-gray-700 font-medium mb-2">
+                          Match Type*
                         </label>
-                        <label className="inline-flex items-center">
-                          <input
-                            type="radio"
-                            name="matchType"
-                            value="semifinal"
-                            checked={formData.matchType === "semifinal"}
-                            onChange={handleRadioChange}
-                            className="form-radio h-4 w-4 text-blue-600"
-                          />
-                          <span className="ml-2 text-gray-700">Semifinal</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                          <input
-                            type="radio"
-                            name="matchType"
-                            value="final"
-                            checked={formData.matchType === "final"}
-                            onChange={handleRadioChange}
-                            className="form-radio h-4 w-4 text-blue-600"
-                          />
-                          <span className="ml-2 text-gray-700">Final</span>
-                        </label>
+                        <div className="flex flex-wrap gap-4">
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="matchType"
+                              value="league"
+                              checked={formData.matchType === "league"}
+                              onChange={handleRadioChange}
+                              className="form-radio h-4 w-4 text-blue-600"
+                            />
+                            <span className="ml-2 text-gray-700">
+                              League Match
+                            </span>
+                          </label>
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="matchType"
+                              value="semifinal"
+                              checked={formData.matchType === "semifinal"}
+                              onChange={handleRadioChange}
+                              className="form-radio h-4 w-4 text-blue-600"
+                            />
+                            <span className="ml-2 text-gray-700">
+                              Semifinal
+                            </span>
+                          </label>
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="matchType"
+                              value="final"
+                              checked={formData.matchType === "final"}
+                              onChange={handleRadioChange}
+                              className="form-radio h-4 w-4 text-blue-600"
+                            />
+                            <span className="ml-2 text-gray-700">Final</span>
+                          </label>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="mb-4">
-                      <label className="block text-gray-700 font-medium mb-2">
-                        Winner*
-                      </label>
-                      <select
-                        name="winner"
-                        value={formData.winner}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      >
-                        <option value="">Select Winner</option>
-                        <option value={selectedMatch.team1}>{selectedMatch.team1}</option>
-                        <option value={selectedMatch.team2}>{selectedMatch.team2}</option>
-                      </select>
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-gray-700 font-medium mb-2">
-                        Man of the Match*
-                      </label>
-                      <select
-                        name="manOfTheMatch"
-                        value={formData.manOfTheMatch}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                      >
-                        <option value="">Select Player</option>
-                        {players.map((player) => (
-                          <option key={player._id} value={player._id}>
-                            {player.name} ({player.team})
+                      <div className="mb-4">
+                        <label className="block text-gray-700 font-medium mb-2">
+                          Winner*
+                        </label>
+                        <select
+                          name="winner"
+                          value={formData.winner}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        >
+                          <option value="">Select Winner</option>
+                          <option value={selectedMatch.team1}>
+                            {selectedMatch.team1}
                           </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="mb-4">
-                      <label className="block text-gray-700 font-medium mb-2">
-                        Winning Type
-                      </label>
-                      <div className="flex flex-wrap gap-4">
-                        <label className="inline-flex items-center">
-                          <input
-                            type="radio"
-                            name="winningType"
-                            value="10wickets"
-                            checked={formData.winningType === "10wickets"}
-                            onChange={handleRadioChange}
-                            className="form-radio h-4 w-4 text-blue-600"
-                          />
-                          <span className="ml-2 text-gray-700">Won by 10 wickets</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                          <input
-                            type="radio"
-                            name="winningType"
-                            value="100runs"
-                            checked={formData.winningType === "100runs"}
-                            onChange={handleRadioChange}
-                            className="form-radio h-4 w-4 text-blue-600"
-                          />
-                          <span className="ml-2 text-gray-700">Won by 100+ runs</span>
-                        </label>
-                        <label className="inline-flex items-center">
-                          <input
-                            type="radio"
-                            name="winningType"
-                            value="none"
-                            checked={formData.winningType === "none" || formData.winningType === ""}
-                            onChange={handleRadioChange}
-                            className="form-radio h-4 w-4 text-blue-600"
-                          />
-                          <span className="ml-2 text-gray-700">None</span>
-                        </label>
+                          <option value={selectedMatch.team2}>
+                            {selectedMatch.team2}
+                          </option>
+                        </select>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Selecting a winning type will award 2 bonus points to users who correctly predicted the winning team.
-                      </p>
-                    </div>
-                  </>
+
+                      <div className="mb-4">
+                        <label className="block text-gray-700 font-medium mb-2">
+                          Man of the Match*
+                        </label>
+                        <select
+                          name="manOfTheMatch"
+                          value={formData.manOfTheMatch}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          required
+                        >
+                          <option value="">Select Player</option>
+                          {players.map((player) => (
+                            <option key={player._id} value={player._id}>
+                              {player.name} ({player.team})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="block text-gray-700 font-medium mb-2">
+                          Winning Type
+                        </label>
+                        <div className="flex flex-wrap gap-4">
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="winningType"
+                              value="10wickets"
+                              checked={formData.winningType === "10wickets"}
+                              onChange={handleRadioChange}
+                              className="form-radio h-4 w-4 text-blue-600"
+                            />
+                            <span className="ml-2 text-gray-700">
+                              Won by 10 wickets
+                            </span>
+                          </label>
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="winningType"
+                              value="100runs"
+                              checked={formData.winningType === "100runs"}
+                              onChange={handleRadioChange}
+                              className="form-radio h-4 w-4 text-blue-600"
+                            />
+                            <span className="ml-2 text-gray-700">
+                              Won by 100+ runs
+                            </span>
+                          </label>
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="winningType"
+                              value="none"
+                              checked={
+                                formData.winningType === "none" ||
+                                formData.winningType === ""
+                              }
+                              onChange={handleRadioChange}
+                              className="form-radio h-4 w-4 text-blue-600"
+                            />
+                            <span className="ml-2 text-gray-700">None</span>
+                          </label>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Selecting a winning type will award 2 bonus points to
+                          users who correctly predicted the winning team.
+                        </p>
+                      </div>
+                    </>
+                  )
                 )}
-                
+
                 <div className="flex justify-end space-x-3 mt-6">
                   <button
                     type="button"
@@ -627,10 +658,16 @@ const LeaderboardPage = () => {
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2 bg-blue-600 border border-transparent rounded-md font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${(!selectedMatch || matchLoading || processingUpdate) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={!selectedMatch || matchLoading || processingUpdate}
+                    className={`px-4 py-2 bg-blue-600 border border-transparent rounded-md font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      !selectedMatch || matchLoading || processingUpdate
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                    disabled={
+                      !selectedMatch || matchLoading || processingUpdate
+                    }
                   >
-                    {processingUpdate ? 'Processing...' : 'Submit'}
+                    {processingUpdate ? "Processing..." : "Submit"}
                   </button>
                 </div>
               </form>
