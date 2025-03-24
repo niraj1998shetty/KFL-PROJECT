@@ -307,7 +307,7 @@ const LeaderboardPage = () => {
     <div className="min-h-screen flex flex-col">
       <TopBar />
 
-      <main className="flex-grow bg-gray-100 py-8 min-h-screen">
+      <main className="flex-grow bg-gray-100 py-8 min-h-[80vh]">
         <div className="max-w-6xl mx-auto px-4">
           {/* Back button */}
           <div className="mb-4">
@@ -333,7 +333,7 @@ const LeaderboardPage = () => {
             </button>
           </div>
 
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="bg-white shadow-md rounded-lg overflow-hidden h-[65vh] flex flex-col">
             <div className="p-4 sm:p-6 bg-blue-600 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
               <h1 className="text-lg sm:text-xl font-semibold">Leader Board</h1>
               {currentUser && currentUser.isAdmin && (
@@ -347,78 +347,85 @@ const LeaderboardPage = () => {
             </div>
 
             {loading ? (
-              <div className="flex justify-center items-center p-8">
+              <div className="flex justify-center items-center p-8 flex-grow">
                 <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-blue-600 rounded-full"></div>
               </div>
             ) : (
-              <div className="overflow-y-auto">
-                <table className="w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Rank
-                      </th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        name
-                      </th>
-                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Points
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {leaderboardData.length > 0 ? (
-                      leaderboardData.map((entry, index) => {
-                        const prevPoints =
-                          index > 0
-                            ? leaderboardData[index - 1].totalPoints
-                            : null;
-                        let rank = index + 1;
-
-                        if (prevPoints === entry.totalPoints) {
-                          rank = index;
-                        }
-
-                        const isInTop3 = rank <= 3;
-
-                        return (
-                          <tr
-                            key={entry.id}
-                            className={isInTop3 ? "bg-blue-50" : ""}
-                          >
-                            <td className="px-4 sm:px-6 py-4">
-                              <div className="text-sm font-medium text-gray-900 flex items-center">
-                                <span className="mr-1">{rank}</span>
-                                <span className="text-lg">
-                                  {getRankMedal(index, entry)}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4">
-                              <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
-                                {entry.username}
-                              </div>
-                            </td>
-                            <td className="px-4 sm:px-6 py-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {entry.totalPoints}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
+              <div className="flex flex-col flex-grow overflow-hidden">
+                <div className="bg-gray-50 border-b border-gray-200">
+                  <table className="w-full">
+                    <thead>
                       <tr>
-                        <td
-                          colSpan="3"
-                          className="px-4 sm:px-6 py-8 text-center text-gray-500"
-                        >
-                          No user data available
-                        </td>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Rank
+                        </th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          name
+                        </th>
+                        <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Points
+                        </th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                  </table>
+                </div>
+                
+                <div className="overflow-y-auto flex-grow">
+                  <table className="w-full">
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {leaderboardData.length > 0 ? (
+                        leaderboardData.map((entry, index) => {
+                          const prevPoints =
+                            index > 0
+                              ? leaderboardData[index - 1].totalPoints
+                              : null;
+                          let rank = index + 1;
+
+                          if (prevPoints === entry.totalPoints) {
+                            rank = index;
+                          }
+
+                          const isInTop3 = rank <= 3;
+
+                          return (
+                            <tr
+                              key={entry.id}
+                              className={isInTop3 ? "bg-blue-50" : ""}
+                            >
+                              <td className="px-4 sm:px-6 py-4">
+                                <div className="text-sm font-medium text-gray-900 flex items-center">
+                                  <span className="mr-1">{rank}</span>
+                                  <span className="text-lg">
+                                    {getRankMedal(index, entry)}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-4 sm:px-6 py-4">
+                                <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
+                                  {entry.username}
+                                </div>
+                              </td>
+                              <td className="px-4 sm:px-6 py-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {entry.totalPoints}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="3"
+                            className="px-4 sm:px-6 py-8 text-center text-gray-500"
+                          >
+                            No user data available
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
