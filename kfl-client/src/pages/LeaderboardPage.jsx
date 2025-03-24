@@ -182,7 +182,7 @@ const LeaderboardPage = () => {
 
   const getRankMedal = (index, entry) => {
     let rank = 1; // Start with rank 1
-    
+  
     for (let i = 0; i < leaderboardData.length; i++) {
       if (leaderboardData[i].totalPoints > entry.totalPoints) {
         rank++;
@@ -375,14 +375,11 @@ const LeaderboardPage = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {leaderboardData.length > 0 ? (
                         leaderboardData.map((entry, index) => {
-                          const prevPoints =
-                            index > 0
-                              ? leaderboardData[index - 1].totalPoints
-                              : null;
-                          let rank = index + 1;
-
-                          if (prevPoints === entry.totalPoints) {
-                            rank = index;
+                          let rank = 1;
+                          for (let i = 0; i < index; i++) {
+                            if (leaderboardData[i].totalPoints > entry.totalPoints) {
+                              rank++;
+                            }
                           }
 
                           const isInTop3 = rank <= 3;
