@@ -46,11 +46,11 @@ const Dashboard = () => {
 
   //disable the previous btn
   const isPreviousDisabled = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const currentDateCopy = new Date(currentDate);
-    currentDateCopy.setHours(0, 0, 0, 0);
-    return currentDateCopy <= today;
+  const minDate = new Date(2025, 2, 22);
+  minDate.setHours(0, 0, 0, 0);
+  const currentDateCopy = new Date(currentDate);
+  currentDateCopy.setHours(0, 0, 0, 0);
+  return currentDateCopy <= minDate;
   };
 
   // navigate to previous
