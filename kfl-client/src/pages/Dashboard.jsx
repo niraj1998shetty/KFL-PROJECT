@@ -82,8 +82,7 @@ const Dashboard = () => {
       .get(`${API_URL}/matches/today`)
       .then((res) => {
         setMatches(res.data);
-
-        fetchPredictionsForMatches(res.data);
+        // We'll fetch predictions after knowing match status
       })
       .catch((error) => {
         console.error("Error fetching today's matches:", error);
@@ -97,24 +96,59 @@ const Dashboard = () => {
   // Helper functions to fetch
   const fetchPredictionsForMatches = async (matchesList) => {
     try {
-      //  all users' predictions for each macth
+      // First get match statuses
+      const statuses = {};
+      for (const match of matchesList) {
+        statuses[match._id] = await fetchMatchStatus(match._id);
+      }
+      setMatchStatus(statuses);
+      
+      // Only fetch all predictions for matches that have started
       const allMatchPredictions = {};
       for (const match of matchesList) {
+        // Always fetch current user's prediction
         try {
-          const allPredictionsRes = await axios.get(
-            `${API_URL}/predictions/match/${match._id}/all`
+          const userPred = userPredictions.find(
+            (p) => p.match && p.match._id === match._id
           );
-          allMatchPredictions[match._id] = allPredictionsRes.data;
+          
+          if (userPred) {
+            if (!allMatchPredictions[match._id]) {
+              allMatchPredictions[match._id] = [];
+            }
+            
+            // Add current user's prediction
+            allMatchPredictions[match._id].push({
+              _id: userPred._id,
+              user: {
+                _id: currentUser._id,
+                name: currentUser.name,
+                mobile: currentUser.mobile
+              },
+              predictedWinner: userPred.predictedWinner,
+              playerOfTheMatch: userPred.playerOfTheMatch
+            });
+          }
+          
+          // Only fetch all users' predictions if match has started
+          if (statuses[match._id]) {
+            const allPredictionsRes = await axios.get(
+              `${API_URL}/predictions/match/${match._id}/all`
+            );
+            allMatchPredictions[match._id] = allPredictionsRes.data;
+          }
         } catch (error) {
           console.error(
             `Error fetching predictions for match ${match._id}:`,
             error
           );
-          allMatchPredictions[match._id] = [];
+          if (!allMatchPredictions[match._id]) {
+            allMatchPredictions[match._id] = [];
+          }
         }
       }
 
-      // Format
+      // Format current user's predictions
       const formattedPredictions = {};
       for (const match of matchesList) {
         const userPred = userPredictions.find(
@@ -192,6 +226,8 @@ const Dashboard = () => {
       setMatches(matchesData);
 
       if (matchesData.length > 0) {
+        // We'll call fetchPredictionsForMatches after setting matches
+        // This fetches the match status first
         await fetchPredictionsForMatches(matchesData);
       } else {
         setPredictions({});
@@ -235,6 +271,7 @@ const Dashboard = () => {
         const todayMatches = await axios.get(`${API_URL}/matches/today`);
         setMatches(todayMatches.data);
 
+        // Format user's own predictions
         const formattedPredictions = {};
         predictionsRes.data.forEach((pred) => {
           if (pred.match) {
@@ -251,24 +288,11 @@ const Dashboard = () => {
         });
         setPredictions(formattedPredictions);
 
-        // Fetch all users' predictions for each match
-        const allMatchPredictions = {};
-        for (const match of todayMatches.data) {
-          try {
-            const allPredictionsRes = await axios.get(
-              `${API_URL}/predictions/match/${match._id}/all`
-            );
-            allMatchPredictions[match._id] = allPredictionsRes.data;
-          } catch (error) {
-            console.error(
-              `Error fetching predictions for match ${match._id}:`,
-              error
-            );
-            allMatchPredictions[match._id] = [];
-          }
+        // We'll fetch all predictions after knowing which matches have started
+        if (todayMatches.data.length > 0) {
+          await fetchPredictionsForMatches(todayMatches.data);
         }
-
-        setAllPredictions(allMatchPredictions);
+        
         setLoading(false);
       } catch (error) {
         console.error("Error fetching initial data:", error);
@@ -296,19 +320,7 @@ const Dashboard = () => {
     setIsEditing(true);
   };
 
-  useEffect(() => {
-    const loadMatchStatuses = async () => {
-      const statuses = {};
-      for (const match of matches) {
-        statuses[match._id] = await fetchMatchStatus(match._id);
-      }
-      setMatchStatus(statuses);
-    };
-
-    if (matches.length > 0) {
-      loadMatchStatuses();
-    }
-  }, [matches]);
+  // Removed the separate effect for loading match statuses since we're doing it in fetchPredictionsForMatches
 
   const handlePredictionSubmit = async (matchId, winningTeam, potm) => {
     try {
@@ -332,6 +344,12 @@ const Dashboard = () => {
       setPredictions(newPredictions);
 
       const newAllPredictions = { ...allPredictions };
+      
+      // Only modify allPredictions if this match has started
+      // or if we need to add/update the current user's prediction
+      if (!newAllPredictions[matchId]) {
+        newAllPredictions[matchId] = [];
+      }
 
       const existingPredictionIndex = newAllPredictions[matchId]?.findIndex(
         (p) => p.user?._id === currentUser._id
@@ -349,10 +367,6 @@ const Dashboard = () => {
         };
       } else {
         // Adding new prediction
-        if (!newAllPredictions[matchId]) {
-          newAllPredictions[matchId] = [];
-        }
-
         newAllPredictions[matchId].push({
           _id: res.data._id,
           user: {
@@ -408,17 +422,33 @@ const Dashboard = () => {
     const matchPredictions = allPredictions[match._id] || [];
     const matchStarted = matchStatus[match._id];
 
-    const userPredictionsList = allUsers.map((user) => {
-      const prediction = matchPredictions.find((p) => p.user?._id === user._id);
+    // Only show predictions for the current user if match hasn't started
+    const userPredictionsList = allUsers
+      .filter(user => {
+        // If match has started, show all users
+        // If match hasn't started, only show current user
+        return matchStarted || user._id === currentUser?._id;
+      })
+      .map((user) => {
+        let prediction = null;
+        
+        // For the current user, always try to find their prediction
+        if (user._id === currentUser?._id) {
+          prediction = matchPredictions.find((p) => p.user?._id === user._id);
+        } 
+        // For other users, only get prediction if match has started
+        else if (matchStarted) {
+          prediction = matchPredictions.find((p) => p.user?._id === user._id);
+        }
 
-      return {
-        userId: user._id,
-        name: user.name,
-        mobile: user.mobile,
-        isCurrentUser: user._id === currentUser?._id,
-        prediction: prediction || null,
-      };
-    });
+        return {
+          userId: user._id,
+          name: user.name,
+          mobile: user.mobile,
+          isCurrentUser: user._id === currentUser?._id,
+          prediction: prediction || null,
+        };
+      });
 
     return (
       <div key={match._id} className="mb-8">
@@ -452,58 +482,56 @@ const Dashboard = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {userPredictionsList.length > 0 ? (
-                userPredictionsList
-                  .filter((userPred) => matchStarted || userPred.isCurrentUser)
-                  .map((userPred) => {
-                    return (
-                      <tr
-                        key={userPred.userId}
-                        className={userPred.isCurrentUser ? "bg-gray-50" : ""}
-                      >
-                        <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
-                          {capitalizeFirstLetter(userPred.name || "Unknown")}
-                          {userPred.isCurrentUser && (
-                            <span className="ml-1 text-blue-500">(You)</span>
-                          )}
-                        </td>
-                        <td className="px-2 md:px-6 py-2 md:py-4 text-sm text-gray-800 break-words">
-                          {userPred.prediction
-                            ? userPred.prediction.predictedWinner
-                            : "--"}
-                        </td>
-                        <td className="px-2 md:px-6 py-2 md:py-4 text-sm text-gray-800 break-words">
-                          {userPred.prediction
-                            ? userPred.prediction.playerOfTheMatch
-                            : "--"}
-                        </td>
-                        {!matchStarted && (
-                          <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
-                            {userPred.isCurrentUser &&
-                              !matchStarted &&
-                              (userPred.prediction ? (
-                                <button
-                                  onClick={() =>
-                                    handleEditPrediction(match._id)
-                                  }
-                                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                                >
-                                  Edit
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() =>
-                                    handlePredictionClick(match._id)
-                                  }
-                                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                                >
-                                  Give Prediction
-                                </button>
-                              ))}
-                          </td>
+                userPredictionsList.map((userPred) => {
+                  return (
+                    <tr
+                      key={userPred.userId}
+                      className={userPred.isCurrentUser ? "bg-gray-50" : ""}
+                    >
+                      <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
+                        {capitalizeFirstLetter(userPred.name || "Unknown")}
+                        {userPred.isCurrentUser && (
+                          <span className="ml-1 text-blue-500">(You)</span>
                         )}
-                      </tr>
-                    );
-                  })
+                      </td>
+                      <td className="px-2 md:px-6 py-2 md:py-4 text-sm text-gray-800 break-words">
+                        {userPred.prediction
+                          ? userPred.prediction.predictedWinner
+                          : "--"}
+                      </td>
+                      <td className="px-2 md:px-6 py-2 md:py-4 text-sm text-gray-800 break-words">
+                        {userPred.prediction
+                          ? userPred.prediction.playerOfTheMatch
+                          : "--"}
+                      </td>
+                      {!matchStarted && (
+                        <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
+                          {userPred.isCurrentUser &&
+                            !matchStarted &&
+                            (userPred.prediction ? (
+                              <button
+                                onClick={() =>
+                                  handleEditPrediction(match._id)
+                                }
+                                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                              >
+                                Edit
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  handlePredictionClick(match._id)
+                                }
+                                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                              >
+                                Give Prediction
+                              </button>
+                            ))}
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td
