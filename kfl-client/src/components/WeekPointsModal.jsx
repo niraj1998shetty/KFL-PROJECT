@@ -6,7 +6,9 @@ const WeekPointsModal = ({
   weekPoints, 
   leaderboardData, 
   onResetWeekPoints,
-  isAdmin = false // New prop with default value of false
+  onBonusPoints,
+  onDeductPoints,
+  isAdmin = false 
 }) => {
   if (!isOpen) return null;
 
@@ -14,11 +16,47 @@ const WeekPointsModal = ({
     (weekPoints[b.id] || 0) - (weekPoints[a.id] || 0)
   );
 
+  // Find users with highest and lowest week points
+  const findExtremeCases = () => {
+    const maxWeekPoints = Math.max(...sortedWeekPointsData.map(entry => weekPoints[entry.id] || 0));
+    const minWeekPoints = Math.min(...sortedWeekPointsData.map(entry => weekPoints[entry.id] || 0));
+
+    const highestPointUsers = sortedWeekPointsData.filter(
+      entry => (weekPoints[entry.id] || 0) === maxWeekPoints
+    );
+
+    const lowestPointUsers = sortedWeekPointsData.filter(
+      entry => (weekPoints[entry.id] || 0) === minWeekPoints
+    );
+
+    return { highestPointUsers, lowestPointUsers };
+  };
+
+  const { highestPointUsers, lowestPointUsers } = findExtremeCases();
+
   const handleReset = () => {
     const confirmReset = window.confirm('Are you sure you want to reset week points for all users?');
     if (confirmReset) {
       onResetWeekPoints();
-      onClose(); 
+      onClose();
+    }
+  };
+
+  const handleBonusPoints = () => {
+    const userNames = highestPointUsers.map(user => user.username).join(', ');
+    const confirmBonus = window.confirm(`Do you want to give 2 bonus points to ${userNames}?`);
+    if (confirmBonus) {
+      highestPointUsers.forEach(user => onBonusPoints(user.id));
+      onClose();
+    }
+  };
+
+  const handleDeductPoints = () => {
+    const userNames = lowestPointUsers.map(user => user.username).join(', ');
+    const confirmDeduct = window.confirm(`Do you want to deduct 2 points from ${userNames}?`);
+    if (confirmDeduct) {
+      lowestPointUsers.forEach(user => onDeductPoints(user.id));
+      onClose();
     }
   };
 
@@ -34,12 +72,32 @@ const WeekPointsModal = ({
           <h2 className="text-xl font-bold">Week Points</h2>
           <div className="flex items-center space-x-2">
             {isAdmin && (
-              <button
-                onClick={handleReset}
-                className="bg-red-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-600"
-              >
-                Reset
-              </button>
+              <>
+                {/* Bonus button for highest point users */}
+                {highestPointUsers.length > 0 && (
+                  <button
+                    onClick={handleBonusPoints}
+                    className="bg-green-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-green-600"
+                  >
+                    Bonus +2
+                  </button>
+                )}
+                {/* Deduct button for lowest point users */}
+                {lowestPointUsers.length > 0 && (
+                  <button
+                    onClick={handleDeductPoints}
+                    className="bg-red-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-600"
+                  >
+                    Deduct -2
+                  </button>
+                )}
+                <button
+                  onClick={handleReset}
+                  className="bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-600"
+                >
+                  Reset
+                </button>
+              </>
             )}
             <button
               onClick={onClose}
@@ -67,6 +125,9 @@ const WeekPointsModal = ({
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
                 <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Rank
+                </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Name
                 </th>
                 <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -80,6 +141,11 @@ const WeekPointsModal = ({
                 
                 return (
                   <tr key={entry.id}>
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        {index + 1}
+                      </div>
+                    </td>
                     <td className="px-4 sm:px-6 py-4">
                       <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
                         {entry.username}

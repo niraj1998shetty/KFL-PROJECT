@@ -210,6 +210,46 @@ import axios from 'axios';
     return "";
   };
 
+  const handleBonusPoints = async (userId) => {
+    try {
+      await axios.put(
+        `${API_URL}/users/admin/addPoints/${userId}/2`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      // Refetch leaderboard to update points
+      await fetchLeaderboardData();
+    } catch (error) {
+      console.error(`Error adding bonus points for user ${userId}:`, error);
+      // Optionally, show an error message to the user
+    }
+  };
+  
+  const handleDeductPoints = async (userId) => {
+    try {
+      await axios.put(
+        `${API_URL}/users/admin/addPoints/${userId}/-2`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      // Refetch leaderboard to update points
+      await fetchLeaderboardData();
+    } catch (error) {
+      console.error(`Error deducting points for user ${userId}:`, error);
+      // Optionally, show an error message to the user
+    }
+  };
+
   // const updateUserPoints = async (userId, pointsToAdd) => {
   //   try {
   //     await axios.put(
@@ -514,6 +554,8 @@ import axios from 'axios';
         weekPoints={weekPoints}
         leaderboardData={leaderboardData}
         onResetWeekPoints={handleResetWeekPoints}
+        onBonusPoints={handleBonusPoints}
+        onDeductPoints={handleDeductPoints}
         isAdmin={currentUser && currentUser.isAdmin}
       />
       {isUpdateModalOpen && (
