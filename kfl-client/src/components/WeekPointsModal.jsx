@@ -12,9 +12,17 @@ const WeekPointsModal = ({
 }) => {
   if (!isOpen) return null;
 
-  const sortedWeekPointsData = [...leaderboardData].sort((a, b) => 
-    (weekPoints[b.id] || 0) - (weekPoints[a.id] || 0)
-  );
+  // Sort the data by week points in descending order
+  const sortedWeekPointsData = [...leaderboardData]
+    .sort((a, b) => (weekPoints[b.id] || 0) - (weekPoints[a.id] || 0))
+    .map((entry, index, arr) => {
+      // Calculate proper rank with equal points getting the same rank
+      const entryPoints = weekPoints[entry.id] || 0;
+      const rank = arr.findIndex(
+        prevEntry => (weekPoints[prevEntry.id] || 0) === entryPoints
+      ) + 1;
+      return { ...entry, rank };
+    });
 
   // Find users with highest and lowest week points
   const findExtremeCases = () => {
@@ -62,38 +70,36 @@ const WeekPointsModal = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50" 
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       ></div>
 
       <div className="bg-white text-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 z-10 max-h-[90vh] flex flex-col">
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-xl font-bold">Week Points</h2>
-          <div className="flex items-center space-x-2">
+          <h2 className="text-sm font-semibold">Week's Points</h2>
+          <div className="flex items-center space-x-1">
             {isAdmin && (
               <>
-                {/* Bonus button for highest point users */}
                 {highestPointUsers.length > 0 && (
                   <button
                     onClick={handleBonusPoints}
-                    className="bg-green-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-green-600"
+                    className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
                   >
-                    Bonus +2
+                    Bonus
                   </button>
                 )}
-                {/* Deduct button for lowest point users */}
                 {lowestPointUsers.length > 0 && (
                   <button
                     onClick={handleDeductPoints}
-                    className="bg-red-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-600"
+                    className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
                   >
-                    Deduct -2
+                    Deduct
                   </button>
                 )}
                 <button
                   onClick={handleReset}
-                  className="bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-600"
+                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
                 >
                   Reset
                 </button>
@@ -101,10 +107,10 @@ const WeekPointsModal = ({
             )}
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 focus:outline-none"
+              className="text-gray-500 hover:text-gray-700 ml-4 focus:outline-none"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -136,14 +142,14 @@ const WeekPointsModal = ({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sortedWeekPointsData.map((entry, index) => {
+              {sortedWeekPointsData.map((entry) => {
                 const weekPoint = weekPoints[entry.id] || 0;
-                
+
                 return (
                   <tr key={entry.id}>
                     <td className="px-4 sm:px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {index + 1}
+                        {entry.rank}
                       </div>
                     </td>
                     <td className="px-4 sm:px-6 py-4">
