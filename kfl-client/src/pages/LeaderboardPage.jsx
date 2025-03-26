@@ -49,8 +49,6 @@ import axios from 'axios';
           weekPoints: user.weekPoints,
           mobile: user.mobile,
         }));
-
-        console.log("transformedData", transformedData);
         
         const sortedData = transformedData.sort((a, b) => b.totalPoints - a.totalPoints);
         setLeaderboardData(sortedData);
@@ -249,25 +247,6 @@ import axios from 'axios';
       // Optionally, show an error message to the user
     }
   };
-
-  // const updateUserPoints = async (userId, pointsToAdd) => {
-  //   try {
-  //     await axios.put(
-  //       `${API_URL}/users/admin/addPoints/${userId}/${pointsToAdd}`,
-  //       {},
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem('token')}`
-  //         }
-  //       }
-  //     );
-      
-  //     return true;
-  //   } catch (error) {
-  //     console.error(`Error updating points for user ${userId}:`, error);
-  //     return false;
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

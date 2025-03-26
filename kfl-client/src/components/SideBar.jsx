@@ -18,7 +18,6 @@ const Sidebar = () => {
       try {
         setLoading(true);
         const res = await axios.get(`${API_URL}/auth/allUsers`);
-        console.log(res.data);
         setUsers(res.data);
         setLoading(false);
       } catch (error) {
