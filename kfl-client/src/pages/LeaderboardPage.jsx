@@ -42,12 +42,15 @@ import axios from 'axios';
         setLoading(true);
         const res = await axios.get(`${API_URL}/auth/allUsers`);
         
-        const transformedData = res.data.map(user => ({
+        const transformedData = res.data.map((user) => ({
           id: user._id,
-        username: user.name,
-        totalPoints: user.points,
-        mobile: user.mobile
+          username: user.name,
+          totalPoints: user.points,
+          weekPoints: user.weekPoints,
+          mobile: user.mobile,
         }));
+
+        console.log("transformedData", transformedData);
         
         const sortedData = transformedData.sort((a, b) => b.totalPoints - a.totalPoints);
         setLeaderboardData(sortedData);
