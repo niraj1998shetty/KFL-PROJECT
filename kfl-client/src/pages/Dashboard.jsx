@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState([]);
+  const [playerDetails, setPlayerDetails] = useState({});
   const [userPredictions, setUserPredictions] = useState([]);
   const [allPredictions, setAllPredictions] = useState({});
   const [allUsers, setAllUsers] = useState([]);
@@ -27,6 +28,7 @@ const Dashboard = () => {
   const [matchStatus, setMatchStatus] = useState({});
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
   // DD/MM/YYYY
   const formatDate = (date) => {
     return `${String(date.getDate()).padStart(2, "0")}/${String(
@@ -46,11 +48,11 @@ const Dashboard = () => {
 
   //disable the previous btn
   const isPreviousDisabled = () => {
-  const minDate = new Date(2025, 2, 22);
-  minDate.setHours(0, 0, 0, 0);
-  const currentDateCopy = new Date(currentDate);
-  currentDateCopy.setHours(0, 0, 0, 0);
-  return currentDateCopy <= minDate;
+    const minDate = new Date(2025, 2, 22);
+    minDate.setHours(0, 0, 0, 0);
+    const currentDateCopy = new Date(currentDate);
+    currentDateCopy.setHours(0, 0, 0, 0);
+    return currentDateCopy <= minDate;
   };
 
   // navigate to previous
@@ -93,6 +95,15 @@ const Dashboard = () => {
         setDateLoading(false);
       });
   };
+
+  // Update players details mapping when players are loaded
+  useEffect(() => {
+    const playerDetailsMap = players.reduce((acc, player) => {
+      acc[player._id] = player.name;
+      return acc;
+    }, {});
+    setPlayerDetails(playerDetailsMap);
+  }, [players]);
 
   // Helper functions to fetch
   const fetchPredictionsForMatches = async (matchesList) => {
@@ -277,7 +288,7 @@ const Dashboard = () => {
     };
 
     fetchInitialData();
-  }, [currentUser]); // Only depend on currentUser, not API_URL
+  }, [currentUser]);
 
   // Effect to fetch matches when the date changes
   useEffect(() => {
@@ -426,7 +437,7 @@ const Dashboard = () => {
           Predictions for {match.team1} vs {match.team2}
           {!matchStarted && (
             <span className="block md:inline text-xs md:text-sm font-normal text-gray-500 md:ml-2 mt-1 md:mt-0">
-              (Other predictions will be visible once the match starts)
+              (Others predictions will be visible once the match starts)
             </span>
           )}
         </h3>
@@ -583,7 +594,74 @@ const Dashboard = () => {
     );
   };
 
-  // Toggle sidebar
+  const renderMatchDetails = (match) => {
+    const matchStarted = matchStatus[match._id];
+    const userPrediction = predictions[match._id];
+
+    // Check if match is completed and has a result
+    const isMatchCompleted = match.result?.completed;
+    const matchWinner = isMatchCompleted ? match.result.winner : null;
+    const playerOfTheMatch = isMatchCompleted 
+      ? playerDetails[match.result.playerOfTheMatch] 
+      : null;
+
+    return (
+      <div
+        key={match._id}
+        className="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-3 md:p-4 rounded-lg shadow mb-3 md:mb-4"
+      >
+        <div className="font-semibold text-sm md:text-base mb-2 md:mb-0">
+          Match {match.matchNumber}: {match.team1} vs {match.team2}
+          
+          {isMatchCompleted ? (
+            <div className="text-green-600 md:ml-2 block md:inline mt-1 md:mt-0 text-sm">
+              <span>Winning team: {matchWinner} </span>
+              {playerOfTheMatch && (
+                <span className="ml-2 text-orange-600">
+                  POTM: {playerOfTheMatch}
+                </span>
+              )}
+            </div>
+          ) : matchStarted ? (
+            <span className="text-orange-500 md:ml-2 block md:inline mt-1 md:mt-0">
+              (Match started)
+            </span>
+          ) : (
+            <span className="text-gray-500 text-xs md:ml-2 block md:inline mt-1 md:mt-0">
+              (You can't predict after {match.time})
+            </span>
+          )}
+        </div>
+
+        {!isMatchCompleted && (
+          <>
+            {userPrediction ? (
+              <button
+                onClick={() => handleEditPrediction(match._id)}
+                className={`bg-green-600 hover:bg-green-700 text-white px-3 py-1 md:px-4 md:py-2 rounded transition duration-300 text-sm ${
+                  matchStarted ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={matchStarted}
+              >
+                Edit Prediction
+              </button>
+            ) : (
+              <button
+                onClick={() => handlePredictionClick(match._id)}
+                className={`bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 md:px-4 md:py-2 rounded transition duration-300 text-sm ${
+                  matchStarted ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={matchStarted}
+              >
+                Give Prediction
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -613,7 +691,6 @@ const Dashboard = () => {
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <main className="flex-1 p-4 md:p-6 bg-gray-100 overflow-x-hidden min-h-[80vh]">
-          {/* Date navigation controls */}
           {renderDateNavigation()}
 
           <div className="text-center mb-6 md:mb-8">
@@ -645,51 +722,7 @@ const Dashboard = () => {
 
           {!dateLoading && matches.length > 0 && (
             <div className="mb-6 md:mb-8">
-              {matches.map((match) => {
-                const matchStarted = matchStatus[match._id];
-                const userPrediction = predictions[match._id];
-
-                return (
-                  <div
-                    key={match._id}
-                    className="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-3 md:p-4 rounded-lg shadow mb-3 md:mb-4"
-                  >
-                    <div className="font-semibold text-sm md:text-base mb-2 md:mb-0">
-                      Match {match.matchNumber}: {match.team1} vs {match.team2}
-                      {matchStarted ? (
-                        <span className="text-orange-500 md:ml-2 block md:inline mt-1 md:mt-0">
-                          (Match started)
-                        </span>
-                      ) :
-                      (<span className="text-gray-500 text-xs md:ml-2 block md:inline mt-1 md:mt-0">
-                        (You can't predict after {match.time})
-                      </span>)
-                      }
-                    </div>
-                    {userPrediction ? (
-                      <button
-                        onClick={() => handleEditPrediction(match._id)}
-                        className={`bg-green-600 hover:bg-green-700 text-white px-3 py-1 md:px-4 md:py-2 rounded transition duration-300 text-sm ${
-                          matchStarted ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                        disabled={matchStarted}
-                      >
-                        Edit Prediction
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handlePredictionClick(match._id)}
-                        className={`bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 md:px-4 md:py-2 rounded transition duration-300 text-sm ${
-                          matchStarted ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                        disabled={matchStarted}
-                      >
-                        Give Prediction
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+              {matches.map(renderMatchDetails)}
             </div>
           )}
 

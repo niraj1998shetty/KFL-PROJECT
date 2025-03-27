@@ -155,9 +155,7 @@ const TopBar = () => {
       <div className="bg-indigo-700 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            {/* Logo and Title Container */}
             <div className="flex items-center flex-shrink-0">
-              {/* Logo - Larger size */}
               <div className="h-12 w-12">
                 <img
                   src={logo}
@@ -166,7 +164,6 @@ const TopBar = () => {
                 />
               </div>
 
-              {/* Title - Better responsive breakpoints */}
               <div className="font-bold">
                 <span className="hidden md:inline text-xl">
                   KattheGang Fantasy League
@@ -175,10 +172,8 @@ const TopBar = () => {
               </div>
             </div>
 
-            {/* Create flexible space between logo and buttons */}
             <div className="flex-grow"></div>
 
-            {/* Right side content */}
             <div className="flex items-center space-x-1">
               <div className="relative" ref={semifinalOptionsRef}>
                 <button

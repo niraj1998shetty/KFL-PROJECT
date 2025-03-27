@@ -2,58 +2,69 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Footer from '../components/Footer';
 import TopBar from '../components/TopBar';
+import WeekPointsModal from '../components/WeekPointsModal';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const LeaderboardPage = () => {
-  const { currentUser } = useAuth();
-  const navigate = useNavigate();
-  const [leaderboardData, setLeaderboardData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [matchLoading, setMatchLoading] = useState(false);
-  const [updateError, setUpdateError] = useState('');
-  const [updateSuccess, setUpdateSuccess] = useState('');
-  const [matches, setMatches] = useState([]);
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [players, setPlayers] = useState([]);
-  const [userPredictions, setUserPredictions] = useState([]);
-  const [processingUpdate, setProcessingUpdate] = useState(false);
-  const [formData, setFormData] = useState({
-    matchNumber: '',
-    matchType: 'league',
-    winner: '',
-    manOfTheMatch: '',
-    winningType: '',
-  });
-
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
-  useEffect(() => {
-    fetchLeaderboardData();
-    fetchAllMatches();
-  }, []);
-
-  const fetchLeaderboardData = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_URL}/auth/allUsers`);
-      
-      const transformedData = res.data.map(user => ({
-        id: user._id,
-        username: user.name,
-        totalPoints: user.points,
-        mobile: user.mobile
-      }));
-      
-      const sortedData = transformedData.sort((a, b) => b.totalPoints - a.totalPoints);
-      setLeaderboardData(sortedData);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching users for leaderboard:", error);
-      setLoading(false);
-    }
-  };
+  const LeaderboardPage = () => {
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
+    const [leaderboardData, setLeaderboardData] = useState([]);
+    const [weekPoints, setWeekPoints] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [isWeekPointsModalOpen, setIsWeekPointsModalOpen] = useState(false);
+    const [matchLoading, setMatchLoading] = useState(false);
+    const [updateError, setUpdateError] = useState('');
+    const [updateSuccess, setUpdateSuccess] = useState('');
+    const [matches, setMatches] = useState([]);
+    const [selectedMatch, setSelectedMatch] = useState(null);
+    const [players, setPlayers] = useState([]);
+    const [userPredictions, setUserPredictions] = useState([]);
+    const [processingUpdate, setProcessingUpdate] = useState(false);
+    const [formData, setFormData] = useState({
+      matchNumber: '',
+      matchType: 'league',
+      winner: '',
+      manOfTheMatch: '',
+      winningType: '',
+    });
+  
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  
+    useEffect(() => {
+      fetchLeaderboardData();
+      fetchAllMatches();
+    }, []);
+  
+    const fetchLeaderboardData = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_URL}/auth/allUsers`);
+        
+        const transformedData = res.data.map((user) => ({
+          id: user._id,
+          username: user.name,
+          totalPoints: user.points,
+          weekPoints: user.weekPoints,
+          mobile: user.mobile,
+        }));
+        
+        const sortedData = transformedData.sort((a, b) => b.totalPoints - a.totalPoints);
+        setLeaderboardData(sortedData);
+  
+        const weekPointsObj = transformedData.reduce((acc, user) => {
+          acc[user.id] = user.weekPoints || 0;
+          return acc;
+        }, {});
+        setWeekPoints(weekPointsObj);
+  
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching users for leaderboard:", error);
+        setLoading(false);
+      }
+    };
 
   const fetchAllMatches = async () => {
     try {
@@ -181,7 +192,7 @@ const LeaderboardPage = () => {
   };
 
   const getRankMedal = (index, entry) => {
-    let rank = 1; // Start with rank 1
+    let rank = 1;
   
     for (let i = 0; i < leaderboardData.length; i++) {
       if (leaderboardData[i].totalPoints > entry.totalPoints) {
@@ -189,17 +200,16 @@ const LeaderboardPage = () => {
       }
     }
     
-    // Assign medals based on actual rank
-    if (rank === 1) return "🥇"; // Gold
-    if (rank === 2) return "🥈"; // Silver
-    if (rank === 3) return "🥉"; // Bronze
+    if (rank === 1) return "🥇"; 
+    if (rank === 2) return "🥈"; 
+    if (rank === 3) return "🥉";
     return "";
   };
 
-  const updateUserPoints = async (userId, pointsToAdd) => {
+  const handleBonusPoints = async (userId) => {
     try {
       await axios.put(
-        `${API_URL}/users/admin/addPoints/${userId}/${pointsToAdd}`,
+        `${API_URL}/users/admin/addPoints/${userId}/2`,
         {},
         {
           headers: {
@@ -208,10 +218,27 @@ const LeaderboardPage = () => {
         }
       );
       
-      return true;
+      await fetchLeaderboardData();
     } catch (error) {
-      console.error(`Error updating points for user ${userId}:`, error);
-      return false;
+      console.error(`Error adding bonus points for user ${userId}:`, error);
+    }
+  };
+  
+  const handleDeductPoints = async (userId) => {
+    try {
+      await axios.put(
+        `${API_URL}/users/admin/addPoints/${userId}/-2`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      await fetchLeaderboardData();
+    } catch (error) {
+      console.error(`Error deducting points for user ${userId}:`, error);
     }
   };
 
@@ -251,7 +278,7 @@ const LeaderboardPage = () => {
       )?.name;
       
       if (userPredictions.length > 0) {
-        const updatePromises = userPredictions.map(prediction => {
+        const updatePromises = userPredictions.map(async prediction => {
           const correctTeam = prediction.predictedWinner === formData.winner;
           
           const correctMOM = 
@@ -275,7 +302,25 @@ const LeaderboardPage = () => {
           }
           
           if (pointsToAward > 0) {
-            return updateUserPoints(prediction.user._id, pointsToAward);
+            await axios.put(
+                         `${API_URL}/users/admin/addPoints/${prediction.user._id}/${pointsToAward}`,
+                         {},
+                         {
+                           headers: {
+                             Authorization: `Bearer ${localStorage.getItem('token')}`
+                           }
+                         }
+                       );
+           
+                       await axios.put(
+                         `${API_URL}/users/weekPoints/add/${prediction.user._id}/${pointsToAward}`,
+                         {},
+                         {
+                           headers: {
+                             Authorization: `Bearer ${localStorage.getItem('token')}`
+                           }
+                         }
+                       );
           }
           return Promise.resolve();
         });
@@ -301,8 +346,33 @@ const LeaderboardPage = () => {
 
   const handleBackToDashboard = () => {
     navigate('/dashboard'); 
-  };
-
+      };
+      
+      const handleResetWeekPoints = async () => {
+         try {
+              await axios.put(`${API_URL}/users/weekPoints/reset`, {}, {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+              });
+        
+              const resetWeekPoints = leaderboardData.reduce((acc, user) => {
+                acc[user.id] = 0;
+                return acc;
+              }, {});
+        
+              setWeekPoints(resetWeekPoints);
+        
+              fetchLeaderboardData();
+            } catch (error) {
+              console.error("Error resetting week points:", error);
+            }
+      };
+    
+      const openWeekPointsModal = () => {
+        setIsWeekPointsModalOpen(true);
+      };
+    
   return (
     <div className="min-h-screen flex flex-col">
       <TopBar />
@@ -335,15 +405,26 @@ const LeaderboardPage = () => {
 
           <div className="bg-white shadow-md rounded-lg overflow-hidden h-[65vh] flex flex-col">
             <div className="p-4 sm:p-6 bg-blue-600 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
-              <h1 className="text-lg sm:text-xl font-semibold">Leader Board</h1>
-              {currentUser && currentUser.isAdmin && (
+              <h1 className="text-base sm:text-lg font-semibold">
+                Leader Board
+              </h1>
+              <div className="flex space-x-2">
                 <button
-                  onClick={openUpdateModal}
-                  className="bg-white text-blue-600 px-3 py-1.5 rounded-md font-medium hover:bg-gray-100 transition duration-300 text-sm"
+                  onClick={openWeekPointsModal}
+                  className="bg-white text-blue-600 px-2 py-1 rounded-md font-medium hover:bg-gray-100 transition duration-300 text-xs sm:text-sm"
                 >
-                  Update Result
+                  Week's leaderboard
                 </button>
-              )}
+
+                {currentUser && currentUser.isAdmin && (
+                  <button
+                    onClick={openUpdateModal}
+                    className="bg-white text-blue-600 px-2 py-1 rounded-md font-medium hover:bg-gray-100 transition duration-300 text-xs sm:text-sm"
+                  >
+                    Result
+                  </button>
+                )}
+              </div>
             </div>
 
             {loading ? (
@@ -369,7 +450,7 @@ const LeaderboardPage = () => {
                     </thead>
                   </table>
                 </div>
-                
+
                 <div className="overflow-y-auto flex-grow">
                   <table className="w-full">
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -377,7 +458,9 @@ const LeaderboardPage = () => {
                         leaderboardData.map((entry, index) => {
                           let rank = 1;
                           for (let i = 0; i < index; i++) {
-                            if (leaderboardData[i].totalPoints > entry.totalPoints) {
+                            if (
+                              leaderboardData[i].totalPoints > entry.totalPoints
+                            ) {
                               rank++;
                             }
                           }
@@ -430,7 +513,16 @@ const LeaderboardPage = () => {
       </main>
 
       <Footer />
-
+      <WeekPointsModal
+        isOpen={isWeekPointsModalOpen}
+        onClose={() => setIsWeekPointsModalOpen(false)}
+        weekPoints={weekPoints}
+        leaderboardData={leaderboardData}
+        onResetWeekPoints={handleResetWeekPoints}
+        onBonusPoints={handleBonusPoints}
+        onDeductPoints={handleDeductPoints}
+        isAdmin={currentUser && currentUser.isAdmin}
+      />
       {isUpdateModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
@@ -475,7 +567,6 @@ const LeaderboardPage = () => {
               )}
             </div>
 
-            {/* Scrollable Content */}
             <div className="p-6 overflow-y-auto flex-grow">
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
@@ -493,7 +584,7 @@ const LeaderboardPage = () => {
                     {matches
                       .filter(
                         (match) => !match.result || !match.result.completed
-                      ) // Filter out completed matches
+                      ) 
                       .map((match) => (
                         <option key={match._id} value={match.matchNumber}>
                           Match {match.matchNumber}: {match.team1} vs{" "}

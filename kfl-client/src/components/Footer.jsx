@@ -24,17 +24,15 @@ const Footer = () => {
   const closePrizeModal = () => {
     setIsPrizeModalOpen(false);
   };
-  const fireworksContainerRef = useRef(null); // Declare the ref
+  const fireworksContainerRef = useRef(null); 
 
 
   useEffect(() => {
     if (isPrizeModalOpen && fireworksContainerRef.current) {
-      // Ensure the container is available and initialize fireworks
       const container = fireworksContainerRef.current;
       const fireworks = new Fireworks(container);
       fireworks.start();
 
-      // Cleanup fireworks when the modal closes
       return () => fireworks.stop();
     }
   }, [isPrizeModalOpen]);
@@ -151,7 +149,6 @@ const Footer = () => {
 
       {isRulesModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          {/* Modal Overlay */}
           <div
             className="fixed inset-0 bg-black bg-opacity-50"
             onClick={closeRulesModal}
@@ -278,16 +275,12 @@ const Footer = () => {
       
 {isPrizeModalOpen && (
   <div className="fixed inset-0 flex items-center justify-center z-50">
-    {/* Fireworks Container */}
-
-    
-    {/* Modal Overlay */}
     <div
       className="fixed inset-0 bg-black bg-opacity-50"
       onClick={closePrizeModal}
     >
       <div
-              ref={fireworksContainerRef} // Attach the ref to the container div
+              ref={fireworksContainerRef}
               
             ></div>
     </div>
@@ -320,8 +313,6 @@ const Footer = () => {
       </div>
   
       <div className="space-y-4" >
-        {/* Prize Pool Image */}
-        
         <div className="text-center mb-4">
         <img
           src={prizePoolImage}
