@@ -633,7 +633,6 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Only show prediction buttons if match is not completed */}
         {!isMatchCompleted && (
           <>
             {userPrediction ? (
@@ -663,7 +662,6 @@ const Dashboard = () => {
     );
   };
 
-  // Toggle sidebar
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -693,7 +691,6 @@ const Dashboard = () => {
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <main className="flex-1 p-4 md:p-6 bg-gray-100 overflow-x-hidden min-h-[80vh]">
-          {/* Date navigation controls */}
           {renderDateNavigation()}
 
           <div className="text-center mb-6 md:mb-8">

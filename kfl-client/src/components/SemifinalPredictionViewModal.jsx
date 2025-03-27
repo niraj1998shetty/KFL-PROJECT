@@ -86,8 +86,6 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
                             <span className="text-xs font-medium bg-gray-200 text-gray-800 px-2 py-1 rounded mr-2">
                               {team}
                             </span>
-                            {/* You can add full team name if needed */}
-                            {/* {teamNames[team]} */}
                           </div>
                         </td>
                       ))}

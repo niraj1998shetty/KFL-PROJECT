@@ -53,7 +53,6 @@ import axios from 'axios';
         const sortedData = transformedData.sort((a, b) => b.totalPoints - a.totalPoints);
         setLeaderboardData(sortedData);
   
-        // Create week points object
         const weekPointsObj = transformedData.reduce((acc, user) => {
           acc[user.id] = user.weekPoints || 0;
           return acc;
@@ -193,7 +192,7 @@ import axios from 'axios';
   };
 
   const getRankMedal = (index, entry) => {
-    let rank = 1; // Start with rank 1
+    let rank = 1;
   
     for (let i = 0; i < leaderboardData.length; i++) {
       if (leaderboardData[i].totalPoints > entry.totalPoints) {
@@ -201,10 +200,9 @@ import axios from 'axios';
       }
     }
     
-    // Assign medals based on actual rank
-    if (rank === 1) return "🥇"; // Gold
-    if (rank === 2) return "🥈"; // Silver
-    if (rank === 3) return "🥉"; // Bronze
+    if (rank === 1) return "🥇"; 
+    if (rank === 2) return "🥈"; 
+    if (rank === 3) return "🥉";
     return "";
   };
 
@@ -220,11 +218,9 @@ import axios from 'axios';
         }
       );
       
-      // Refetch leaderboard to update points
       await fetchLeaderboardData();
     } catch (error) {
       console.error(`Error adding bonus points for user ${userId}:`, error);
-      // Optionally, show an error message to the user
     }
   };
   
@@ -240,11 +236,9 @@ import axios from 'axios';
         }
       );
       
-      // Refetch leaderboard to update points
       await fetchLeaderboardData();
     } catch (error) {
       console.error(`Error deducting points for user ${userId}:`, error);
-      // Optionally, show an error message to the user
     }
   };
 
@@ -318,7 +312,6 @@ import axios from 'axios';
                          }
                        );
            
-                       // Update week points
                        await axios.put(
                          `${API_URL}/users/weekPoints/add/${prediction.user._id}/${pointsToAward}`,
                          {},
@@ -363,7 +356,6 @@ import axios from 'axios';
                 }
               });
         
-              // Reset local state
               const resetWeekPoints = leaderboardData.reduce((acc, user) => {
                 acc[user.id] = 0;
                 return acc;
@@ -371,7 +363,6 @@ import axios from 'axios';
         
               setWeekPoints(resetWeekPoints);
         
-              // Refetch leaderboard to ensure updated data
               fetchLeaderboardData();
             } catch (error) {
               console.error("Error resetting week points:", error);
@@ -382,10 +373,6 @@ import axios from 'axios';
         setIsWeekPointsModalOpen(true);
       };
     
-      // const closeWeekPointsModal = () => {
-      //   setIsWeekPointsModalOpen(false);
-      // };
-
   return (
     <div className="min-h-screen flex flex-col">
       <TopBar />
@@ -526,7 +513,6 @@ import axios from 'axios';
       </main>
 
       <Footer />
-      {/* Week Points Modal */}
       <WeekPointsModal
         isOpen={isWeekPointsModalOpen}
         onClose={() => setIsWeekPointsModalOpen(false)}
@@ -581,7 +567,6 @@ import axios from 'axios';
               )}
             </div>
 
-            {/* Scrollable Content */}
             <div className="p-6 overflow-y-auto flex-grow">
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
@@ -599,7 +584,7 @@ import axios from 'axios';
                     {matches
                       .filter(
                         (match) => !match.result || !match.result.completed
-                      ) // Filter out completed matches
+                      ) 
                       .map((match) => (
                         <option key={match._id} value={match.matchNumber}>
                           Match {match.matchNumber}: {match.team1} vs{" "}
