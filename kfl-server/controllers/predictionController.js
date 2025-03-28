@@ -80,6 +80,44 @@ const getUserMatchPrediction = asyncHandler(async (req, res) => {
 // @route   GET /api/predictions/match/:matchId/all
 // @access  Private
 const getAllMatchPredictions = asyncHandler(async (req, res) => {
+  // First, check if the match exists
+  const match = await Match.findById(req.params.matchId);
+  if (!match) {
+    res.status(404);
+    throw new Error('Match not found');
+  }
+
+  // Get current time in UTC
+  const serverTimeUTC = new Date();
+  
+  // Parse match date and time
+  const [day, month, year] = match.date.split('/');
+  const timeString = match.time.split(' ')[0];
+  const [hours, minutes] = timeString.split(':').map(num => parseInt(num, 10));
+  
+  // Create match time in UTC
+  const matchTimeUTC = new Date(Date.UTC(
+    parseInt(year, 10),
+    parseInt(month, 10) - 1,
+    parseInt(day, 10),
+    hours - 5, // Convert IST to UTC
+    minutes - 30
+  ));
+
+  // If match hasn't started, only return the current user's prediction
+  if (serverTimeUTC < matchTimeUTC) {
+    const userPrediction = await Prediction.find({ 
+      match: req.params.matchId, 
+      user: req.user.id 
+    }).populate({
+      path: 'user',
+      select: 'name mobile'
+    });
+    
+    return res.status(200).json(userPrediction);
+  }
+
+  // If match has started, fetch and return all predictions
   const predictions = await Prediction.find({ match: req.params.matchId })
     .populate({
       path: 'user',

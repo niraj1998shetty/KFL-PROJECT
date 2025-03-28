@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSwipeable } from "react-swipeable";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import TopBar from "../components/TopBar";
@@ -35,6 +36,13 @@ const Dashboard = () => {
       date.getMonth() + 1
     ).padStart(2, "0")}/${date.getFullYear()}`;
   };
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => goToNextDay(),
+    onSwipedRight: () => goToPreviousDay(),
+    preventScrollOnSwipe: true,
+    trackMouse: true
+  });
 
   // today
   const isToday = (date) => {
@@ -271,11 +279,16 @@ const Dashboard = () => {
             );
             allMatchPredictions[match._id] = allPredictionsRes.data;
           } catch (error) {
-            console.error(
-              `Error fetching predictions for match ${match._id}:`,
-              error
-            );
-            allMatchPredictions[match._id] = [];
+            if (error.response && error.response.status === 403) {
+              // Predictions not visible yet
+              allMatchPredictions[match._id] = [];
+            } else {
+              console.error(
+                `Error fetching predictions for match ${match._id}:`,
+                error
+              );
+              allMatchPredictions[match._id] = [];
+            }
           }
         }
 
@@ -672,7 +685,7 @@ const Dashboard = () => {
         <TopBar onMenuClick={toggleSidebar} />
         <div className="flex flex-1">
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-          <main className="flex-1 p-4 md:p-6 bg-gray-100 flex items-center justify-center min-h-[80vh]">
+          <main className="flex-1 p-4 md:p-6 bg-gray-100 flex items-center justify-center min-h-[80vh] mt-16">
             <span className="flex items-center justify-center">
               <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-primary rounded-full"></span>
             </span>
@@ -684,13 +697,13 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div {...swipeHandlers} className="flex flex-col min-h-screen w-full touch-pan-y">
       <TopBar onMenuClick={toggleSidebar} />
 
       <div className="flex flex-1">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 p-4 md:p-6 bg-gray-100 overflow-x-hidden min-h-[80vh]">
+        <main className="flex-1 p-4 md:p-6 bg-gray-100 overflow-x-hidden min-h-[80vh] mt-16">
           {renderDateNavigation()}
 
           <div className="text-center mb-6 md:mb-8">
