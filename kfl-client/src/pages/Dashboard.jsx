@@ -271,11 +271,16 @@ const Dashboard = () => {
             );
             allMatchPredictions[match._id] = allPredictionsRes.data;
           } catch (error) {
-            console.error(
-              `Error fetching predictions for match ${match._id}:`,
-              error
-            );
-            allMatchPredictions[match._id] = [];
+            if (error.response && error.response.status === 403) {
+              // Predictions not visible yet
+              allMatchPredictions[match._id] = [];
+            } else {
+              console.error(
+                `Error fetching predictions for match ${match._id}:`,
+                error
+              );
+              allMatchPredictions[match._id] = [];
+            }
           }
         }
 
