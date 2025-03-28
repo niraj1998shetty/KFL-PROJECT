@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSwipeable } from "react-swipeable";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import TopBar from "../components/TopBar";
@@ -35,6 +36,13 @@ const Dashboard = () => {
       date.getMonth() + 1
     ).padStart(2, "0")}/${date.getFullYear()}`;
   };
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => goToNextDay(),
+    onSwipedRight: () => goToPreviousDay(),
+    preventScrollOnSwipe: true,
+    trackMouse: true
+  });
 
   // today
   const isToday = (date) => {
@@ -689,7 +697,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div {...swipeHandlers} className="flex flex-col min-h-screen w-full touch-pan-y">
       <TopBar onMenuClick={toggleSidebar} />
 
       <div className="flex flex-1">
