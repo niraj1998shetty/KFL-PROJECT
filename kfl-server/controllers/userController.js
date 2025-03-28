@@ -114,35 +114,36 @@ const adminAddPoints = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/admin/addPoints/:userId/:points
 // @access  Private (Admin only)
 const adminAddPointsToUser = asyncHandler(async (req, res) => {
-    // Check if admin
-    if (!req.user.isAdmin) {
-      res.status(403);
-      throw new Error('Not authorized');
-    }
+  // Check if admin
+  if (!req.user.isAdmin) {
+    res.status(403);
+    throw new Error('Not authorized');
+  }
+
+  const userId = req.params.userId;
+  const points = parseInt(req.params.points);
   
-    const userId = req.params.userId;
-    const points = parseInt(req.params.points);
-    
-    if (isNaN(points) || points < 0) {
-      res.status(400);
-      throw new Error('Please provide a valid number of points');
-    }
+  if (isNaN(points)) {
+    res.status(400);
+    throw new Error('Please provide a valid number of points');
+  }
+
+  const user = await User.findById(userId);
   
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      res.status(404);
-      throw new Error('User not found');
-    }
-  
-    user.points += points;
-    await user.save();
-  
-    res.status(200).json({
-      message: `Successfully added ${points} points to user ${user.name}`,
-      currentPoints: user.points
-    });
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  // Prevent points from going below zero
+  user.points = Math.max(0, user.points + points);
+  await user.save();
+
+  res.status(200).json({
+    message: `Successfully ${points >= 0 ? 'added' : 'deducted'} ${Math.abs(points)} points to/from user ${user.name}`,
+    currentPoints: user.points
   });
+});
 
 // @desc    Reset user points
 // @route   PUT /api/users/points/reset
