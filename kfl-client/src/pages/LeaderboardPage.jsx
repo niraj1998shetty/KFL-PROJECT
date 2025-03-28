@@ -377,7 +377,7 @@ import axios from 'axios';
     <div className="min-h-screen flex flex-col">
       <TopBar />
 
-      <main className="flex-grow bg-gray-100 py-8 min-h-[80vh]">
+      <main className="flex-grow bg-gray-100 py-8 min-h-[80vh] mt-12">
         <div className="max-w-6xl mx-auto px-4">
           {/* Back button */}
           <div className="mb-4">
