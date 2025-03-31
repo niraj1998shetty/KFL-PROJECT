@@ -3,7 +3,7 @@ import { useSwipeable } from "react-swipeable";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import TopBar from "../components/TopBar";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/SideBar";
 import Footer from "../components/Footer";
 import MatchPredictionModal from "../components/MatchPredictionModal";
 import { capitalizeFirstLetter } from "../helpers/functions";
