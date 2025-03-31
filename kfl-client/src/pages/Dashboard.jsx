@@ -697,13 +697,13 @@ const Dashboard = () => {
   }
 
   return (
-    <div {...swipeHandlers} className="flex flex-col min-h-screen w-full touch-pan-y">
+    <div className="flex flex-col min-h-screen w-full ">
       <TopBar onMenuClick={toggleSidebar} />
 
       <div className="flex flex-1">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 p-4 md:p-6 bg-gray-100 overflow-x-hidden min-h-[80vh] mt-16">
+        <main {...swipeHandlers} className="flex-1 p-4 md:p-6 bg-gray-100 overflow-x-hidden min-h-[80vh] mt-16 touch-pan-y">
           {renderDateNavigation()}
 
           <div className="text-center mb-6 md:mb-8">
