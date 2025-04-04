@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import LeaderboardPage from './pages/LeaderboardPage';
+import PredictionStats from './pages/PredictionStats';
 import AuthGuard from './guards/AuthGuard';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -29,6 +30,14 @@ const App = () => {
             element={
               <AuthGuard>
                 <LeaderboardPage />
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/stats" 
+            element={
+              <AuthGuard>
+                <PredictionStats />
               </AuthGuard>
             } 
           />
