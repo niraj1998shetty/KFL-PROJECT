@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Prediction = require('../models/Prediction');
 const Match = require('../models/Matches');
+const Player = require('../models/Player');
 
 // @desc    Create or update prediction
 // @route   POST /api/predictions
@@ -131,7 +132,35 @@ const getAllMatchPredictions = asyncHandler(async (req, res) => {
 // @route   GET /api/predictions/leaderboard
 // @access  Private
 const getLeaderboard = asyncHandler(async (req, res) => {
+  // First, get all players to have a mapping of player ID to name
+  const players = await Player.find({});
+  
+  // Create a map of player IDs to names for quick lookup
+  const playerMap = players.reduce((map, player) => {
+    map[player._id.toString()] = player.name;
+    return map;
+  }, {});
+
   const leaderboard = await Prediction.aggregate([
+    {
+      $lookup: {
+        from: 'matches',
+        localField: 'match',
+        foreignField: '_id',
+        as: 'matchDetails'
+      }
+    },
+    {
+      $unwind: '$matchDetails'
+    },
+    {
+      $addFields: {
+        // Store relevant match details for easier access
+        matchCompleted: '$matchDetails.result.completed',
+        actualPotmId: '$matchDetails.result.playerOfTheMatch',
+        actualWinner: '$matchDetails.result.winner'
+      }
+    },
     {
       $group: {
         _id: '$user',
@@ -139,6 +168,16 @@ const getLeaderboard = asyncHandler(async (req, res) => {
         correctPredictions: {
           $sum: {
             $cond: [{ $eq: ['$isCorrect', true] }, 1, 0]
+          }
+        },
+        // Store all predictions and match results to process later
+        predictions: {
+          $push: {
+            predictedPotm: '$playerOfTheMatch',
+            predictedWinner: '$predictedWinner',
+            actualPotmId: '$actualPotmId',
+            actualWinner: '$actualWinner',
+            matchCompleted: '$matchCompleted'
           }
         },
         totalPredictions: { $sum: 1 }
@@ -154,29 +193,58 @@ const getLeaderboard = asyncHandler(async (req, res) => {
     },
     {
       $unwind: '$userDetails'
-    },
-    {
-      $project: {
-        _id: 1,
-        name: '$userDetails.name',
-        mobile: '$userDetails.mobile',
-        totalPoints: 1,
-        correctPredictions: 1,
-        totalPredictions: 1,
-        accuracy: {
-          $multiply: [
-            { $divide: ['$correctPredictions', '$totalPredictions'] },
-            100
-          ]
-        }
-      }
-    },
-    {
-      $sort: { totalPoints: -1, accuracy: -1 }
     }
   ]);
   
-  res.status(200).json(leaderboard);
+  // Post-process to count various correct predictions with playerMap
+  const processedLeaderboard = leaderboard.map(entry => {
+    // Initialize counters
+    let correctPotmCount = 0;
+    let bothCorrectCount = 0;
+    
+    entry.predictions.forEach(prediction => {
+      if (prediction.matchCompleted) {
+        // Check POTM prediction
+        let isPotmCorrect = false;
+        if (prediction.actualPotmId) {
+          const actualPlayerName = playerMap[prediction.actualPotmId];
+          if (actualPlayerName && actualPlayerName === prediction.predictedPotm) {
+            correctPotmCount++;
+            isPotmCorrect = true;
+          }
+        }
+        
+        // Check if both winner and POTM predictions are correct
+        const isWinnerCorrect = prediction.predictedWinner === prediction.actualWinner;
+        if (isWinnerCorrect && isPotmCorrect) {
+          bothCorrectCount++;
+        }
+      }
+    });
+    
+    // Calculate accuracy
+    const accuracy = entry.totalPredictions > 0
+      ? (entry.correctPredictions * 100) / entry.totalPredictions
+      : 0;
+    
+    // Return processed entry
+    return {
+      _id: entry._id,
+      name: entry.userDetails.name,
+      mobile: entry.userDetails.mobile,
+      totalPoints: entry.totalPoints,
+      correctPredictions: entry.correctPredictions,
+      correctPotmPredictions: correctPotmCount,
+      bothCorrectPredictions: bothCorrectCount,
+      totalPredictions: entry.totalPredictions,
+      accuracy
+    };
+  });
+  
+  // Sort by total points (descending)
+  processedLeaderboard.sort((a, b) => b.totalPoints - a.totalPoints);
+  
+  res.status(200).json(processedLeaderboard);
 });
 
 module.exports = {
