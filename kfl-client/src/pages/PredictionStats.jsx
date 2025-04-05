@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '../contexts/AuthContext';
 import axios from "axios";
 import TopBar from "../components/TopBar";
 import Footer from "../components/Footer";
@@ -7,6 +8,7 @@ import { getFirstName } from "../helpers/functions";
 
 const PredictionStats = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [statsData, setStatsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [completedMatches, setCompletedMatches] = useState(0);
@@ -212,6 +214,9 @@ const PredictionStats = () => {
     setShowExtraStats(!showExtraStats);
   };
 
+  // Check if the current user is an admin
+  const isAdmin = currentUser && currentUser.isAdmin;
+
   return (
     <div className="min-h-screen flex flex-col">
       <TopBar />
@@ -396,7 +401,8 @@ const PredictionStats = () => {
                   />
                 </svg>
               </h2>
-              {showExtraStats && (
+              {/* Only show edit button if user is admin and extra stats are visible */}
+              {showExtraStats && isAdmin && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent triggering the parent onClick
@@ -415,7 +421,7 @@ const PredictionStats = () => {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm font-semibold text-gray-600">Highest score in a week:</p>
-                    {isEditing ? (
+                    {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.highestWeeklyScore}
@@ -429,7 +435,7 @@ const PredictionStats = () => {
                   
                   <div>
                     <p className="text-sm font-semibold text-gray-600">Lowest score in a week:</p>
-                    {isEditing ? (
+                    {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.lowestWeeklyScore}
@@ -443,7 +449,7 @@ const PredictionStats = () => {
                   
                   <div>
                     <p className="text-sm font-semibold text-gray-600">Consecutive Wrong prediction:</p>
-                    {isEditing ? (
+                    {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.consecutiveWrongPrediction}
@@ -457,7 +463,7 @@ const PredictionStats = () => {
                   
                   <div>
                     <p className="text-sm font-semibold text-gray-600">Consecutive Right prediction:</p>
-                    {isEditing ? (
+                    {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.consecutiveRightPrediction}
@@ -473,7 +479,7 @@ const PredictionStats = () => {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm font-semibold text-gray-600">Highest +2 points Received by (week topper):</p>
-                    {isEditing ? (
+                    {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.highestPlusPoints}
@@ -487,7 +493,7 @@ const PredictionStats = () => {
                   
                   <div>
                     <p className="text-sm font-semibold text-gray-600">Highest -2 points received by (week lower):</p>
-                    {isEditing ? (
+                    {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.highestMinusPoints}
