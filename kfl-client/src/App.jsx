@@ -8,6 +8,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import PredictionStats from './pages/PredictionStats';
 import AuthGuard from './guards/AuthGuard';
 import ScrollToTop from './components/ScrollToTop';
+import Posts from './pages/Posts';
 
 const App = () => {
   return (
@@ -38,6 +39,14 @@ const App = () => {
             element={
               <AuthGuard>
                 <PredictionStats />
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/posts" 
+            element={
+              <AuthGuard>
+                <Posts />
               </AuthGuard>
             } 
           />

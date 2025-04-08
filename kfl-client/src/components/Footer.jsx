@@ -83,6 +83,14 @@ const Footer = () => {
                   Statistics
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/posts"
+                  className="text-gray-400 hover:text-white transition duration-300"
+                >
+                  Posts
+                </Link>
+              </li>
                <li>
                 <a
                   href="https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing"
