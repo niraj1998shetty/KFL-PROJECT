@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext';
 import axios from "axios";
 import TopBar from "../components/TopBar";
-import Footer from "../components/Footer";
 import { getFirstName } from "../helpers/functions";
 
 // Emoji mapping for reactions
@@ -19,7 +17,6 @@ const reactionEmojis = {
 };
 
 const Posts = () => {
-  const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -289,9 +286,6 @@ const Posts = () => {
     setActiveDropdownId(null);
   };
   
-  const handleBackToDashboard = () => {
-    navigate('/dashboard'); 
-  };
 
   const addPollOption = () => {
     setPollOptions([...pollOptions, ""]);
@@ -335,16 +329,18 @@ const Posts = () => {
     return isAuthor && isWithinEditWindow;
   };
 
-  // Fixed function to check if post has been meaningfully edited
-  const isPostEdited = (post) => {
-    // If createdAt and updatedAt are the same, it hasn't been edited
-    if (post.createdAt === post.updatedAt) return false;
+    // Fixed function to check if post has been meaningfully edited
     
-    // Check if there's a meaningful time difference (at least 1 second)
-    const createdTime = new Date(post.createdAt).getTime();
-    const updatedTime = new Date(post.updatedAt).getTime();
-    return (updatedTime - createdTime) >= 1000; // 1 second difference threshold
-  };
+
+//   const isPostEdited = (post) => {
+//     // If createdAt and updatedAt are the same, it hasn't been edited
+//     if (post.createdAt === post.updatedAt) return false;
+    
+//     // Check if there's a meaningful time difference (at least 1 second)
+//     const createdTime = new Date(post.createdAt).getTime();
+//     const updatedTime = new Date(post.updatedAt).getTime();
+//     return (updatedTime - createdTime) >= 1000; // 1 second difference threshold
+//   };
 
   // Toggle dropdown menu for post actions
   const toggleDropdown = (postId) => {
@@ -352,33 +348,11 @@ const Posts = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       <TopBar />
   
-      <main className="flex-grow bg-gray-100 py-8 min-h-[80vh] mt-16">
+      <main className="flex-grow bg-gray-100 py-4">
         <div className="max-w-3xl mx-auto px-4">
-          <div className="mb-4">
-            <button
-              onClick={handleBackToDashboard}
-              className="flex items-center text-blue-600 hover:text-blue-800 transition duration-300"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              Back
-            </button>
-          </div>
           {/* Create Post Button */}
           {!showCreatePost && (
             <div className="mb-6">
@@ -558,12 +532,12 @@ const Posts = () => {
               </div>
             ) : (
               posts.map((post) => (
-                <div key={post._id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 relative">
+                <div key={post._id} className="text-sm bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 relative">
                   {/* Post Header */}
                   <div className="p-4">
                     <div className="flex justify-between items-start">
                       <div className="flex items-start space-x-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-medium flex-shrink-0">
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-medium flex-shrink-0">
                           {post.author?.name ? getFirstName(post.author.name).charAt(0).toUpperCase() : '?'}
                         </div>
                         <div>
@@ -574,9 +548,9 @@ const Posts = () => {
                             <span className="mx-1 text-gray-400">·</span>
                             <p className="text-xs text-gray-500">
                               {formatTimestamp(post.createdAt)}
-                              {isPostEdited(post) && (
+                              {/* {isPostEdited(post) && (
                                 <span className="ml-1 text-gray-400">(edited)</span>
-                              )}
+                              )} */}
                             </p>
                           </div>
                           
@@ -838,9 +812,7 @@ const Posts = () => {
           </div>
         </div>
       </main>
-  
-      <Footer />
-    </div>
+    </>
   );
 };
 

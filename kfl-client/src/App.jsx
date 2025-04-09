@@ -9,12 +9,31 @@ import PredictionStats from './pages/PredictionStats';
 import AuthGuard from './guards/AuthGuard';
 import ScrollToTop from './components/ScrollToTop';
 import Posts from './pages/Posts';
+import TopBar from './components/TopBar';
+import Sidebar from './components/SideBar';
+import Footer from './components/Footer';
+
+// Layout component for authenticated pages
+const AppLayout = ({ children }) => {
+  return (
+    <div className="flex flex-col h-screen">
+      <TopBar />
+      <div className="flex flex-1 pt-16 overflow-hidden">
+        <Sidebar />
+        <main className="flex-1 bg-gray-100 overflow-auto pb-16 md:pb-0">
+          {children}
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+};
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
-      <ScrollToTop />
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -22,7 +41,9 @@ const App = () => {
             path="/dashboard" 
             element={
               <AuthGuard>
-                <Dashboard />
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
               </AuthGuard>
             } 
           />
@@ -30,7 +51,9 @@ const App = () => {
             path="/leaderboard" 
             element={
               <AuthGuard>
-                <LeaderboardPage />
+                <AppLayout>
+                  <LeaderboardPage />
+                </AppLayout>
               </AuthGuard>
             } 
           />
@@ -38,7 +61,9 @@ const App = () => {
             path="/stats" 
             element={
               <AuthGuard>
-                <PredictionStats />
+                <AppLayout>
+                  <PredictionStats />
+                </AppLayout>
               </AuthGuard>
             } 
           />
@@ -46,7 +71,9 @@ const App = () => {
             path="/posts" 
             element={
               <AuthGuard>
-                <Posts />
+                <AppLayout>
+                  <Posts />
+                </AppLayout>
               </AuthGuard>
             } 
           />

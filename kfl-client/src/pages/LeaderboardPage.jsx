@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import Footer from '../components/Footer';
 import TopBar from '../components/TopBar';
 import WeekPointsModal from '../components/WeekPointsModal';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
   const LeaderboardPage = () => {
     const { currentUser } = useAuth();
-    const navigate = useNavigate();
     const [leaderboardData, setLeaderboardData] = useState([]);
     const [weekPoints, setWeekPoints] = useState({});
     const [loading, setLoading] = useState(true);
@@ -343,10 +340,6 @@ import axios from 'axios';
       setProcessingUpdate(false);
     }
   };
-
-  const handleBackToDashboard = () => {
-    navigate('/dashboard'); 
-      };
       
       const handleResetWeekPoints = async () => {
          try {
@@ -374,36 +367,13 @@ import axios from 'axios';
       };
     
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       <TopBar />
 
-      <main className="flex-grow bg-gray-100 py-8 min-h-[80vh] mt-12">
+      <main className="flex-grow bg-gray-100 py-4">
         <div className="max-w-6xl mx-auto px-4">
-          {/* Back button */}
-          <div className="mb-4">
-            <button
-              onClick={handleBackToDashboard}
-              className="flex items-center text-blue-600 hover:text-blue-800 transition duration-300"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              Back
-            </button>
-          </div>
 
-          <div className="bg-white shadow-md rounded-lg overflow-hidden h-[65vh] flex flex-col">
+          <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
             <div className="p-4 sm:p-6 bg-blue-600 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
               <h1 className="text-base sm:text-lg font-semibold">
                 Leader Board
@@ -512,7 +482,6 @@ import axios from 'axios';
         </div>
       </main>
 
-      <Footer />
       <WeekPointsModal
         isOpen={isWeekPointsModalOpen}
         onClose={() => setIsWeekPointsModalOpen(false)}
@@ -770,7 +739,7 @@ import axios from 'axios';
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
