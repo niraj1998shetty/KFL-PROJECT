@@ -401,7 +401,7 @@ const Posts = () => {
                 />
                 
                 {/* Poll toggle */}
-                <div className="flex items-center mb-4">
+                {/* <div className="flex items-center mb-4">
                   <input
                     type="checkbox"
                     id="isPoll"
@@ -412,7 +412,7 @@ const Posts = () => {
                   <label htmlFor="isPoll" className="text-gray-700">
                     Create a poll
                   </label>
-                </div>
+                </div> */}
                 
                 {/* Poll options */}
                 {isCreatingPoll && (
