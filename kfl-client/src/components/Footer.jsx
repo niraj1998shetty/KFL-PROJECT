@@ -8,6 +8,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import prizePoolImage from '../assets/prize-pool-image.jpg';
 import Fireworks from "fireworks-js";
 
 const Footer = () => {
@@ -366,7 +367,7 @@ const Footer = () => {
             <div className="space-y-4" >
               <div className="text-center mb-4">
                 <img
-                  src="/src/assets/prize-pool-image.jpg"
+                  src={prizePoolImage}
                   alt="Prize Pool"
                   className="rounded-lg shadow-lg max-w-full h-auto"
                 /> 
