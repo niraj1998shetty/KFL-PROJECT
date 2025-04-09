@@ -481,7 +481,7 @@ const Posts = () => {
               <div className="p-4 border-b flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-gray-800">Edit Post</h2>
                 <span className="text-xs text-gray-500">
-                  Posts can only be edited within 30 minutes of creation
+                 edit within 30 minutes
                 </span>
               </div>
               
@@ -613,7 +613,7 @@ const Posts = () => {
                                   Edit
                                 </button>
                               )}
-                              {(post.author._id === currentUser?._id || currentUser?.isAdmin) && (
+                              {(post.author._id === currentUser?._id && currentUser?.isAdmin) && (
                                 <button
                                   onClick={() => handleDeletePost(post._id)}
                                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
