@@ -613,7 +613,7 @@ const Posts = () => {
                                   Edit
                                 </button>
                               )}
-                              {(post.author._id === currentUser?._id && currentUser?.isAdmin) && (
+                              {(currentUser?.isAdmin) && (
                                 <button
                                   onClick={() => handleDeletePost(post._id)}
                                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center"
