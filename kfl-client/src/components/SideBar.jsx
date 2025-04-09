@@ -95,7 +95,7 @@ const Sidebar = () => {
   return (
     <div className="w-64 bg-gray-800 text-white p-4 h-full overflow-y-auto hidden md:block">
       <h2 className="text-xl font-bold mb-6 pb-2 border-b border-gray-700">
-        Menu
+        
       </h2>
 
       <div className="space-y-2">
