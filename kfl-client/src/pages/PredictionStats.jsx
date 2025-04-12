@@ -15,13 +15,14 @@ const PredictionStats = () => {
   const [sortField, setSortField] = useState("totalPoints");
   const [sortDirection, setSortDirection] = useState("desc");
   
+  // Initialize with empty values
   const [extraStats, setExtraStats] = useState({
-    highestWeeklyScore: "Sagar, Samiksha, Adesh (34)",
-    lowestWeeklyScore: "Anusha (5)",
-    consecutiveWrongPrediction: "Anusha (12 matches)",
-    consecutiveRightPrediction: "Akhilesh (7 matches)",
-    highestPlusPoints: "Sagar, Sameeksha, Adesh, Aadi",
-    highestMinusPoints: "Anusha (2 times)",
+    highestWeeklyScore: "",
+    lowestWeeklyScore: "",
+    consecutiveWrongPrediction: "",
+    consecutiveRightPrediction: "",
+    highestPlusPoints: "",
+    highestMinusPoints: "",
   });
   const [editableStats, setEditableStats] = useState({...extraStats});
 
@@ -29,6 +30,7 @@ const PredictionStats = () => {
 
   useEffect(() => {
     fetchStatsData();
+    fetchExtraStats();
   }, []);
 
   const fetchStatsData = async () => {
@@ -36,7 +38,7 @@ const PredictionStats = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      // Use the new optimized endpoint that returns all necessary data in one call
+      // Use the optimized endpoint that returns all necessary data in one call
       const response = await axios.get(`${API_URL}/predictions/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -47,16 +49,25 @@ const PredictionStats = () => {
       // Set completed matches count
       setCompletedMatches(response.data.completedMatchesCount);
       
-      // Optionally update extra stats if coming from backend
-      if (response.data.extraStats) {
-        // You can choose to use some of the calculated stats from backend
-        // or keep using your hardcoded values
-      }
-      
       setLoading(false);
     } catch (error) {
       console.error("Error fetching stats data:", error);
       setLoading(false);
+    }
+  };
+
+  const fetchExtraStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.get(`${API_URL}/extrastats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setExtraStats(response.data);
+      setEditableStats(response.data);
+    } catch (error) {
+      console.error("Error fetching extra stats:", error);
     }
   };
 
@@ -100,15 +111,29 @@ const PredictionStats = () => {
     );
   };
 
-  const handleEditToggle = () => {
+  const handleEditToggle = async () => {
     if (isEditing) {
-      // Save changes
-      setExtraStats({...editableStats});
+      try {
+        // Save changes to the backend
+        const token = localStorage.getItem('token');
+        await axios.put(
+          `${API_URL}/extrastats`, 
+          editableStats, 
+          { headers: { Authorization: `Bearer ${token}` }}
+        );
+        
+        // Update local state
+        setExtraStats({...editableStats});
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Error updating extra stats:", error);
+        alert("Failed to update extra stats. Please try again.");
+      }
     } else {
       // Enter edit mode
       setEditableStats({...extraStats});
+      setIsEditing(true);
     }
-    setIsEditing(!isEditing);
   };
 
   const handleStatChange = (key, value) => {

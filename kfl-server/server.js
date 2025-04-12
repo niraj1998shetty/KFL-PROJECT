@@ -10,6 +10,7 @@ const playerRoutes = require('./routes/playerRoutes');
 const whitelistRoutes = require('./routes/whitelistRoutes');
 const semifinalRoutes = require('./routes/semifinalRoutes'); // Added semifinal routes
 const postRoutes = require('./routes/postRoutes');
+const extraStatsRoutes = require('./routes/extraStatsRoutes');
 const { errorHandler } = require('./utils/errorHandler');
 
 // Connect to MongoDB
@@ -54,6 +55,8 @@ app.use('/api/players', playerRoutes);
 app.use('/api/whitelist', whitelistRoutes);
 app.use('/api/semifinals', semifinalRoutes); // Added semifinal routes
 app.use('/api/posts', postRoutes); 
+app.use('/api/extrastats', extraStatsRoutes);
+
 
 // Basic route
 app.get('/', (req, res) => {
