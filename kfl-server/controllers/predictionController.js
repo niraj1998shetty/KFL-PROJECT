@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const Prediction = require('../models/Prediction');
 const Match = require('../models/Matches');
 const Player = require('../models/Player');
+const User = require('../models/User');
 
 // @desc    Create or update prediction
 // @route   POST /api/predictions
@@ -247,10 +248,161 @@ const getLeaderboard = asyncHandler(async (req, res) => {
   res.status(200).json(processedLeaderboard);
 });
 
+
+// @desc    Get predictions for multiple matches
+// @route   GET /api/predictions/matches/batch
+// @access  Private
+const getBatchMatchPredictions = asyncHandler(async (req, res) => {
+  // Get match IDs from query string as comma-separated values
+  // Example: /api/predictions/matches/batch?ids=60d5e8b8e3b4f13d9c9a1b5a,60d5e8b8e3b4f13d9c9a1b5b
+  const { ids } = req.query;
+  
+  if (!ids) {
+    res.status(400);
+    throw new Error('Match IDs are required');
+  }
+  
+  // Split the comma-separated IDs
+  const matchIds = ids.split(',');
+  
+  // Validate match IDs
+  for (const id of matchIds) {
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      res.status(400);
+      throw new Error(`Invalid match ID format: ${id}`);
+    }
+  }
+  
+  // Fetch all predictions for the specified matches in one query
+  const predictions = await Prediction.find({ match: { $in: matchIds } })
+    .populate({
+      path: 'user',
+      select: 'name mobile _id'
+    })
+    .populate('match');
+  
+  // Group predictions by match
+  const predictionsByMatch = {};
+  
+  for (const prediction of predictions) {
+    const matchId = prediction.match._id.toString();
+    
+    if (!predictionsByMatch[matchId]) {
+      predictionsByMatch[matchId] = [];
+    }
+    
+    predictionsByMatch[matchId].push(prediction);
+  }
+  
+  res.status(200).json(predictionsByMatch);
+});
+
+// @desc    Get all data needed for prediction stats
+// @route   GET /api/predictions/stats
+// @access  Private
+const getStatsData = asyncHandler(async (req, res) => {
+  // Step 1: Get all users
+  const users = await User.find({}).select('_id name points');
+  
+  // Step 2: Get all completed matches
+  const completedMatches = await Match.find({ 'result.completed': true });
+  const completedMatchIds = completedMatches.map(match => match._id);
+  
+  // Step 3: Get player information for POTM validation
+  const players = await Player.find({});
+  const playerMap = players.reduce((map, player) => {
+    map[player._id.toString()] = player.name;
+    return map;
+  }, {});
+  
+  // Step 4: Get all predictions for completed matches in one query
+  const predictions = await Prediction.find({ match: { $in: completedMatchIds } })
+    .populate('match')
+    .populate({
+      path: 'user',
+      select: '_id name'
+    });
+  
+  // Step 5: Process stats data manually for more accurate POTM calculation
+  const statsMap = {};
+  
+  // Initialize stats for all users
+  users.forEach(user => {
+    statsMap[user._id.toString()] = {
+      id: user._id,
+      name: user.name,
+      totalPoints: user.points || 0,
+      predictionsCount: 0,
+      correctPredictions: 0,
+      correctPotmPredictions: 0,
+      bothCorrectPredictions: 0,
+      noPredictionCount: completedMatchIds.length, // Initialize with total matches
+      accuracy: 0
+    };
+  });
+  
+  // Process each prediction
+  predictions.forEach(prediction => {
+    const userId = prediction.user._id.toString();
+    const userStats = statsMap[userId];
+    
+    if (!userStats) return; // Skip if user not found (shouldn't happen)
+    
+    // Count prediction
+    userStats.predictionsCount++;
+    
+    // Decrement no prediction count since we found a prediction
+    userStats.noPredictionCount--;
+    
+    // Check if match result exists
+    if (prediction.match.result && prediction.match.result.completed) {
+      // Count correct team prediction
+      if (prediction.isCorrect) {
+        userStats.correctPredictions++;
+      }
+      
+      // Count correct POTM prediction - need to compare names, not IDs
+      let isPotmCorrect = false;
+      if (prediction.match.result.playerOfTheMatch) {
+        const potmId = prediction.match.result.playerOfTheMatch.toString();
+        const actualPotmName = playerMap[potmId];
+        
+        if (actualPotmName && actualPotmName === prediction.playerOfTheMatch) {
+          userStats.correctPotmPredictions++;
+          isPotmCorrect = true;
+        }
+      }
+      
+      // Count both correct (team and POTM)
+      if (prediction.isCorrect && isPotmCorrect) {
+        userStats.bothCorrectPredictions++;
+      }
+    }
+  });
+  
+  // Calculate accuracy for each user
+  Object.values(statsMap).forEach(userStats => {
+    if (userStats.predictionsCount > 0) {
+      userStats.accuracy = parseFloat(((userStats.correctPredictions / userStats.predictionsCount) * 100).toFixed(1));
+    }
+  });
+  
+  // Convert map to array and sort by totalPoints
+  const statsData = Object.values(statsMap).sort((a, b) => b.totalPoints - a.totalPoints);
+  
+  // Return all necessary data
+  res.status(200).json({
+    statsData,
+    completedMatchesCount: completedMatchIds.length
+  });
+});
+
 module.exports = {
   createPrediction,
   getUserPredictions,
   getUserMatchPrediction,
   getAllMatchPredictions,
-  getLeaderboard
+  getLeaderboard,
+  getBatchMatchPredictions,
+  getStatsData
 };
