@@ -11,17 +11,18 @@ const PredictionStats = () => {
   const [completedMatches, setCompletedMatches] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [showExtraStats, setShowExtraStats] = useState(false);
-  // New sorting states
+  // Sorting states
   const [sortField, setSortField] = useState("totalPoints");
   const [sortDirection, setSortDirection] = useState("desc");
   
+  // Initialize with empty values
   const [extraStats, setExtraStats] = useState({
-    highestWeeklyScore: "Sagar, Samiksha, Adesh (34)",
-    lowestWeeklyScore: "Anusha (5)",
-    consecutiveWrongPrediction: "Anusha (12 matches)",
-    consecutiveRightPrediction: "Akhilesh (7 matches)",
-    highestPlusPoints: "Sagar, Sameeksha, Adesh, Aadi",
-    highestMinusPoints: "Anusha (2 times)",
+    highestWeeklyScore: "",
+    lowestWeeklyScore: "",
+    consecutiveWrongPrediction: "",
+    consecutiveRightPrediction: "",
+    highestPlusPoints: "",
+    highestMinusPoints: "",
   });
   const [editableStats, setEditableStats] = useState({...extraStats});
 
@@ -29,6 +30,7 @@ const PredictionStats = () => {
 
   useEffect(() => {
     fetchStatsData();
+    fetchExtraStats();
   }, []);
 
   const fetchStatsData = async () => {
@@ -36,105 +38,17 @@ const PredictionStats = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      // Get all users
-      const usersRes = await axios.get(`${API_URL}/auth/allUsers`, {
+      // Use the optimized endpoint that returns all necessary data in one call
+      const response = await axios.get(`${API_URL}/predictions/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Get all matches
-      const matchesRes = await axios.get(`${API_URL}/matches`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Set the stats data
+      setStatsData(response.data.statsData);
       
-      // Filter completed matches
-      const completedMatchesArray = matchesRes.data.filter(match => match.result.completed);
-      setCompletedMatches(completedMatchesArray.length);
+      // Set completed matches count
+      setCompletedMatches(response.data.completedMatchesCount);
       
-      // Get all completed match IDs
-      const completedMatchIds = completedMatchesArray.map(match => match._id);
-      
-      // Get all predictions for each user
-      const allUserPredictions = {};
-      
-      // First initialize with empty arrays for all users
-      usersRes.data.forEach(user => {
-        allUserPredictions[user._id] = [];
-      });
-      
-      // Get all predictions for completed matches
-      for (const matchId of completedMatchIds) {
-        try {
-          const matchPredictions = await axios.get(`${API_URL}/predictions/match/${matchId}/all`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
-          // Add these predictions to the user's array
-          matchPredictions.data.forEach(prediction => {
-            if (allUserPredictions[prediction.user._id]) {
-              allUserPredictions[prediction.user._id].push(prediction.match);
-            }
-          });
-        } catch (error) {
-          console.error(`Error fetching predictions for match ${matchId}:`, error);
-        }
-      }
-      
-      // Get leaderboard data which has accurate prediction counts
-      const leaderboardRes = await axios.get(`${API_URL}/predictions/leaderboard`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      // Map user data with leaderboard data
-      const statsData = usersRes.data.map(user => {
-        // Find this user in the leaderboard data
-        const leaderboardEntry = leaderboardRes.data.find(entry => entry._id === user._id);
-        
-        // Get user's predictions for completed matches
-        const userCompletedPredictions = allUserPredictions[user._id] || [];
-        
-        // Calculate unique completed matches the user has predicted
-        const uniquePredictedMatches = new Set(userCompletedPredictions);
-        
-        // Calculate no prediction count
-        const noPredictionCount = completedMatchIds.length - uniquePredictedMatches.size;
-        
-        if (leaderboardEntry) {
-          // Calculate accuracy based on completed matches instead of total predictions
-          const accuracy = completedMatchesArray.length > 0 
-            ? (leaderboardEntry.correctPredictions * 100) / completedMatchesArray.length 
-            : 0;
-            
-          return {
-            id: user._id,
-            name: user.name,
-            totalPoints: user.points,
-            predictionsCount: leaderboardEntry.totalPredictions,
-            correctPredictions: leaderboardEntry.correctPredictions,
-            correctPotmPredictions: leaderboardEntry.correctPotmPredictions || 0,
-            bothCorrectPredictions: leaderboardEntry.bothCorrectPredictions || 0,
-            noPredictionCount: noPredictionCount,
-            accuracy: parseFloat(accuracy.toFixed(1))
-          };
-        } else {
-          // User hasn't made any predictions yet
-          return {
-            id: user._id,
-            name: user.name,
-            totalPoints: user.points,
-            predictionsCount: 0,
-            correctPredictions: 0,
-            correctPotmPredictions: 0,
-            bothCorrectPredictions: 0,
-            noPredictionCount: completedMatchesArray.length,
-            accuracy: 0.0
-          };
-        }
-      });
-      
-      // Sort by total points (descending) by default
-      const sortedStatsData = sortData(statsData, "totalPoints", "desc");
-      
-      setStatsData(sortedStatsData);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching stats data:", error);
@@ -142,9 +56,24 @@ const PredictionStats = () => {
     }
   };
 
+  const fetchExtraStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.get(`${API_URL}/extrastats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setExtraStats(response.data);
+      setEditableStats(response.data);
+    } catch (error) {
+      console.error("Error fetching extra stats:", error);
+    }
+  };
+
   // Function to sort data based on field and direction
   const sortData = (data, field, direction) => {
-    const sortedData = [...data].sort((a, b) => {
+    return [...data].sort((a, b) => {
       // For string fields (like name)
       if (field === "name") {
         return direction === "asc" 
@@ -157,8 +86,6 @@ const PredictionStats = () => {
         ? a[field] - b[field]
         : b[field] - a[field];
     });
-    
-    return sortedData;
   };
 
   // Handle column header click for sorting
@@ -184,15 +111,29 @@ const PredictionStats = () => {
     );
   };
 
-  const handleEditToggle = () => {
+  const handleEditToggle = async () => {
     if (isEditing) {
-      // Save changes
-      setExtraStats({...editableStats});
+      try {
+        // Save changes to the backend
+        const token = localStorage.getItem('token');
+        await axios.put(
+          `${API_URL}/extrastats`, 
+          editableStats, 
+          { headers: { Authorization: `Bearer ${token}` }}
+        );
+        
+        // Update local state
+        setExtraStats({...editableStats});
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Error updating extra stats:", error);
+        alert("Failed to update extra stats. Please try again.");
+      }
     } else {
       // Enter edit mode
       setEditableStats({...extraStats});
+      setIsEditing(true);
     }
-    setIsEditing(!isEditing);
   };
 
   const handleStatChange = (key, value) => {
