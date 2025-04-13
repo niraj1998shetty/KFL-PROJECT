@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from "axios";
 import TopBar from "../components/TopBar";
 import { getFirstName } from "../helpers/functions";
+import UserStatsCard from "../components/UserStatsCard";
+import RecentPerformanceCard from "../components/RecentPerformanceCard";
 
 const PredictionStats = () => {
   const { currentUser } = useAuth();
@@ -14,6 +16,11 @@ const PredictionStats = () => {
   // Sorting states
   const [sortField, setSortField] = useState("totalPoints");
   const [sortDirection, setSortDirection] = useState("desc");
+  
+  // User specific stats
+  const [currentUserStats, setCurrentUserStats] = useState(null);
+  const [recentPerformance, setRecentPerformance] = useState([]);
+  const [userStatsLoading, setUserStatsLoading] = useState(true);
   
   // Initialize with empty values
   const [extraStats, setExtraStats] = useState({
@@ -29,6 +36,7 @@ const PredictionStats = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
+    fetchUserSpecificStats();
     fetchStatsData();
     fetchExtraStats();
   }, []);
@@ -53,6 +61,31 @@ const PredictionStats = () => {
     } catch (error) {
       console.error("Error fetching stats data:", error);
       setLoading(false);
+    }
+  };
+
+  const fetchUserSpecificStats = async () => {
+    try {
+      setUserStatsLoading(true);
+      const token = localStorage.getItem('token');
+      
+      // Fetch current user's stats
+      const userStatsResponse = await axios.get(`${API_URL}/predictions/user-stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setCurrentUserStats(userStatsResponse.data.userStats);
+      
+      // Fetch recent performance (last 7 matches)
+      const recentMatchesResponse = await axios.get(`${API_URL}/predictions/recent-performance`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setRecentPerformance(recentMatchesResponse.data.recentMatches);
+      setUserStatsLoading(false);
+    } catch (error) {
+      console.error("Error fetching user specific stats:", error);
+      setUserStatsLoading(false);
     }
   };
 
@@ -157,6 +190,18 @@ const PredictionStats = () => {
 
       <main className="flex-grow bg-gray-100 py-8">
         <div className="max-w-6xl mx-auto px-4">
+          
+          {/* New User Stats Section with charts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <UserStatsCard 
+              userData={currentUserStats} 
+              loading={userStatsLoading} 
+            />
+            <RecentPerformanceCard 
+              recentMatches={recentPerformance} 
+              loading={userStatsLoading} 
+            />
+          </div>
 
           <div className="bg-white shadow-md rounded-lg overflow-hidden h-[65vh] flex flex-col mb-6">
             <div className="p-4 sm:p-6 bg-blue-600 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
@@ -233,14 +278,15 @@ const PredictionStats = () => {
                         {statsData.length > 0 ? (
                           statsData.map((user, index) => {
                             const isInTop3 = index < 3 && sortField === "totalPoints" && sortDirection === "desc";
+                            const isCurrentUser = user.id === currentUser?.id;
                             return (
                               <tr
                                 key={user.id}
-                                className={isInTop3 ? "bg-blue-50" : ""}
+                                className={`${isInTop3 ? "bg-blue-50" : ""} ${isCurrentUser ? "bg-yellow-50" : ""}`}
                               >
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-medium text-gray-900">
-                                    {getFirstName(user.name)}
+                                    {getFirstName(user.name)} {isCurrentUser && "(You)"}
                                   </div>
                                 </td>
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">

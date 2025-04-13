@@ -383,7 +383,8 @@ const getStatsData = asyncHandler(async (req, res) => {
   // Calculate accuracy for each user
   Object.values(statsMap).forEach(userStats => {
     if (userStats.predictionsCount > 0) {
-      userStats.accuracy = parseFloat(((userStats.correctPredictions / userStats.predictionsCount) * 100).toFixed(1));
+      userStats.accuracy = parseFloat(((userStats.correctPredictions / completedMatchIds.length) * 100).toFixed(1));
+      // userStats.accuracy = parseFloat(((userStats.correctPredictions / userStats.predictionsCount) * 100).toFixed(1)); //(for only predicted matches)
     }
   });
   
@@ -397,6 +398,197 @@ const getStatsData = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get user-specific stats
+// @route   GET /api/predictions/user-stats
+// @access  Private
+const getUserStats = asyncHandler(async (req, res) => {
+  // Get user ID from auth middleware
+  const userId = req.user.id;
+  
+  // Get all completed matches
+  const completedMatches = await Match.find({ 'result.completed': true });
+  const completedMatchIds = completedMatches.map(match => match._id);
+  const totalMatches = completedMatches.length;
+  
+  // Get player information for POTM validation
+  const players = await Player.find({});
+  const playerMap = players.reduce((map, player) => {
+    map[player._id.toString()] = player.name;
+    return map;
+  }, {});
+  
+  // Get all predictions for the user for completed matches
+  const userPredictions = await Prediction.find({ 
+    user: userId,
+    match: { $in: completedMatchIds } 
+  }).populate('match');
+  
+  // Calculate stats
+  let correctPredictions = 0;
+  let correctPotmPredictions = 0;
+  let bothCorrectPredictions = 0;
+  let totalPoints = 0;
+  
+  userPredictions.forEach(prediction => {
+    // Add points
+    totalPoints += prediction.points || 0;
+    
+    // Check team prediction
+    if (prediction.isCorrect) {
+      correctPredictions++;
+    }
+    
+    // Check POTM prediction
+    let isPotmCorrect = false;
+    if (prediction.match.result && prediction.match.result.playerOfTheMatch) {
+      const potmId = prediction.match.result.playerOfTheMatch.toString();
+      const actualPotmName = playerMap[potmId];
+      
+      if (actualPotmName && actualPotmName === prediction.playerOfTheMatch) {
+        correctPotmPredictions++;
+        isPotmCorrect = true;
+      }
+    }
+    
+    // Check if both correct
+    if (prediction.isCorrect && isPotmCorrect) {
+      bothCorrectPredictions++;
+    }
+  });
+  
+  // Get user info
+  const user = await User.findById(userId);
+  
+  // Combine stats
+  const userStats = {
+    totalPoints: user.points || totalPoints, // Use points from user model if available
+    correctPredictions,
+    totalMatches,
+    correctPotmPredictions,
+    bothCorrectPredictions,
+  };
+  
+  res.status(200).json({ userStats });
+});
+
+// In the getRecentPerformance function, modify the problematic code at line ~530
+// Previous code:
+// const teamA = match.teamA.split(' ').pop(); // Get last word of team name
+// const teamB = match.teamB.split(' ').pop();
+// const matchShort = `${teamA} vs ${teamB}`;
+
+// Updated safe code with null checks:
+const getRecentPerformance = asyncHandler(async (req, res) => {
+  // Get user ID from auth middleware
+  const userId = req.user.id;
+  
+  // Get all completed matches
+  const completedMatches = await Match.find({ 'result.completed': true });
+  
+  // Convert string dates to actual Date objects for proper sorting
+  const matchesWithParsedDates = completedMatches.map(match => {
+    // Parse DD/MM/YYYY format
+    const [day, month, year] = match.date.split('/');
+    // Create Date object (note: month is 0-indexed in JS)
+    const parsedDate = new Date(year, month - 1, day);
+    
+    // Parse time (assuming format like "14:00 IST")
+    let timeValue = 0;
+    if (match.time) {
+      const timeParts = match.time.split(' ')[0].split(':');
+      if (timeParts.length === 2) {
+        timeValue = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+      }
+    }
+    
+    return {
+      ...match.toObject(),
+      _parsedDate: parsedDate,
+      _timeValue: timeValue
+    };
+  });
+  
+  // Sort by parsed date (newest first) and then by time
+  matchesWithParsedDates.sort((a, b) => {
+    // First compare dates
+    const dateComparison = b._parsedDate - a._parsedDate;
+    if (dateComparison !== 0) return dateComparison;
+    
+    // If same date, compare times
+    return b._timeValue - a._timeValue;
+  });
+  
+  // Take only the 7 most recent matches
+  const recentMatches = matchesWithParsedDates.slice(0, 7);
+  
+  // Get player information for POTM validation
+  const players = await Player.find({});
+  const playerMap = players.reduce((map, player) => {
+    map[player._id.toString()] = player.name;
+    return map;
+  }, {});
+  
+  // Get match IDs for the recent matches
+  const matchIds = recentMatches.map(match => match._id);
+  
+  // Get user predictions for these matches
+  const predictions = await Prediction.find({
+    user: userId,
+    match: { $in: matchIds }
+  }).populate('match');
+  
+  // Create a map of match ID to prediction for easier lookup
+  const predictionMap = {};
+  predictions.forEach(pred => {
+    predictionMap[pred.match._id.toString()] = pred;
+  });
+  
+  // Process match data with predictions
+  const processedMatches = recentMatches.map((match, index) => {
+    const matchId = match._id.toString();
+    const prediction = predictionMap[matchId];
+    
+    // Default values - consider no prediction as incorrect (teamCorrect = false)
+    let teamCorrect = false;
+    let potmCorrect = false;
+    let hasPrediction = false;
+    
+    if (prediction) {
+      // User made a prediction for this match
+      hasPrediction = true;
+      teamCorrect = prediction.isCorrect || false;
+      
+      // Check POTM prediction
+      if (match.result && match.result.playerOfTheMatch) {
+        const potmId = match.result.playerOfTheMatch.toString();
+        const actualPotmName = playerMap[potmId];
+        
+        potmCorrect = (actualPotmName && actualPotmName === prediction.playerOfTheMatch);
+      }
+    }
+    
+    // Create match display name safely with null checks
+    const team1Short = match.team1 ? match.team1.split(' ').pop() : 'Team 1';
+    const team2Short = match.team2 ? match.team2.split(' ').pop() : 'Team 2';
+    
+    return {
+      matchId: matchId,
+      match: match.team1 && match.team2 ? `${match.team1} vs ${match.team2}` : 'Match Data Missing',
+      matchShort: `${team1Short} vs ${team2Short}`,
+      matchNumber: match.matchNumber || `Match ${index + 1}`,
+      date: match.date,
+      teamCorrect,
+      potmCorrect,
+      hasPrediction
+    };
+  });
+  
+  // Return the matches in chronological order (oldest to newest)
+  // This matches the order shown in your reference image
+  processedMatches.reverse();
+  
+  res.status(200).json({ recentMatches: processedMatches });
+});
 module.exports = {
   createPrediction,
   getUserPredictions,
@@ -404,5 +596,7 @@ module.exports = {
   getAllMatchPredictions,
   getLeaderboard,
   getBatchMatchPredictions,
-  getStatsData
+  getStatsData,
+  getUserStats,
+  getRecentPerformance
 };
