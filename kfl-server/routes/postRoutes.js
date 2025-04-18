@@ -7,13 +7,15 @@ const {
   updatePost,
   deletePost,
   reactToPost,
-  voteOnPoll
+  voteOnPoll,
+  getUnreadPostsCount // Add this new import
 } = require('../controllers/postController');
 const { protect } = require('../middleware/authMiddleware');
 
 // Basic post routes
 router.post('/', protect, createPost);
 router.get('/', protect, getPosts);
+router.get('/unread/count', protect, getUnreadPostsCount); // Add this new route
 router.get('/:id', protect, getPostById);
 router.put('/:id', protect, updatePost);
 router.delete('/:id', protect, deletePost);

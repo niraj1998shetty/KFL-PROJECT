@@ -31,7 +31,7 @@ const UserStatsCard = ({ userData, loading }) => {
       transition={{ duration: 0.5 }}
       className="bg-white shadow-md rounded-lg overflow-hidden"
     >
-      <div className="p-3 bg-blue-600 text-white">
+      <div className="p-4 bg-blue-600 text-white">
         <h2 className="text-sm font-semibold">Your Accuracy</h2>
       </div>
       

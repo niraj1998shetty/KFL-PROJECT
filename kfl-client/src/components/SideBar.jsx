@@ -27,6 +27,7 @@ const Sidebar = () => {
   const [loading, setLoading] = useState(true);
   const [showUsers, setShowUsers] = useState(false);
   const [showOtherLinks, setShowOtherLinks] = useState(false);
+  const [unreadPostsCount, setUnreadPostsCount] = useState(0);
   const location = useLocation();
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -45,13 +46,42 @@ const Sidebar = () => {
     };
 
     fetchUsers();
+    fetchUnreadPostsCount();
+
+    // Listen for updates from Posts component
+    const handleUnreadPostsUpdate = (event) => {
+      setUnreadPostsCount(event.detail.count);
+    };
+
+    window.addEventListener('unreadPostsUpdate', handleUnreadPostsUpdate);
+    
+    return () => {
+      window.removeEventListener('unreadPostsUpdate', handleUnreadPostsUpdate);
+    };
   }, []);
+
+  const fetchUnreadPostsCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/posts/unread/count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUnreadPostsCount(response.data.count);
+    } catch (error) {
+      console.error("Error fetching unread posts count:", error);
+    }
+  };
 
   const menuItems = [
     { path: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
     { path: "/leaderboard", label: "Leaderboard", icon: <Trophy className="w-5 h-5" /> },
     { path: "/stats", label: "Statistics", icon: <BarChart2 className="w-5 h-5" /> },
-    { path: "/posts", label: "Posts", icon: <MessageSquare className="w-5 h-5" /> },
+    { 
+      path: "/posts", 
+      label: "Posts", 
+      icon: <MessageSquare className="w-5 h-5" />,
+      badge: unreadPostsCount > 0 ? unreadPostsCount : null
+    },
     { 
       label: "Prize Pool", 
       icon: <Gift className="w-5 h-5" />, 
@@ -114,12 +144,19 @@ const Sidebar = () => {
             <Link
               key={index}
               to={item.path}
-              className={`flex items-center space-x-3 p-2 rounded transition duration-300 ${
+              className={`flex items-center justify-between p-2 rounded transition duration-300 ${
                 isActive(item.path) ? "bg-blue-700" : "hover:bg-gray-700"
               } w-full`}
             >
-              {item.icon}
-              <span>{item.label}</span>
+              <div className="flex items-center space-x-3">
+                {item.icon}
+                <span>{item.label}</span>
+              </div>
+              {item.badge && (
+                <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           )
         ))}

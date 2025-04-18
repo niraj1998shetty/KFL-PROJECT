@@ -10,14 +10,18 @@ import {
 } from "lucide-react";
 import prizePoolImage from '../assets/prize-pool-image.jpg';
 import Fireworks from "fireworks-js";
+import axios from "axios";
 
 const Footer = () => {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [isPrizeModalOpen, setIsPrizeModalOpen] = useState(false);
   const [isOtherMenuOpen, setIsOtherMenuOpen] = useState(false);
+  const [unreadPostsCount, setUnreadPostsCount] = useState(0);
   const fireworksContainerRef = useRef(null);
   const location = useLocation();
   const mobileMenuRef = useRef(null);
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     // Listen for modal events from sidebar
@@ -30,11 +34,34 @@ const Footer = () => {
       }
     };
 
+    // Listen for unread posts updates
+    const handleUnreadPostsUpdate = (event) => {
+      setUnreadPostsCount(event.detail.count);
+    };
+
     window.addEventListener('openModal', handleOpenModal);
+    window.addEventListener('unreadPostsUpdate', handleUnreadPostsUpdate);
+    
+    // Fetch unread posts count on component mount
+    fetchUnreadPostsCount();
+    
     return () => {
       window.removeEventListener('openModal', handleOpenModal);
+      window.removeEventListener('unreadPostsUpdate', handleUnreadPostsUpdate);
     };
   }, []);
+
+  const fetchUnreadPostsCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/posts/unread/count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUnreadPostsCount(response.data.count);
+    } catch (error) {
+      console.error("Error fetching unread posts count:", error);
+    }
+  };
 
   useEffect(() => {
     if (isPrizeModalOpen && fireworksContainerRef.current) {
@@ -83,7 +110,12 @@ const Footer = () => {
     { path: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
     { path: "/leaderboard", label: "Leaderboard", icon: <Trophy className="w-5 h-5" /> },
     { path: "/stats", label: "Statistics", icon: <BarChart2 className="w-5 h-5" /> },
-    { path: "/posts", label: "Posts", icon: <MessageSquare className="w-5 h-5" /> },
+    { 
+      path: "/posts", 
+      label: "Posts", 
+      icon: <MessageSquare className="w-5 h-5" />,
+      badge: unreadPostsCount > 0 ? unreadPostsCount : null
+    },
     { 
       label: "More", 
       icon: <Menu className="w-5 h-5" />, 
@@ -149,12 +181,19 @@ const Footer = () => {
               <Link
                 key={index}
                 to={item.path}
-                className={`flex flex-col items-center justify-center py-3 px-1 ${
+                className={`flex flex-col items-center justify-center py-3 px-1 relative ${
                   isActive(item.path) ? "text-blue-400" : "text-gray-400"
                 } hover:text-white`}
               >
                 {item.icon}
                 <span className="text-xs mt-1">{item.label}</span>
+                
+                {/* Notification Badge */}
+                {item.badge && (
+                  <span className="absolute top-1 right-1 inline-flex items-center justify-center w-5 h-5 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </span>
+                )}
               </Link>
             )
           ))}

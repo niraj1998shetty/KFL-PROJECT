@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose');  // Make sure this import is at the top of the file
 
 const reactionSchema = new mongoose.Schema({
   type: {
@@ -50,6 +50,10 @@ const postSchema = new mongoose.Schema({
   },
   pollOptions: [pollOptionSchema],
   reactions: [reactionSchema],
+  readBy: [{  // Added this field to track users who have read the post
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   createdAt: {
     type: Date,
     default: Date.now
@@ -77,8 +81,8 @@ postSchema.methods.getReactionCounts = function() {
     thumbsUp: 0,
     dislike: 0,
     sad: 0,
-      cry: 0,
-    hardLaugh:0,
+    cry: 0,
+    hardLaugh: 0,
     highFive: 0
   };
   

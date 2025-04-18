@@ -28,9 +28,12 @@ const Dashboard = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-  // DD/MM/YYYY
+  // Format date as "Day, DD/MM/YYYY"
   const formatDate = (date) => {
-    return `${String(date.getDate()).padStart(2, "0")}/${String(
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayName = days[date.getDay()];
+    
+    return `${dayName}, ${String(date.getDate()).padStart(2, "0")}/${String(
       date.getMonth() + 1
     ).padStart(2, "0")}/${date.getFullYear()}`;
   };
@@ -168,8 +171,8 @@ const Dashboard = () => {
   const fetchMatchesForDate = async (date) => {
     try {
       setDateLoading(true);
-      const formattedDate = formatDate(date);
-      setDisplayDate(formattedDate);
+      const formattedDate = formatDate(date).split(', ')[1]; // Extract DD/MM/YYYY part for API
+      setDisplayDate(formatDate(date)); // Set full display date with day name
 
       const encodedDate = encodeURIComponent(formattedDate);
 
