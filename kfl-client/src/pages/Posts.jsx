@@ -35,6 +35,8 @@ const Posts = () => {
   const [postsPerPage, setPostsPerPage] = useState(10);
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [unreadPostsCount, setUnreadPostsCount] = useState(0);
+
   
 
   // New refs for click outside detection
@@ -45,6 +47,7 @@ const Posts = () => {
 
   useEffect(() => {
     fetchPosts();
+    fetchUnreadPostsCount();
   }, []);
 
   // Separate useEffect for event listeners to avoid unnecessary re-renders
@@ -93,18 +96,26 @@ const Posts = () => {
       
       const postsRes = await axios.get(`${API_URL}/posts`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { page: currentPage, limit: postsPerPage }
+        params: { page: currentPage, limit: postsPerPage, markAsRead: true }
       });
       
       setPosts(postsRes.data.posts);
       setTotalPosts(postsRes.data.pagination.total);
       setTotalPages(postsRes.data.pagination.totalPages);
       setLoading(false);
+      
+      // Reset unread count
+      setUnreadPostsCount(0);
+      
+      // Update other components
+      window.dispatchEvent(new CustomEvent('unreadPostsUpdate', { 
+        detail: { count: 0 } 
+      }));
     } catch (error) {
       console.error("Error fetching posts:", error);
       setLoading(false);
     }
-    };
+  };
     
     useEffect(() => {
       fetchPosts();
@@ -303,6 +314,23 @@ const Posts = () => {
     const newOptions = [...pollOptions];
     newOptions[index] = value;
     setPollOptions(newOptions);
+  };
+
+  const fetchUnreadPostsCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/posts/unread/count`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUnreadPostsCount(response.data.count);
+      
+      // Also dispatch an event so other components can update
+      window.dispatchEvent(new CustomEvent('unreadPostsUpdate', { 
+        detail: { count: response.data.count } 
+      }));
+    } catch (error) {
+      console.error("Error fetching unread posts count:", error);
+    }
   };
 
   // Improved formatTimestamp to handle timezone consistently

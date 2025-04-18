@@ -58,53 +58,66 @@ const createPost = asyncHandler(async (req, res) => {
 // @route   GET /api/posts
 // @access  Private
 const getPosts = asyncHandler(async (req, res) => {
-    // Extract pagination parameters from query string
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    
-    // Get total count for pagination info
-    const total = await Post.countDocuments();
-    
-    // Fetch posts with pagination
-    const posts = await Post.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('author', 'name isAdmin')
-      .populate('tags', 'name')
-      .populate('reactions.user', 'name');
+  // Extract pagination parameters from query string
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  const markAsRead = req.query.markAsRead === 'true';
   
-    // Format posts to include reaction counts and editability
-    const formattedPosts = posts.map(post => {
-      const postObj = post.toObject({ virtuals: true });
-      postObj.reactionCounts = post.getReactionCounts();
-      postObj.userReactions = {
-        like: post.hasUserReacted(req.user.id, 'like'),
-        fire: post.hasUserReacted(req.user.id, 'fire'),
-        thumbsUp: post.hasUserReacted(req.user.id, 'thumbsUp'),
-        dislike: post.hasUserReacted(req.user.id, 'dislike'),
-        sad: post.hasUserReacted(req.user.id, 'sad'),
-        cry: post.hasUserReacted(req.user.id, 'cry'),
-        hardLaugh: post.hasUserReacted(req.user.id, 'hardLaugh'), // Add this line
-        highFive: post.hasUserReacted(req.user.id, 'highFive')
-      };
-      return postObj;
-    });
+  // Get total count for pagination info
+  const total = await Post.countDocuments();
   
-    // Return pagination metadata along with posts
-    res.status(200).json({
-      posts: formattedPosts,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-        hasNextPage: page < Math.ceil(total / limit),
-        hasPrevPage: page > 1
-      }
-    });
+  // If markAsRead is true, update posts to mark them as read by this user
+  if (markAsRead) {
+    await Post.updateMany(
+      { 
+        readBy: { $ne: req.user.id },
+        author: { $ne: req.user.id } // Don't mark own posts
+      },
+      { $addToSet: { readBy: req.user.id } }
+    );
+  }
+  
+  // Fetch posts with pagination
+  const posts = await Post.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate('author', 'name isAdmin')
+    .populate('tags', 'name')
+    .populate('reactions.user', 'name');
+
+  // Format posts to include reaction counts and editability
+  const formattedPosts = posts.map(post => {
+    const postObj = post.toObject({ virtuals: true });
+    postObj.reactionCounts = post.getReactionCounts();
+    postObj.userReactions = {
+      like: post.hasUserReacted(req.user.id, 'like'),
+      fire: post.hasUserReacted(req.user.id, 'fire'),
+      thumbsUp: post.hasUserReacted(req.user.id, 'thumbsUp'),
+      dislike: post.hasUserReacted(req.user.id, 'dislike'),
+      sad: post.hasUserReacted(req.user.id, 'sad'),
+      cry: post.hasUserReacted(req.user.id, 'cry'),
+      hardLaugh: post.hasUserReacted(req.user.id, 'hardLaugh'),
+      highFive: post.hasUserReacted(req.user.id, 'highFive')
+    };
+    postObj.hasRead = post.readBy && post.readBy.includes(req.user.id);
+    return postObj;
   });
+
+  // Return pagination metadata along with posts
+  res.status(200).json({
+    posts: formattedPosts,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page < Math.ceil(total / limit),
+      hasPrevPage: page > 1
+    }
+  });
+});
 
 // @desc    Get a single post by ID
 // @route   GET /api/posts/:id
@@ -345,6 +358,19 @@ const voteOnPoll = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get count of unread posts for current user
+// @route   GET /api/posts/unread/count
+// @access  Private
+const getUnreadPostsCount = asyncHandler(async (req, res) => {
+  const count = await Post.countDocuments({
+    readBy: { $ne: req.user.id },
+    // Don't count user's own posts as unread
+    author: { $ne: req.user.id }
+  });
+  
+  res.status(200).json({ count });
+});
+
 module.exports = {
   createPost,
   getPosts,
@@ -352,5 +378,6 @@ module.exports = {
   updatePost,
   deletePost,
   reactToPost,
-  voteOnPoll
+  voteOnPoll,
+  getUnreadPostsCount
 };
