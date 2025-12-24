@@ -6,3 +6,4 @@ kfl-server/node_modules/
 dist/
 .env
 kfl-server/logs
+.env.local
