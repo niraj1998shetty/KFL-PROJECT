@@ -126,6 +126,16 @@ const Footer = () => {
   // Other menu items (for mobile)
   const otherMenuItems = [
     { 
+      label: "Teams & Players", 
+      path: "/teams-players",
+      action: () => setIsOtherMenuOpen(false)
+    },
+    { 
+      label: "IPL Results", 
+      path: "/match-results",
+      action: () => setIsOtherMenuOpen(false)
+    },
+    { 
       label: "Prize Pool", 
       action: () => {
         setIsPrizeModalOpen(true);

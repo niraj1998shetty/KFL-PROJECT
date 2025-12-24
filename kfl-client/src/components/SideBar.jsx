@@ -83,6 +83,16 @@ const Sidebar = () => {
       badge: unreadPostsCount > 0 ? unreadPostsCount : null
     },
     { 
+      path: "/teams-players", 
+      label: "Teams & Players", 
+      icon: <Users className="w-5 h-5" /> 
+    },
+    { 
+      path: "/match-results", 
+      label: "IPL Results", 
+      icon: <FileText className="w-5 h-5" /> 
+    },
+    { 
       label: "Prize Pool", 
       icon: <Gift className="w-5 h-5" />, 
       modal: true, 
