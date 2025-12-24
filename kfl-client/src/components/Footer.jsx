@@ -126,6 +126,11 @@ const Footer = () => {
   // Other menu items (for mobile)
   const otherMenuItems = [
     { 
+      label: "Teams & Players", 
+      path: "/teams-players",
+      action: () => setIsOtherMenuOpen(false)
+    },
+    { 
       label: "Prize Pool", 
       action: () => {
         setIsPrizeModalOpen(true);
@@ -224,6 +229,15 @@ const Footer = () => {
                   >
                     {item.label}
                   </a>
+                ) : item.path ? (
+                  <Link
+                    key={index}
+                    to={item.path}
+                    onClick={item.action}
+                    className="block text-gray-400 hover:text-white py-2"
+                  >
+                    {item.label}
+                  </Link>
                 ) : (
                   <button
                     key={index}

@@ -18,7 +18,8 @@ import {
   ChevronDown, 
   ChevronUp,
   ExternalLink,
-  Instagram
+  Instagram,
+  Users
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -81,6 +82,11 @@ const Sidebar = () => {
       label: "Posts", 
       icon: <MessageSquare className="w-5 h-5" />,
       badge: unreadPostsCount > 0 ? unreadPostsCount : null
+    },
+    { 
+      path: "/teams-players", 
+      label: "Teams & Players", 
+      icon: <Users className="w-5 h-5" /> 
     },
     { 
       label: "Prize Pool", 

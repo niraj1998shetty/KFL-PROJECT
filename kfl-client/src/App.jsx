@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import LeaderboardPage from './pages/LeaderboardPage';
 import PredictionStats from './pages/PredictionStats';
+import TeamsPlayersPage from './pages/TeamsPlayersPage';
 import AuthGuard from './guards/AuthGuard';
 import ScrollToTop from './components/ScrollToTop';
 import Posts from './pages/Posts';
@@ -73,6 +74,16 @@ const App = () => {
               <AuthGuard>
                 <AppLayout>
                   <Posts />
+                </AppLayout>
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/teams-players" 
+            element={
+              <AuthGuard>
+                <AppLayout>
+                  <TeamsPlayersPage />
                 </AppLayout>
               </AuthGuard>
             } 
