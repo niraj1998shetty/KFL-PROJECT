@@ -18,7 +18,8 @@ import {
   ChevronDown, 
   ChevronUp,
   ExternalLink,
-  Instagram
+  Instagram,
+  Users
 } from "lucide-react";
 
 const Sidebar = () => {

@@ -234,6 +234,15 @@ const Footer = () => {
                   >
                     {item.label}
                   </a>
+                ) : item.path ? (
+                  <Link
+                    key={index}
+                    to={item.path}
+                    onClick={item.action}
+                    className="block text-gray-400 hover:text-white py-2"
+                  >
+                    {item.label}
+                  </Link>
                 ) : (
                   <button
                     key={index}
