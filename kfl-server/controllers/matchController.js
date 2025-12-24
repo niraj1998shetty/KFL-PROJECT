@@ -119,7 +119,7 @@ const isMatchStarted = asyncHandler(async (req, res) => {
 // @route   PUT /api/matches/:id/result
 // @access  Private (Admin only)
 const updateMatchResult = asyncHandler(async (req, res) => {
-  const { winner, playerOfTheMatch } = req.body;
+  const { winner, playerOfTheMatch, noResult } = req.body;
 
   const match = await Match.findById(req.params.id);
   
@@ -131,11 +131,14 @@ const updateMatchResult = asyncHandler(async (req, res) => {
   match.result.winner = winner;
   match.result.playerOfTheMatch = playerOfTheMatch;
   match.result.completed = true;
+  match.result.noResult = noResult || false; // Add this field to your schema
   
   await match.save();
 
-  // Update prediction points
-  await updatePredictionPoints(match._id, winner, playerOfTheMatch);
+  // Only update prediction points if it's not a "no result" match
+  if (!noResult) {
+    await updatePredictionPoints(match._id, winner, playerOfTheMatch);
+  }
   
   res.status(200).json(match);
 });
