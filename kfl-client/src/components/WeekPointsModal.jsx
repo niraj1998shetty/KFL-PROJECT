@@ -99,7 +99,7 @@ const WeekPointsModal = ({
                 )}
                 <button
                   onClick={handleReset}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
+                  className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white px-2 py-1 rounded text-xs hover:from-indigo-700 hover:to-purple-800"
                 >
                   Reset
                 </button>

@@ -29,7 +29,7 @@ const RecentPerformanceCard = ({ recentMatches, loading }) => {
       transition={{ duration: 0.5, delay: 0.2 }}
       className="bg-white shadow-md rounded-lg overflow-hidden h-full"
     >
-      <div className="p-2 bg-blue-600 text-white">
+      <div className="p-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
         <h2 className="text-sm font-semibold">Your Recent Performance</h2>
         <p className="text-xs text-white mt-0.5">Last 7 matches</p>
       </div>

@@ -386,7 +386,7 @@ const Posts = () => {
             <div className="mb-6">
               <button
                 onClick={() => setShowCreatePost(true)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-medium py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center gap-2"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -494,7 +494,7 @@ const Posts = () => {
                   </button>
                   <button
                     onClick={handleCreatePost}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-md hover:from-indigo-700 hover:to-purple-800"
                   >
                     Publish
                   </button>
@@ -539,7 +539,7 @@ const Posts = () => {
                   </button>
                   <button
                     onClick={handleUpdatePost}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-md hover:from-indigo-700 hover:to-purple-800"
                   >
                     Save Changes
                   </button>
@@ -779,7 +779,7 @@ const Posts = () => {
                   disabled={currentPage === 1}
                   className={`px-3 py-1 rounded-md ${currentPage === 1 
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                    : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white hover:from-indigo-700 hover:to-purple-800'}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -809,7 +809,7 @@ const Posts = () => {
                             onClick={() => handlePageChange(page)}
                             className={`px-3 py-1 rounded-md ${
                               page === currentPage
-                                ? 'bg-blue-600 text-white'
+                                ? 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white'
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                           >
@@ -829,7 +829,7 @@ const Posts = () => {
                   disabled={currentPage === totalPages}
                   className={`px-3 py-1 rounded-md ${currentPage === totalPages 
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                    : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    : 'bg-gradient-to-r from-indigo-600 to-purple-700 text-white hover:from-indigo-700 hover:to-purple-800'}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />

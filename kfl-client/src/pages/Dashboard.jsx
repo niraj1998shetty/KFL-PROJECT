@@ -576,8 +576,8 @@ const Dashboard = () => {
           disabled={dateLoading || isToday(currentDate)}
           className={`${
             isToday(currentDate)
-              ? "bg-blue-300 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600"
+              ? "bg-indigo-300 cursor-not-allowed"
+              : "bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800"
           } text-white font-bold py-1 px-2 md:px-4 rounded text-xs md:text-sm ${
             isToday(currentDate) ? "opacity-50" : ""
           }`}
@@ -662,7 +662,7 @@ const Dashboard = () => {
             ) : (
               <button
                 onClick={() => handlePredictionClick(match._id)}
-                className={`bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 md:px-4 md:py-2 rounded transition duration-300 text-sm ${
+                className={`bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white px-3 py-1 md:px-4 md:py-2 rounded transition duration-300 text-sm ${
                   matchStarted ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={matchStarted}
@@ -710,7 +710,7 @@ const Dashboard = () => {
             <h2 className="text-xl md:text-2xl font-bold">
               Date: {displayDate}
               {isToday(currentDate) && (
-                <span className="ml-2 text-blue-500">(Today)</span>
+                <span className="ml-2 text-indigo-600">(Today)</span>
               )}
             </h2>
 

@@ -39,7 +39,7 @@ const MatchResultsTable = ({ matches, loading, error, year }) => {
       <div className="hidden md:block overflow-x-auto bg-white rounded-lg shadow-md">
         <table className="w-full">
           <thead>
-            <tr className="bg-indigo-700 text-white">
+            <tr className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
               <th className="px-4 py-3 text-left text-sm font-semibold">Match No</th>
               <th className="px-4 py-3 text-left text-sm font-semibold">Team 1</th>
               <th className="px-4 py-3 text-left text-sm font-semibold">Team 2</th>
@@ -100,7 +100,7 @@ const MatchResultsTable = ({ matches, loading, error, year }) => {
         {matches.map((match, index) => (
           <div
             key={match.id || index}
-            className="border-b border-gray-200 p-4 last:border-b-0 bg-indigo-50 rounded-lg mb-3"
+            className="border-b border-gray-200 p-4 last:border-b-0 bg-purple-50 rounded-lg mb-3"
           >
             <div className="mb-2 flex justify-between items-start">
               <h3 className="font-semibold text-gray-900">Match {match.matchNo}</h3>
