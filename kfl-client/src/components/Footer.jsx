@@ -192,7 +192,7 @@ const Footer = () => {
                 key={index}
                 to={item.path}
                 className={`flex flex-col items-center justify-center py-3 px-1 relative ${
-                  isActive(item.path) ? "text-blue-400" : "text-gray-400"
+                  isActive(item.path) ? "text-indigo-600" : "text-gray-400"
                 } hover:text-white`}
               >
                 {item.icon}

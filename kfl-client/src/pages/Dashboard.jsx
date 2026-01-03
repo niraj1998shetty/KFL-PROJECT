@@ -488,7 +488,7 @@ const Dashboard = () => {
                         <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
                           {capitalizeFirstLetter(userPred.name || "Unknown")}
                           {userPred.isCurrentUser && (
-                            <span className="ml-1 text-blue-500">(You)</span>
+                            <span className="ml-1 text-indigo-600">(You)</span>
                           )}
                         </td>
                         <td className="px-2 md:px-6 py-2 md:py-4 text-sm text-gray-800 break-words">
@@ -519,7 +519,7 @@ const Dashboard = () => {
                                   onClick={() =>
                                     handlePredictionClick(match._id)
                                   }
-                                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                  className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
                                 >
                                   Give Prediction
                                 </button>

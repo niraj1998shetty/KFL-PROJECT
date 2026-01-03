@@ -156,7 +156,7 @@ const TeamsPlayersPage = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-8">
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mb-2">
                   Teams
                 </h1>
                 <p className="text-gray-600">
@@ -173,7 +173,7 @@ const TeamsPlayersPage = () => {
               {teams.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20">
                   <div className="text-6xl mb-4">📭</div>
-                  <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+                  <h2 className="text-lg sm:text-2xl font-semibold text-gray-700 mb-2">
                     No Teams Found
                   </h2>
                   <p className="text-gray-600">
@@ -211,7 +211,7 @@ const TeamsPlayersPage = () => {
                   <span>Back to Teams</span>
                 </button>
 
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mb-2">
                   {selectedTeam.name}
                 </h1>
                 <p className="text-gray-600">
@@ -238,7 +238,7 @@ const TeamsPlayersPage = () => {
               ) : players.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20">
                   <div className="text-6xl mb-4">👥</div>
-                  <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+                  <h2 className="text-lg sm:text-2xl font-semibold text-gray-700 mb-2">
                     No Players Found
                   </h2>
                   <p className="text-gray-600">
