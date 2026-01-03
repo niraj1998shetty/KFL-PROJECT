@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import logo from '../assets/logo.png';
+import "../styles/AuthPages.css";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
@@ -35,128 +37,123 @@ const RegisterPage = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.7)), url('/api/placeholder/1200/800')",
-      }}
-    >
-      <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-800">
-            KattheGang Fantasy League
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Create an account to join the league
-          </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="name"
-            >
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
-              placeholder="Enter your full name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="mobile"
-            >
-              Mobile Number
-            </label>
-            <input
-              id="mobile"
-              type="tel"
-              className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
-              placeholder="Enter 10-digit mobile number"
-              value={mobileNumber}
-              onChange={(e) => setMobileNumber(e.target.value)}
-              pattern="[6-9][0-9]{9}"
-              maxLength="10"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Enter ypur whatsapp number
-            </p>
-          </div>
-
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+    <div className="auth-container">
+      <div className="auth-wrapper">
+        <div className="auth-layout">
+          {/* Logo Section */}
+          <div className="auth-logo-section">
+            <div className="logo-container">
+              <div className="logo-glow"></div>
+              <img
+                src={logo}
+                alt="KattheGang Fantasy League"
+                className="logo-image"
               />
+              <div className="logo-shadow"></div>
+            </div>
+            {/* <div className="brand-text">
+              <div className="brand-title">KattheGang</div>
+              <div className="brand-subtitle">Fantasy League</div>
+            </div> */}
+          </div>
+
+          {/* Form Section */}
+          <div className="auth-form-section">
+            <div className="form-header text-center">
+              <h2>Sign-Up</h2>
+              <p>Join the league and start making predictions</p>
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <form onSubmit={handleSubmit} className="auth-form">
+              <div className="form-group">
+                <label htmlFor="name" className="form-label">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  className="form-input"
+                  placeholder="Enter your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="mobile" className="form-label">
+                  Mobile Number
+                </label>
+                <input
+                  id="mobile"
+                  type="tel"
+                  className="form-input"
+                  placeholder="Enter 10-digit mobile number"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  pattern="[6-9][0-9]{9}"
+                  maxLength="10"
+                  required
+                />
+                <p className="form-hint">Enter your WhatsApp number</p>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  Password
+                </label>
+                <div className="form-input-wrapper">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    className="form-input"
+                    placeholder="Create a strong password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
               <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                onClick={() => setShowPassword(!showPassword)}
+                type="submit"
+                className="auth-button auth-button-primary"
+                disabled={loading}
               >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-500" />
+                {loading ? (
+                  <>
+                    <div className="spinner"></div>
+                    <span>Creating Account...</span>
+                  </>
                 ) : (
-                  <Eye className="h-5 w-5 text-gray-500" />
+                  "Sign Up"
                 )}
               </button>
-            </div>
-          </div>
 
-          <div className="mb-6">
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300"
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-white rounded-full"></span>
-                  Signing Up...
-                </span>
-              ) : (
-                "Sign Up"
-              )}
-            </button>
+              <div className="auth-footer">
+                <p>
+                  Already have an account?{" "}
+                  <Link to="/login" className="auth-link">
+                    Sign In
+                  </Link>
+                </p>
+              </div>
+            </form>
           </div>
-
-          <div className="text-center">
-            <p className="text-gray-600">
-              Already have an account?{" "}
-              <Link to="/login" className="text-blue-600 hover:text-blue-800">
-                Sign In
-              </Link>
-            </p>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

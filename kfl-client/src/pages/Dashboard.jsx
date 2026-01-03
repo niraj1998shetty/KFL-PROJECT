@@ -746,7 +746,7 @@ const Dashboard = () => {
           {!dateLoading && matches.length === 0 && (
             <div className="bg-white p-4 md:p-6 rounded-lg shadow">
               <p className="text-center text-base md:text-lg text-gray-600">
-                No matches scheduled for this date. Try another day!
+                No predictions available for this date.
               </p>
             </div>
           )}
