@@ -79,12 +79,39 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Forgot password - initiate password reset
+  const forgotPassword = async (mobile) => {
+    try {
+      const res = await axios.post(`${API_URL}/auth/forgot-password`, { mobile });
+      return res.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to process forgot password request.');
+    }
+  };
+
+  // Reset password with token
+  const resetPassword = async (mobile, resetToken, newPassword, confirmPassword) => {
+    try {
+      const res = await axios.post(`${API_URL}/auth/reset-password`, {
+        mobile,
+        resetToken,
+        newPassword,
+        confirmPassword
+      });
+      return res.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to reset password.');
+    }
+  };
+
   const value = {
     currentUser,
     loading,
     login,
     logout,
-    register
+    register,
+    forgotPassword,
+    resetPassword
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
