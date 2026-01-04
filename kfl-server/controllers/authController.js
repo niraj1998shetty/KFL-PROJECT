@@ -34,11 +34,31 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('This mobile number is not authorized to register');
   }
 
+  // Generate a unique recovery code
+  const generateRecoveryCode = () => {
+    return crypto.randomBytes(9).toString('hex').toUpperCase().slice(0, 12);
+  };
+
+  let recoveryCode;
+  let attempts = 0;
+
+  // Ensure recovery code uniqueness
+  do {
+    recoveryCode = generateRecoveryCode();
+    attempts++;
+  } while (await User.findOne({ recoveryCode }) && attempts < 10);
+
+  if (attempts >= 10) {
+    res.status(500);
+    throw new Error('Failed to generate unique recovery code');
+  }
+
   // Create user
   const user = await User.create({
     name,
     mobile,
-    password
+    password,
+    recoveryCode
   });
 
   if (user) {
@@ -115,53 +135,42 @@ const allUsers = asyncHandler(async (req, res) => {
   res.status(200).json(users);
 });
 
-// @desc    Forgot password - Generate reset token
+// @desc    Forgot password - Validate recovery code
 // @route   POST /api/auth/forgot-password
 // @access  Public
 const forgotPassword = asyncHandler(async (req, res) => {
-  const { mobile } = req.body;
+  const { recoveryCode } = req.body;
 
-  // Check if user exists
-  const user = await User.findOne({ mobile });
+  // Validate recovery code provided
+  if (!recoveryCode || recoveryCode.trim() === '') {
+    res.status(400);
+    throw new Error('Please provide your recovery code');
+  }
+
+  // Check if user exists with this recovery code
+  const user = await User.findOne({ recoveryCode: recoveryCode.toUpperCase().trim() });
 
   if (!user) {
     res.status(404);
-    throw new Error('User with this mobile number not found');
+    throw new Error('Invalid recovery code. Please contact the admin to get a new recovery code.');
   }
 
-  // Generate reset token (6 digit code for SMS)
-  const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
-  
-  // Hash the token before storing
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-
-  // Set reset token and expiration time (30 minutes)
-  user.resetPasswordToken = hashedToken;
-  user.resetPasswordExpire = Date.now() + 30 * 60 * 1000;
-
-  await user.save();
-
-  // In a real application, you would send this via SMS
-  // For now, we'll return it (in production, remove this and use SMS service)
   res.status(200).json({
     success: true,
-    message: 'Password reset code sent to your registered mobile number',
-    // Only for development - remove in production
-    resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+    message: 'Recovery code verified. You can now reset your password.',
+    userId: user._id,
+    mobile: user.mobile
   });
 });
 
-// @desc    Reset password with token
+// @desc    Reset password with recovery code
 // @route   POST /api/auth/reset-password
 // @access  Public
 const resetPassword = asyncHandler(async (req, res) => {
-  const { mobile, resetToken, newPassword, confirmPassword } = req.body;
+  const { userId, newPassword, confirmPassword } = req.body;
 
   // Validate input
-  if (!mobile || !resetToken || !newPassword || !confirmPassword) {
+  if (!userId || !newPassword || !confirmPassword) {
     res.status(400);
     throw new Error('Please provide all required fields');
   }
@@ -176,30 +185,16 @@ const resetPassword = asyncHandler(async (req, res) => {
     throw new Error('Password must be at least 6 characters long');
   }
 
-  // Find user
-  const user = await User.findOne({ mobile });
+  // Find user by ID
+  const user = await User.findById(userId);
 
   if (!user) {
     res.status(404);
-    throw new Error('User with this mobile number not found');
-  }
-
-  // Hash the provided token and compare
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-
-  // Check if token is valid and not expired
-  if (user.resetPasswordToken !== hashedToken || !user.resetPasswordExpire || Date.now() > user.resetPasswordExpire) {
-    res.status(400);
-    throw new Error('Invalid or expired reset token');
+    throw new Error('User not found');
   }
 
   // Update password
   user.password = newPassword;
-  user.resetPasswordToken = null;
-  user.resetPasswordExpire = null;
 
   await user.save();
 

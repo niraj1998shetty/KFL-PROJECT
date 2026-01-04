@@ -6,7 +6,6 @@ import logo from "../assets/logo.png";
 import "../styles/AuthPages.css";
 
 const ResetPasswordPage = () => {
-  const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -16,16 +15,11 @@ const ResetPasswordPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const mobileNumber = location.state?.mobileNumber || "";
+  const userId = location.state?.userId || "";
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   const validateForm = () => {
-    if (!resetToken.trim()) {
-      setError("Please enter the reset code");
-      return false;
-    }
-
     if (!newPassword.trim()) {
       setError("Please enter a new password");
       return false;
@@ -57,8 +51,7 @@ const ResetPasswordPage = () => {
       setLoading(true);
 
       const response = await axios.post(`${API_URL}/auth/reset-password`, {
-        mobile: mobileNumber,
-        resetToken,
+        userId,
         newPassword,
         confirmPassword
       });
@@ -76,7 +69,7 @@ const ResetPasswordPage = () => {
     }
   };
 
-  if (!mobileNumber) {
+  if (!userId) {
     return (
       <div className="auth-container">
         <div className="auth-wrapper">
@@ -141,30 +134,13 @@ const ResetPasswordPage = () => {
           <div className="auth-form-section">
             <div className="form-header text-center">
               <h2>Reset Password</h2>
-              <p>Enter the reset code and your new password</p>
+              <p>Enter your new password</p>
             </div>
 
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
 
             <form onSubmit={handleResetPassword} className="auth-form">
-              <div className="form-group">
-                <label htmlFor="resetToken" className="form-label">
-                  Reset Code
-                </label>
-                <input
-                  id="resetToken"
-                  type="text"
-                  className="form-input"
-                  placeholder="Enter the 6-digit code sent to your mobile"
-                  value={resetToken}
-                  onChange={(e) => setResetToken(e.target.value.toUpperCase())}
-                  maxLength="6"
-                  required
-                />
-                <p className="form-hint">Check your registered mobile number for the code</p>
-              </div>
-
               <div className="form-group">
                 <label htmlFor="newPassword" className="form-label">
                   New Password

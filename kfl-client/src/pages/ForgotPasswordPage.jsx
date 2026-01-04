@@ -6,12 +6,12 @@ import logo from "../assets/logo.png";
 import "../styles/AuthPages.css";
 
 const ForgotPasswordPage = () => {
-  const [mobileNumber, setMobileNumber] = useState("");
+  const [recoveryCode, setRecoveryCode] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [resetToken, setResetToken] = useState("");
   const [showResetForm, setShowResetForm] = useState(false);
+  const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -19,9 +19,9 @@ const ForgotPasswordPage = () => {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
 
-    // Validate mobile number format (10 digits)
-    if (!/^[6-9]\d{9}$/.test(mobileNumber)) {
-      setError("Please enter a valid 10-digit Indian mobile number");
+    // Validate recovery code format (should be provided)
+    if (!recoveryCode.trim()) {
+      setError("Please enter your recovery code");
       return;
     }
 
@@ -31,17 +31,14 @@ const ForgotPasswordPage = () => {
       setLoading(true);
 
       const response = await axios.post(`${API_URL}/auth/forgot-password`, {
-        mobile: mobileNumber
+        recoveryCode: recoveryCode.toUpperCase().trim()
       });
 
       setSuccess(response.data.message);
-      // Show reset token in development mode
-      if (response.data.resetToken) {
-        setResetToken(response.data.resetToken);
-      }
+      setUserId(response.data.userId);
       setShowResetForm(true);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to process request. Please try again.");
+      setError(err.response?.data?.message || "Failed to verify recovery code. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -69,7 +66,7 @@ const ForgotPasswordPage = () => {
           <div className="auth-form-section">
             <div className="form-header text-center">
               <h2>Forgot Password?</h2>
-              <p>{showResetForm ? "Enter the reset code sent to your mobile" : "Enter your mobile number to reset your password"}</p>
+              <p>{showResetForm ? "Enter your new password" : "Enter your recovery code to reset your password"}</p>
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -78,21 +75,20 @@ const ForgotPasswordPage = () => {
             {!showResetForm ? (
               <form onSubmit={handleForgotPassword} className="auth-form">
                 <div className="form-group">
-                  <label htmlFor="mobile" className="form-label">
-                    Mobile Number
+                  <label htmlFor="recoveryCode" className="form-label">
+                    Recovery Code
                   </label>
                   <input
-                    id="mobile"
-                    type="tel"
+                    id="recoveryCode"
+                    type="text"
                     className="form-input"
-                    placeholder="Enter 10-digit mobile number"
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value)}
-                    pattern="[6-9][0-9]{9}"
-                    maxLength="10"
+                    placeholder="Enter your 12-character recovery code"
+                    value={recoveryCode}
+                    onChange={(e) => setRecoveryCode(e.target.value)}
+                    maxLength="12"
                     required
                   />
-                  <p className="form-hint">Enter your registered WhatsApp number</p>
+                  <p className="form-hint">You can get your recovery code from the admin</p>
                 </div>
 
                 <button
@@ -103,10 +99,10 @@ const ForgotPasswordPage = () => {
                   {loading ? (
                     <>
                       <div className="spinner"></div>
-                      <span>Sending Code...</span>
+                      <span>Verifying Code...</span>
                     </>
                   ) : (
-                    "Send Reset Code"
+                    "Verify Recovery Code"
                   )}
                 </button>
 
@@ -121,34 +117,27 @@ const ForgotPasswordPage = () => {
               </form>
             ) : (
               <div className="auth-form">
-                {resetToken && (
-                  <div className="reset-token-box">
-                    <p className="reset-token-label">Your reset code (Development):</p>
-                    <p className="reset-token-value">{resetToken}</p>
-                    <p className="reset-token-note">(This is visible only in development mode)</p>
-                  </div>
-                )}
                 <p className="text-center mb-6">
-                  A reset code has been sent to <strong>{mobileNumber}</strong>
+                  Your recovery code has been verified. You can now reset your password.
                 </p>
                 <Link
                   to="/reset-password"
-                  state={{ mobileNumber }}
+                  state={{ userId }}
                   className="auth-button auth-button-primary"
                 >
-                  Enter Reset Code
+                  Reset Password
                 </Link>
                 <button
                   onClick={() => {
                     setShowResetForm(false);
-                    setMobileNumber("");
-                    setResetToken("");
+                    setRecoveryCode("");
                     setSuccess("");
                     setError("");
+                    setUserId(null);
                   }}
                   className="auth-button auth-button-secondary"
                 >
-                  Try Different Number
+                  Try Different Code
                 </button>
               </div>
             )}

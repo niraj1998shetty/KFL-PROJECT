@@ -31,12 +31,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  resetPasswordToken: {
+  recoveryCode: {
     type: String,
-    default: null
-  },
-  resetPasswordExpire: {
-    type: Date,
+    unique: true,
+    sparse: true,
     default: null
   },
   createdAt: {
