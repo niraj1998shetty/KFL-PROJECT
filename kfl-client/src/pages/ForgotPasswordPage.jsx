@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft } from "lucide-react";
+import logo from "../assets/logo.png";
+import "../styles/AuthPages.css";
 
 const ForgotPasswordPage = () => {
   const [mobileNumber, setMobileNumber] = useState("");
@@ -46,132 +48,112 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.7)), url('/api/placeholder/1200/800')",
-      }}
-    >
-      <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Login
-        </button>
+    <div className="auth-container">
+      <div className="auth-wrapper">
+        <div className="auth-layout">
+          {/* Logo Section */}
+          <div className="auth-logo-section">
 
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-800">Forgot Password?</h1>
-          <p className="text-gray-600 mt-2">
-            {showResetForm
-              ? "Enter the reset code sent to your mobile"
-              : "Enter your mobile number to reset your password"}
-          </p>
-        </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-            {error}
-          </div>
-        )}
-
-        {success && !showResetForm && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-            {success}
-          </div>
-        )}
-
-        {!showResetForm ? (
-          <form onSubmit={handleForgotPassword}>
-            <div className="mb-6">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="mobile"
-              >
-                Mobile Number
-              </label>
-              <input
-                id="mobile"
-                type="tel"
-                className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-blue-500"
-                placeholder="Enter 10-digit mobile number"
-                value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
-                pattern="[6-9][0-9]{9}"
-                maxLength="10"
-                required
+            <div className="logo-container">
+              <div className="logo-glow"></div>
+              <img
+                src={logo}
+                alt="KattheGang Fantasy League"
+                className="logo-image"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Enter your registered WhatsApp number
-              </p>
+              <div className="logo-shadow"></div>
+            </div>
+          </div>
+
+          {/* Form Section */}
+          <div className="auth-form-section">
+            <div className="form-header text-center">
+              <h2>Forgot Password?</h2>
+              <p>{showResetForm ? "Enter the reset code sent to your mobile" : "Enter your mobile number to reset your password"}</p>
             </div>
 
-            <div className="mb-6">
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center">
-                    <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-white rounded-full"></span>
-                    Sending Code...
-                  </span>
-                ) : (
-                  "Send Reset Code"
+            {error && <div className="error-message">{error}</div>}
+            {success && !showResetForm && <div className="success-message">{success}</div>}
+
+            {!showResetForm ? (
+              <form onSubmit={handleForgotPassword} className="auth-form">
+                <div className="form-group">
+                  <label htmlFor="mobile" className="form-label">
+                    Mobile Number
+                  </label>
+                  <input
+                    id="mobile"
+                    type="tel"
+                    className="form-input"
+                    placeholder="Enter 10-digit mobile number"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    pattern="[6-9][0-9]{9}"
+                    maxLength="10"
+                    required
+                  />
+                  <p className="form-hint">Enter your registered WhatsApp number</p>
+                </div>
+
+                <button
+                  type="submit"
+                  className="auth-button auth-button-primary"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <div className="spinner"></div>
+                      <span>Sending Code...</span>
+                    </>
+                  ) : (
+                    "Send Reset Code"
+                  )}
+                </button>
+
+                <div className="auth-footer">
+                  <p>
+                    Remember your password?{" "}
+                    <Link to="/login" className="auth-link">
+                      Sign In
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            ) : (
+              <div className="auth-form">
+                {resetToken && (
+                  <div className="reset-token-box">
+                    <p className="reset-token-label">Your reset code (Development):</p>
+                    <p className="reset-token-value">{resetToken}</p>
+                    <p className="reset-token-note">(This is visible only in development mode)</p>
+                  </div>
                 )}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <p className="text-gray-600">
-                Remember your password?{" "}
-                <Link to="/" className="text-blue-600 hover:text-blue-800">
-                  Sign In
+                <p className="text-center mb-6">
+                  A reset code has been sent to <strong>{mobileNumber}</strong>
+                </p>
+                <Link
+                  to="/reset-password"
+                  state={{ mobileNumber }}
+                  className="auth-button auth-button-primary"
+                >
+                  Enter Reset Code
                 </Link>
-              </p>
-            </div>
-          </form>
-        ) : (
-          <div className="text-center">
-            {resetToken && (
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded mb-4 text-center">
-                <p className="text-sm text-gray-600 mb-2">Your reset code (Development):</p>
-                <p className="text-2xl font-bold text-blue-600 font-mono tracking-widest">
-                  {resetToken}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  (This is visible only in development mode)
-                </p>
+                <button
+                  onClick={() => {
+                    setShowResetForm(false);
+                    setMobileNumber("");
+                    setResetToken("");
+                    setSuccess("");
+                    setError("");
+                  }}
+                  className="auth-button auth-button-secondary"
+                >
+                  Try Different Number
+                </button>
               </div>
             )}
-            <p className="text-gray-700 mb-4">
-              A reset code has been sent to <strong>{mobileNumber}</strong>
-            </p>
-            <Link
-              to="/reset-password"
-              state={{ mobileNumber }}
-              className="inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300"
-            >
-              Enter Reset Code
-            </Link>
-            <button
-              onClick={() => {
-                setShowResetForm(false);
-                setMobileNumber("");
-                setResetToken("");
-                setSuccess("");
-                setError("");
-              }}
-              className="mt-4 w-full border border-gray-300 text-gray-700 hover:bg-gray-100 font-bold py-3 px-4 rounded"
-            >
-              Try Different Number
-            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
