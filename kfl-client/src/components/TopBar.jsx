@@ -231,10 +231,17 @@ const TopBar = () => {
 
                 {showProfileMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                    <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                      <div className="font-medium">{currentUser.name}</div>
-                      <div className="text-gray-500">{currentUser.mobile}</div>
-                    </div>
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setShowProfileMenu(false);
+                      }}
+                      className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Profile
+                    </button>
+                    
                     <button
                       onClick={handleLogout}
                       className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"

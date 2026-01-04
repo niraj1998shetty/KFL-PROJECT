@@ -10,6 +10,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import PredictionStats from './pages/PredictionStats';
 import TeamsPlayersPage from './pages/TeamsPlayersPage';
 import MatchResultsPage from './pages/MatchResultsPage';
+import ProfilePage from './pages/ProfilePage';
 import AuthGuard from './guards/AuthGuard';
 import ScrollToTop from './components/ScrollToTop';
 import Posts from './pages/Posts';
@@ -99,6 +100,16 @@ const App = () => {
               <AuthGuard>
                 <AppLayout>
                   <MatchResultsPage />
+                </AppLayout>
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <AuthGuard>
+                <AppLayout>
+                  <ProfilePage />
                 </AppLayout>
               </AuthGuard>
             } 

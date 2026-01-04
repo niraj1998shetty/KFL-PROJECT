@@ -58,7 +58,8 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     mobile,
     password,
-    recoveryCode
+    recoveryCode,
+    about: ''
   });
 
   if (user) {

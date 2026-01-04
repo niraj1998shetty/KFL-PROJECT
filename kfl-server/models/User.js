@@ -37,6 +37,11 @@ const userSchema = new mongoose.Schema({
     sparse: true,
     default: null
   },
+  about: {
+    type: String,
+    default: '',
+    trim: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
