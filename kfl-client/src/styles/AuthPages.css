@@ -624,5 +624,6 @@
   .error-message {
     font-size: 13px;
     padding: 12px 14px;
+    margin-bottom: 24px;
   }
 }
