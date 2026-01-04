@@ -348,6 +348,80 @@
   font-size: 16px;
 }
 
+.success-message {
+  background: linear-gradient(135deg, #26de81 0%, #20c997 100%);
+  color: white;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.success-message::before {
+  content: "✓";
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(-4px);
+}
+
+.reset-token-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 16px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.reset-token-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+
+.reset-token-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: "Courier New", monospace;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  word-spacing: 4px;
+}
+
+.reset-token-note {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
 /* ========================
    BUTTON STYLING
    ======================== */
@@ -388,6 +462,27 @@
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
+.auth-button-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  box-shadow: none;
+  margin-top: 12px;
+}
+
+.auth-button-secondary:hover:not(:disabled) {
+  background: #f7fafc;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+  transform: translateY(-3px);
+  border-color: #764ba2;
+  color: #764ba2;
+}
+
+.auth-button-secondary:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.15);
+}
+
 .auth-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
@@ -414,7 +509,6 @@
 
 .auth-footer {
   text-align: center;
-  margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid #e2e8f0;
 }
@@ -530,5 +624,6 @@
   .error-message {
     font-size: 13px;
     padding: 12px 14px;
+    margin-bottom: 24px;
   }
 }

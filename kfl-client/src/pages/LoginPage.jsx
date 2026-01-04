@@ -127,6 +127,15 @@ const LoginPage = () => {
                 )}
               </button>
 
+              <div className="text-center">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-indigo-600 hover:text-indigo-800"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+
               <div className="auth-footer">
                 <p>
                   Don't have an account?{" "}

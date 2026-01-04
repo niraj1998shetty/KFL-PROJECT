@@ -31,6 +31,17 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  recoveryCode: {
+    type: String,
+    unique: true,
+    sparse: true,
+    default: null
+  },
+  about: {
+    type: String,
+    default: '',
+    trim: true
+  },
   createdAt: {
     type: Date,
     default: Date.now

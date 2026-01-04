@@ -6,7 +6,9 @@ const {
   deductPoints,
   resetPoints,
   adminAddPoints,
-  adminAddPointsToUser
+  adminAddPointsToUser,
+  getUserProfile,
+  updateUserProfile
 } = require('../controllers/userController');
 const { 
   getAllWeekPoints, 
@@ -14,6 +16,10 @@ const {
   addWeekPoints 
 } = require('../controllers/weekpointsController');
 const { protect } = require('../middleware/authMiddleware');
+
+// Profile routes
+router.get('/profile', protect, getUserProfile);
+router.put('/profile', protect, updateUserProfile);
 
 // Existing points routes
 router.get('/points', protect, getUserPoints);
