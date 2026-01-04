@@ -127,7 +127,7 @@ const LoginPage = () => {
                 )}
               </button>
 
-              <div className="mb-6 text-center">
+              <div className="text-center">
                 <Link
                   to="/forgot-password"
                   className="text-sm text-indigo-600 hover:text-indigo-800"
