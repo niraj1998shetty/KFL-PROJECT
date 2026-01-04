@@ -43,7 +43,7 @@ const SemifinalPredictionModal = ({ onClose, onSubmit, initialTeams }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-screen flex flex-col">
-        <div className="bg-indigo-700 text-white p-4 rounded-t-lg">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-4 rounded-t-lg">
           <h3 className="text-lg font-semibold">
             {isEditing ? "Edit Semifinal Team Predictions" : "Semifinal Team Predictions"}
           </h3>
@@ -89,7 +89,7 @@ const SemifinalPredictionModal = ({ onClose, onSubmit, initialTeams }) => {
             <button
               type="button"
               onClick={handleSubmit}
-              className="px-4 py-2 bg-indigo-600 text-white rounded shadow-sm hover:bg-indigo-700 focus:outline-none disabled:bg-indigo-300"
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded shadow-sm hover:from-indigo-700 hover:to-purple-800 focus:outline-none disabled:from-indigo-300 disabled:to-purple-400"
               disabled={!selectedTeams.every(team => team !== '')}
             >
               {isEditing ? "Update Prediction" : "Submit Prediction"}

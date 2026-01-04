@@ -152,7 +152,7 @@ const TopBar = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 bg-indigo-700 text-white shadow-md">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center flex-shrink-0">
@@ -177,7 +177,7 @@ const TopBar = () => {
             <div className="flex items-center space-x-1">
               <div className="relative" ref={semifinalOptionsRef}>
                 <button
-                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-600 transition duration-300"
+                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300"
                   onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
                 >
                   Semifinal Prediction
@@ -223,7 +223,7 @@ const TopBar = () => {
 
               <div className="relative" ref={profileMenuRef}>
                 <button
-                  className="p-2 rounded-full hover:bg-indigo-600 transition duration-300 focus:outline-none"
+                  className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none"
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                 >
                   <User className="h-6 w-6" />

@@ -34,7 +34,7 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full flex flex-col max-h-[90vh]">
-        <div className="bg-indigo-700 text-white p-4 rounded-t-lg flex-shrink-0">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-4 rounded-t-lg flex-shrink-0">
           <h3 className="text-lg font-semibold">Semifinal Predictions</h3>
           <p className="text-sm">View all users' semifinal team predictions</p>
         </div>
@@ -104,7 +104,7 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
         <div className="flex justify-end p-4 border-t flex-shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-indigo-600 text-white rounded shadow-sm hover:bg-indigo-700 focus:outline-none"
+            className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded shadow-sm hover:from-indigo-700 hover:to-purple-800 focus:outline-none"
           >
             Close
           </button>

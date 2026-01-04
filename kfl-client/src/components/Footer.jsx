@@ -192,7 +192,7 @@ const Footer = () => {
                 key={index}
                 to={item.path}
                 className={`flex flex-col items-center justify-center py-3 px-1 relative ${
-                  isActive(item.path) ? "text-blue-400" : "text-gray-400"
+                  isActive(item.path) ? "text-indigo-600" : "text-gray-400"
                 } hover:text-white`}
               >
                 {item.icon}
@@ -376,7 +376,7 @@ const Footer = () => {
             <div className="mt-6 text-center">
               <button
                 onClick={closeRulesModal}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition duration-300"
+                className="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-medium py-2 px-4 rounded transition duration-300"
               >
                 Close
               </button>
@@ -435,7 +435,7 @@ const Footer = () => {
             <div className="mt-6 text-center">
               <button
                 onClick={closePrizeModal}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition duration-300"
+                className="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-medium py-2 px-4 rounded transition duration-300"
               >
                 Close
               </button>

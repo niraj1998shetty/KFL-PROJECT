@@ -42,7 +42,7 @@ const MatchResultsPage = () => {
             <ArrowLeft size={24} className="text-gray-700" />
           </button>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-900">
               IPL 2025 Match Results
             </h1>
             <p className="text-gray-600 text-sm mt-1">

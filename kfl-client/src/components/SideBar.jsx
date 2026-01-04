@@ -156,7 +156,7 @@ const Sidebar = () => {
               key={index}
               to={item.path}
               className={`flex items-center justify-between p-2 rounded transition duration-300 ${
-                isActive(item.path) ? "bg-blue-700" : "hover:bg-gray-700"
+                isActive(item.path) ? "bg-gradient-to-r from-indigo-600 to-purple-700" : "hover:bg-gray-700"
               } w-full`}
             >
               <div className="flex items-center space-x-3">
@@ -231,12 +231,12 @@ const Sidebar = () => {
                       <div
                         key={user._id}
                         className={`flex items-center space-x-3 p-2 rounded transition duration-300 ${
-                          isCurrentUser ? "bg-blue-700" : "hover:bg-gray-700"
+                          isCurrentUser ? "bg-gradient-to-r from-indigo-600 to-purple-700" : "hover:bg-gray-700"
                         }`}
                       >
                         <div
                           className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            isCurrentUser ? "bg-blue-500" : "bg-indigo-600"
+                            isCurrentUser ? "bg-gradient-to-r from-indigo-600 to-purple-700" : "bg-gradient-to-r from-indigo-600 to-purple-700"
                           }`}
                         >
                           {getCapitalizedInitial(user.name)}

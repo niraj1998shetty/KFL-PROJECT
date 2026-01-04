@@ -31,7 +31,7 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
           {/* Avatar */}
           <motion.div
             animate={{ scale: isHovered ? 1.1 : 1 }}
-            className="w-16 h-16 rounded-full bg-indigo-700 flex items-center justify-center text-white font-bold text-lg shadow-lg border-4 border-white"
+            className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-700 flex items-center justify-center text-white font-bold text-lg shadow-lg border-4 border-white"
           >
             {getPlayerInitials(player.name)}
           </motion.div>
