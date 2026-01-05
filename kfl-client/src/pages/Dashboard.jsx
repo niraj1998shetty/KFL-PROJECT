@@ -21,14 +21,12 @@ const Dashboard = () => {
   const [dateLoading, setDateLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // For date navigation
   const [currentDate, setCurrentDate] = useState(new Date());
   const [displayDate, setDisplayDate] = useState("");
   const [matchStatus, setMatchStatus] = useState({});
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-  // Format date as "Day, DD/MM/YYYY"
   const formatDate = (date) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dayName = days[date.getDay()];

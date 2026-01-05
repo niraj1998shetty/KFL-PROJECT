@@ -144,11 +144,6 @@ const MatchResultsTable = ({ matches, loading, error, year }) => {
   );
 };
 
-/**
- * Format date to readable string
- * @param {string} dateString - ISO date string
- * @returns {string} - Formatted date
- */
 const formatDate = (dateString) => {
   try {
     const date = new Date(dateString);

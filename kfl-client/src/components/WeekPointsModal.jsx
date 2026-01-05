@@ -12,11 +12,9 @@ const WeekPointsModal = ({
 }) => {
   if (!isOpen) return null;
 
-  // Sort the data by week points in descending order
   const sortedWeekPointsData = [...leaderboardData]
     .sort((a, b) => (weekPoints[b.id] || 0) - (weekPoints[a.id] || 0))
     .map((entry, index, arr) => {
-      // Calculate proper rank with equal points getting the same rank
       const entryPoints = weekPoints[entry.id] || 0;
       const rank = arr.findIndex(
         prevEntry => (weekPoints[prevEntry.id] || 0) === entryPoints
@@ -24,7 +22,6 @@ const WeekPointsModal = ({
       return { ...entry, rank };
     });
 
-  // Find users with highest and lowest week points
   const findExtremeCases = () => {
     const maxWeekPoints = Math.max(...sortedWeekPointsData.map(entry => weekPoints[entry.id] || 0));
     const minWeekPoints = Math.min(...sortedWeekPointsData.map(entry => weekPoints[entry.id] || 0));

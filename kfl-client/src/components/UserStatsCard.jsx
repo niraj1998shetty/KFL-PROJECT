@@ -4,7 +4,6 @@ import "react-circular-progressbar/dist/styles.css";
 import { motion } from "framer-motion";
 
 const UserStatsCard = ({ userData, loading }) => {
-  // If no user data or still loading, show loader
   if (loading || !userData) {
     return (
       <div className="bg-white shadow-md rounded-lg p-4 flex items-center justify-center h-40">

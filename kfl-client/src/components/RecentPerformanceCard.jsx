@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 const RecentPerformanceCard = ({ recentMatches, loading }) => {
   const [activeMatchIndex, setActiveMatchIndex] = useState(null);
 
-  // If still loading or no data, show loader
   if (loading || !recentMatches?.length) {
     return (
       <div className="bg-white shadow-md rounded-lg p-3 flex items-center justify-center h-36">
@@ -13,12 +12,11 @@ const RecentPerformanceCard = ({ recentMatches, loading }) => {
     );
   }
 
-  // Handle dot click to show/hide tooltip
   const handleDotClick = (index) => {
     if (activeMatchIndex === index) {
-      setActiveMatchIndex(null); // Close tooltip if already open
+      setActiveMatchIndex(null);
     } else {
-      setActiveMatchIndex(index); // Open tooltip for this match
+      setActiveMatchIndex(index);
     }
   };
 

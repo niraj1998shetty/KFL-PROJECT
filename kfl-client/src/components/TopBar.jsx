@@ -22,7 +22,6 @@ const TopBar = () => {
   const navigate = useNavigate();
   const [editingAllowed, setEditingAllowed] = useState(false);
 
-  // Add refs for the dropdown menus
   const profileMenuRef = useRef(null);
   const semifinalOptionsRef = useRef(null);
 
@@ -41,7 +40,6 @@ const TopBar = () => {
           setPredictionTeams(response.data.teams);
         }
       } catch (error) {
-        // If 404 error (no prediction found), that's expected for new users
         if (error.response && error.response.status !== 404) {
           console.error("Error checking semifinal prediction:", error);
         }
@@ -52,11 +50,8 @@ const TopBar = () => {
     if (currentUser) {
       checkSemifinalPrediction();
     }
-    // Using a stable identifier for currentUser, not the entire object
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.id || currentUser?.mobile, showSemifinalPredictionModal]);
 
-  // Add click outside handler effect
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -73,12 +68,10 @@ const TopBar = () => {
       }
     }
 
-    // Add event listener when dropdowns are open
     if (showProfileMenu || showSemifinalOptions) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
-    // Clean up the event listener
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };

@@ -24,7 +24,7 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="h-full rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 bg-white overflow-hidden">
-        {/* Header with gradient */}
+        {/* Header */}
         <div
           className={`h-24 bg-gradient-to-br ${colorGradient} relative flex items-end justify-center pb-3`}
         >
@@ -67,13 +67,6 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
             </p>
           </motion.div>
         </div>
-
-        {/* Footer Info - Always visible */}
-        {/* <div className="px-4 py-2 bg-gray-50 text-center border-t border-gray-200">
-          <p className="text-xs font-medium text-gray-700">
-            Team: <span className="text-blue-600 font-bold">{player.team}</span>
-          </p>
-        </div> */}
       </div>
     </motion.div>
   );

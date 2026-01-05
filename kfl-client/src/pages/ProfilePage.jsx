@@ -124,10 +124,6 @@ const ProfilePage = () => {
 
     return (
   <>
-    {/* <div className="profile-container"> */}
-      {/* Header Background */}
-      {/* <div className="profile-header-bg"></div> */}
-
       <div className="profile-wrapper">
         {/* Profile Card */}
         <div className="profile-card">
