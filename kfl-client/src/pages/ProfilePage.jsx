@@ -18,7 +18,7 @@ const ProfilePage = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";//Do not remove anywhere
 
   useEffect(() => {
     fetchProfile();
