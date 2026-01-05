@@ -46,6 +46,5 @@ cd ./kfl-server
 run--> npm ci  
 to run the app do --> npm run start  
 Optional-- if error occurs regarding package installation see package.json file (dependecies) and do individual installation( i.e --> npm i express mongoose cors jsonwebtoken etc) 
-I found one issue- better we should do--> npm i react react-router-dom lucide-react axios
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------  
