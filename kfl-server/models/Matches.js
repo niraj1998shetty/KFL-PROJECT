@@ -1,3 +1,4 @@
+// In your Match schema (Matches.js)
 const mongoose = require('mongoose');
 
 const MatchSchema = new mongoose.Schema({
@@ -35,6 +36,10 @@ const MatchSchema = new mongoose.Schema({
       default: null
     },
     completed: {
+      type: Boolean,
+      default: false
+    },
+    noResult: {
       type: Boolean,
       default: false
     }

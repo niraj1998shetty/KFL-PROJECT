@@ -26,6 +26,8 @@ import axios from 'axios';
       manOfTheMatch: '',
       winningType: '',
     });
+    
+    const isNoResultMatch = formData.matchType === "noResult";
   
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
   
@@ -241,27 +243,42 @@ import axios from 'axios';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.matchNumber || !formData.winner || !formData.manOfTheMatch) {
-      setUpdateError('Please fill in all required fields');
-      return;
+   
+    // Special validation for "no result" matches
+    if (formData.matchType === "noResult") {
+      // For "no result" matches, we don't require winner or MOTM
+      if (!formData.matchNumber) {
+        setUpdateError('Please select a match number');
+        return;
+      }
+    } else {
+      // Normal validation for other match types
+      if (!formData.matchNumber || !formData.winner || !formData.manOfTheMatch) {
+        setUpdateError('Please fill in all required fields');
+        return;
+      }
     }
-  
+ 
     if (!selectedMatch) {
       setUpdateError('Please select a valid match number');
       return;
     }
-  
+ 
     setProcessingUpdate(true);
     setUpdateError('');
     setUpdateSuccess('');
-  
+ 
     try {
+      // For no result matches, set winner and playerOfTheMatch to empty strings
+      const winnerValue = formData.matchType === "noResult" ? "" : formData.winner;
+      const motmValue = formData.matchType === "noResult" ? "" : formData.manOfTheMatch;
+      
       await axios.put(
         `${API_URL}/matches/${selectedMatch._id}/result`,
         {
-          winner: formData.winner,
-          playerOfTheMatch: formData.manOfTheMatch
+          winner: winnerValue,
+          playerOfTheMatch: motmValue,
+          noResult: formData.matchType === "noResult" // Add this flag to API
         },
         {
           headers: {
@@ -269,19 +286,20 @@ import axios from 'axios';
           }
         }
       );
-      
-      const selectedPlayerName = players.find(
-        player => player._id === formData.manOfTheMatch
-      )?.name;
-      
-      if (userPredictions.length > 0) {
+     
+      // For no result matches, skip awarding points
+      if (formData.matchType !== "noResult" && userPredictions.length > 0) {
+        const selectedPlayerName = players.find(
+          player => player._id === formData.manOfTheMatch
+        )?.name;
+        
         const updatePromises = userPredictions.map(async prediction => {
           const correctTeam = prediction.predictedWinner === formData.winner;
-          
-          const correctMOM = 
-            prediction.playerOfTheMatch === formData.manOfTheMatch || 
-            prediction.playerOfTheMatch === selectedPlayerName; 
-          
+         
+          const correctMOM =
+            prediction.playerOfTheMatch === formData.manOfTheMatch ||
+            prediction.playerOfTheMatch === selectedPlayerName;
+         
           let pointsToAward = 0;
           if (formData.matchType === 'league') {
             if (correctTeam) pointsToAward += 5;
@@ -293,53 +311,53 @@ import axios from 'axios';
             if (correctTeam) pointsToAward += 10;
             if (correctMOM) pointsToAward += 7;
           }
-          
+         
           if (correctTeam && (formData.winningType === '10wickets' || formData.winningType === '100runs')) {
             pointsToAward += 2;
           }
-          
+         
           if (pointsToAward > 0) {
             await axios.put(
-                         `${API_URL}/users/admin/addPoints/${prediction.user._id}/${pointsToAward}`,
-                         {},
-                         {
-                           headers: {
-                             Authorization: `Bearer ${localStorage.getItem('token')}`
-                           }
-                         }
-                       );
+              `${API_URL}/users/admin/addPoints/${prediction.user._id}/${pointsToAward}`,
+              {},
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+              }
+            );
            
-                       await axios.put(
-                         `${API_URL}/users/weekPoints/add/${prediction.user._id}/${pointsToAward}`,
-                         {},
-                         {
-                           headers: {
-                             Authorization: `Bearer ${localStorage.getItem('token')}`
-                           }
-                         }
-                       );
+            await axios.put(
+              `${API_URL}/users/weekPoints/add/${prediction.user._id}/${pointsToAward}`,
+              {},
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+              }
+            );
           }
           return Promise.resolve();
         });
-        
+       
         await Promise.all(updatePromises);
       }
-      
-      setUpdateSuccess('Match result updated and user points calculated successfully!');
-      
+     
+      setUpdateSuccess('Match result updated successfully!');
+     
       await fetchLeaderboardData();
-      
+     
       setTimeout(() => {
         closeUpdateModal();
       }, 1500);
-      
+     
     } catch (error) {
       console.error("Error updating match result:", error);
       setUpdateError('Failed to update result. Please try again.');
     } finally {
       setProcessingUpdate(false);
     }
-  };
+};
       
       const handleResetWeekPoints = async () => {
          try {
@@ -372,7 +390,6 @@ import axios from 'axios';
 
       <main className="flex-grow bg-gray-100 py-4">
         <div className="max-w-6xl mx-auto px-4">
-
           <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
             <div className="p-4 sm:p-6 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
               <h1 className="text-base sm:text-lg font-semibold">
@@ -553,7 +570,7 @@ import axios from 'axios';
                     {matches
                       .filter(
                         (match) => !match.result || !match.result.completed
-                      ) 
+                      )
                       .map((match) => (
                         <option key={match._id} value={match.matchNumber}>
                           Match {match.matchNumber}: {match.team1} vs{" "}
@@ -612,19 +629,35 @@ import axios from 'axios';
                             />
                             <span className="ml-2 text-gray-700">Final</span>
                           </label>
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              name="matchType"
+                              value="noResult"
+                              checked={formData.matchType === "noResult"}
+                              onChange={handleRadioChange}
+                              className="form-radio h-4 w-4 text-blue-600"
+                            />
+                            <span className="ml-2 text-gray-700">
+                              No result
+                            </span>
+                          </label>
                         </div>
                       </div>
 
                       <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">
-                          Winner*
+                          {isNoResultMatch
+                            ? "Winner (Not Required)"
+                            : "Winner*"}
                         </label>
                         <select
                           name="winner"
                           value={formData.winner}
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
+                          required={!isNoResultMatch}
+                          disabled={isNoResultMatch}
                         >
                           <option value="">Select Winner</option>
                           <option value={selectedMatch.team1}>
@@ -638,14 +671,17 @@ import axios from 'axios';
 
                       <div className="mb-4">
                         <label className="block text-gray-700 font-medium mb-2">
-                          Man of the Match*
+                          {isNoResultMatch
+                            ? "Man of the Match (Not Required)"
+                            : "Man of the Match*"}
                         </label>
                         <select
                           name="manOfTheMatch"
                           value={formData.manOfTheMatch}
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
+                          required={!isNoResultMatch}
+                          disabled={isNoResultMatch}
                         >
                           <option value="">Select Player</option>
                           {players.map((player) => (
