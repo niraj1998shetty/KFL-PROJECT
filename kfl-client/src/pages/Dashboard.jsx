@@ -21,14 +21,12 @@ const Dashboard = () => {
   const [dateLoading, setDateLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // For date navigation
   const [currentDate, setCurrentDate] = useState(new Date());
   const [displayDate, setDisplayDate] = useState("");
   const [matchStatus, setMatchStatus] = useState({});
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-  // Format date as "Day, DD/MM/YYYY"
   const formatDate = (date) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dayName = days[date.getDay()];
@@ -488,7 +486,7 @@ const Dashboard = () => {
                         <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
                           {capitalizeFirstLetter(userPred.name || "Unknown")}
                           {userPred.isCurrentUser && (
-                            <span className="ml-1 text-blue-500">(You)</span>
+                            <span className="ml-1 text-indigo-600">(You)</span>
                           )}
                         </td>
                         <td className="px-2 md:px-6 py-2 md:py-4 text-sm text-gray-800 break-words">
@@ -519,7 +517,7 @@ const Dashboard = () => {
                                   onClick={() =>
                                     handlePredictionClick(match._id)
                                   }
-                                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                  className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
                                 >
                                   Give Prediction
                                 </button>
@@ -576,8 +574,8 @@ const Dashboard = () => {
           disabled={dateLoading || isToday(currentDate)}
           className={`${
             isToday(currentDate)
-              ? "bg-blue-300 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600"
+              ? "bg-indigo-300 cursor-not-allowed"
+              : "bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800"
           } text-white font-bold py-1 px-2 md:px-4 rounded text-xs md:text-sm ${
             isToday(currentDate) ? "opacity-50" : ""
           }`}
@@ -662,7 +660,7 @@ const Dashboard = () => {
             ) : (
               <button
                 onClick={() => handlePredictionClick(match._id)}
-                className={`bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 md:px-4 md:py-2 rounded transition duration-300 text-sm ${
+                className={`bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white px-3 py-1 md:px-4 md:py-2 rounded transition duration-300 text-sm ${
                   matchStarted ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 disabled={matchStarted}
@@ -710,7 +708,7 @@ const Dashboard = () => {
             <h2 className="text-xl md:text-2xl font-bold">
               Date: {displayDate}
               {isToday(currentDate) && (
-                <span className="ml-2 text-blue-500">(Today)</span>
+                <span className="ml-2 text-indigo-600">(Today)</span>
               )}
             </h2>
 
@@ -746,7 +744,7 @@ const Dashboard = () => {
           {!dateLoading && matches.length === 0 && (
             <div className="bg-white p-4 md:p-6 rounded-lg shadow">
               <p className="text-center text-base md:text-lg text-gray-600">
-                No matches scheduled for this date. Try another day!
+                No predictions available for this date.
               </p>
             </div>
           )}

@@ -12,11 +12,9 @@ const WeekPointsModal = ({
 }) => {
   if (!isOpen) return null;
 
-  // Sort the data by week points in descending order
   const sortedWeekPointsData = [...leaderboardData]
     .sort((a, b) => (weekPoints[b.id] || 0) - (weekPoints[a.id] || 0))
     .map((entry, index, arr) => {
-      // Calculate proper rank with equal points getting the same rank
       const entryPoints = weekPoints[entry.id] || 0;
       const rank = arr.findIndex(
         prevEntry => (weekPoints[prevEntry.id] || 0) === entryPoints
@@ -24,7 +22,6 @@ const WeekPointsModal = ({
       return { ...entry, rank };
     });
 
-  // Find users with highest and lowest week points
   const findExtremeCases = () => {
     const maxWeekPoints = Math.max(...sortedWeekPointsData.map(entry => weekPoints[entry.id] || 0));
     const minWeekPoints = Math.min(...sortedWeekPointsData.map(entry => weekPoints[entry.id] || 0));
@@ -99,7 +96,7 @@ const WeekPointsModal = ({
                 )}
                 <button
                   onClick={handleReset}
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600"
+                  className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white px-2 py-1 rounded text-xs hover:from-indigo-700 hover:to-purple-800"
                 >
                   Reset
                 </button>

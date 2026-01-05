@@ -391,14 +391,14 @@ import axios from 'axios';
       <main className="flex-grow bg-gray-100 py-4">
         <div className="max-w-6xl mx-auto px-4">
           <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
-            <div className="p-4 sm:p-6 bg-blue-600 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
+            <div className="p-4 sm:p-6 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
               <h1 className="text-base sm:text-lg font-semibold">
                 Leader Board
               </h1>
               <div className="flex space-x-2">
                 <button
                   onClick={openWeekPointsModal}
-                  className="bg-white text-blue-600 px-2 py-1 rounded-md font-medium hover:bg-gray-100 transition duration-300 text-xs sm:text-sm"
+                  className="bg-white text-purple-700 px-2 py-1 rounded-md font-medium hover:bg-purple-50 transition duration-300 text-xs sm:text-sm"
                 >
                   Week's leaderboard
                 </button>

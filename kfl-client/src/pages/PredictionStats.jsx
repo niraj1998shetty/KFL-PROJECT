@@ -204,7 +204,7 @@ const PredictionStats = () => {
           </div>
 
           <div className="bg-white shadow-md rounded-lg overflow-hidden h-[65vh] flex flex-col mb-6">
-            <div className="p-4 sm:p-6 bg-blue-600 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
+            <div className="p-4 sm:p-6 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
               <h1 className="text-base sm:text-lg font-semibold">
                 Statistics
               </h1>
@@ -338,7 +338,7 @@ const PredictionStats = () => {
           {/* Extra Stats Card with Toggle */}
           <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
             <div 
-              className="p-4 sm:p-6 bg-blue-600 text-white flex justify-between items-center cursor-pointer"
+              className="p-4 sm:p-6 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex justify-between items-center cursor-pointer"
               onClick={toggleExtraStats}
             >
               <h2 className="text-base sm:text-lg font-semibold flex items-center">
@@ -365,7 +365,7 @@ const PredictionStats = () => {
                     e.stopPropagation(); // Prevent triggering the parent onClick
                     handleEditToggle();
                   }}
-                  className="px-3 py-1 bg-white text-blue-600 rounded-md hover:bg-blue-50 transition duration-300 text-sm font-medium"
+                  className="px-3 py-1 bg-white text-purple-700 rounded-md hover:bg-purple-50 transition duration-300 text-sm font-medium"
                 >
                   {isEditing ? "Save" : "Edit"}
                 </button>

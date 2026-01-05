@@ -172,11 +172,76 @@ const resetPoints = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get user profile
+// @route   GET /api/users/profile
+// @access  Private
+const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    mobile: user.mobile,
+    about: user.about,
+    points: user.points,
+    weekPoints: user.weekPoints,
+    recoveryCode: user.recoveryCode,
+    createdAt: user.createdAt
+  });
+});
+
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const { name, about } = req.body;
+
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  // Update only name and about (mobile is non-editable)
+  if (name) {
+    user.name = name.trim();
+  }
+
+  if (about !== undefined) {
+    user.about = about.trim();
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Profile updated successfully',
+    user: {
+      _id: user._id,
+      name: user.name,
+      mobile: user.mobile,
+      about: user.about,
+      points: user.points,
+      weekPoints: user.weekPoints,
+      recoveryCode: user.recoveryCode,
+      createdAt: user.createdAt
+    }
+  });
+});
+
 module.exports = {
   getUserPoints,
     addPoints,
     adminAddPoints,
     adminAddPointsToUser,
   deductPoints,
-  resetPoints
+  resetPoints,
+  getUserProfile,
+  updateUserProfile
 };

@@ -22,7 +22,6 @@ const TopBar = () => {
   const navigate = useNavigate();
   const [editingAllowed, setEditingAllowed] = useState(false);
 
-  // Add refs for the dropdown menus
   const profileMenuRef = useRef(null);
   const semifinalOptionsRef = useRef(null);
 
@@ -41,7 +40,6 @@ const TopBar = () => {
           setPredictionTeams(response.data.teams);
         }
       } catch (error) {
-        // If 404 error (no prediction found), that's expected for new users
         if (error.response && error.response.status !== 404) {
           console.error("Error checking semifinal prediction:", error);
         }
@@ -52,11 +50,8 @@ const TopBar = () => {
     if (currentUser) {
       checkSemifinalPrediction();
     }
-    // Using a stable identifier for currentUser, not the entire object
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.id || currentUser?.mobile, showSemifinalPredictionModal]);
 
-  // Add click outside handler effect
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -73,12 +68,10 @@ const TopBar = () => {
       }
     }
 
-    // Add event listener when dropdowns are open
     if (showProfileMenu || showSemifinalOptions) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
-    // Clean up the event listener
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -152,7 +145,7 @@ const TopBar = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 bg-indigo-700 text-white shadow-md">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center flex-shrink-0">
@@ -177,7 +170,7 @@ const TopBar = () => {
             <div className="flex items-center space-x-1">
               <div className="relative" ref={semifinalOptionsRef}>
                 <button
-                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-600 transition duration-300"
+                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300"
                   onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
                 >
                   Semifinal Prediction
@@ -223,7 +216,7 @@ const TopBar = () => {
 
               <div className="relative" ref={profileMenuRef}>
                 <button
-                  className="p-2 rounded-full hover:bg-indigo-600 transition duration-300 focus:outline-none"
+                  className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none"
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                 >
                   <User className="h-6 w-6" />
@@ -231,10 +224,17 @@ const TopBar = () => {
 
                 {showProfileMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                    <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                      <div className="font-medium">{currentUser.name}</div>
-                      <div className="text-gray-500">{currentUser.mobile}</div>
-                    </div>
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setShowProfileMenu(false);
+                      }}
+                      className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Profile
+                    </button>
+                    
                     <button
                       onClick={handleLogout}
                       className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"

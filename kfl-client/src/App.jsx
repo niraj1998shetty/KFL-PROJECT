@@ -3,9 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import Dashboard from './pages/Dashboard';
 import LeaderboardPage from './pages/LeaderboardPage';
 import PredictionStats from './pages/PredictionStats';
+import TeamsPlayersPage from './pages/TeamsPlayersPage';
+import MatchResultsPage from './pages/MatchResultsPage';
+import ProfilePage from './pages/ProfilePage';
 import AuthGuard from './guards/AuthGuard';
 import ScrollToTop from './components/ScrollToTop';
 import Posts from './pages/Posts';
@@ -37,6 +42,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route 
             path="/dashboard" 
             element={
@@ -73,6 +80,36 @@ const App = () => {
               <AuthGuard>
                 <AppLayout>
                   <Posts />
+                </AppLayout>
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/teams-players" 
+            element={
+              <AuthGuard>
+                <AppLayout>
+                  <TeamsPlayersPage />
+                </AppLayout>
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/match-results" 
+            element={
+              <AuthGuard>
+                <AppLayout>
+                  <MatchResultsPage />
+                </AppLayout>
+              </AuthGuard>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <AuthGuard>
+                <AppLayout>
+                  <ProfilePage />
                 </AppLayout>
               </AuthGuard>
             } 
