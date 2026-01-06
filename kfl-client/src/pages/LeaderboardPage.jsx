@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import TopBar from "../components/TopBar";
 import WeekPointsModal from "../components/WeekPointsModal";
 import axios from "axios";
-import { formatUsername } from "../helpers/functions";
+import { capitalizeFirstLetter } from "../helpers/functions";
 
 
 const LeaderboardPage = () => {
@@ -493,7 +493,7 @@ const LeaderboardPage = () => {
                               </td>
                               <td className="px-4 sm:px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
-                                  {formatUsername(entry.username)}
+                                  {capitalizeFirstLetter(entry.username)}
                                 </div>
                               </td>
                               <td className="px-4 sm:px-6 py-4">

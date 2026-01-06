@@ -4,7 +4,7 @@ import axios from "axios";
 import TopBar from "../components/TopBar";
 import UserStatsCard from "../components/UserStatsCard";
 import RecentPerformanceCard from "../components/RecentPerformanceCard";
-import { formatUsername } from "../helpers/functions";
+import { capitalizeFirstLetter ,getFirstName} from "../helpers/functions";
 
 
 const PredictionStats = () => {
@@ -289,7 +289,7 @@ const PredictionStats = () => {
                               >
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-medium text-gray-900">
-                                    {formatUsername(user.name)}{" "}
+                                    {capitalizeFirstLetter(getFirstName(user.name))}{" "}
                                     {isCurrentUser && "(You)"}
                                   </div>
                                 </td>

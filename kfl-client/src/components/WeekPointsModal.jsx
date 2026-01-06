@@ -1,5 +1,5 @@
 import React from "react";
-import { formatUsername } from "../helpers/functions";
+import { capitalizeFirstLetter } from "../helpers/functions";
 
 const WeekPointsModal = ({
   isOpen,
@@ -57,7 +57,7 @@ const WeekPointsModal = ({
 
   const handleBonusPoints = () => {
     const userNames = highestPointUsers
-      .map((user) => formatUsername(user.username))
+      .map((user) => capitalizeFirstLetter(user.username))
       .join(", ");
     const confirmBonus = window.confirm(
       `Do you want to give 2 bonus points to ${userNames}?`
@@ -70,7 +70,7 @@ const WeekPointsModal = ({
 
   const handleDeductPoints = () => {
     const userNames = lowestPointUsers
-      .map((user) => formatUsername(user.username))
+      .map((user) => capitalizeFirstLetter(user.username))
       .join(", ");
     const confirmDeduct = window.confirm(
       `Do you want to deduct 2 points from ${userNames}?`
@@ -167,7 +167,7 @@ const WeekPointsModal = ({
                     </td>
                     <td className="px-4 sm:px-6 py-4">
                       <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
-                        {formatUsername(entry.username)}
+                        {capitalizeFirstLetter(entry.username)}
                       </div>
                     </td>
                     <td className="px-4 sm:px-6 py-4">
