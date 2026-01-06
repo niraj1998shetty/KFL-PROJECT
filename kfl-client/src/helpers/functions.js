@@ -13,6 +13,4 @@ export const capitalizeFirstLetter = (string) => {
     if (!fullName) return '';
     return fullName.split(' ')[0];
   };
-  
-  
-  // Add more string utility functions here as needed
+   // Add more string utility functions here as needed
