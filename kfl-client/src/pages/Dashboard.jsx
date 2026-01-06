@@ -508,7 +508,7 @@ const Dashboard = () => {
                                   onClick={() =>
                                     handleEditPrediction(match._id)
                                   }
-                                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                                  className="text-purple-700 hover:text-purple-500 font-medium text-sm"
                                 >
                                   Edit
                                 </button>
