@@ -708,7 +708,7 @@ const Dashboard = () => {
             <h2 className="text-xl md:text-2xl font-bold">
               Date: {displayDate}
               {isToday(currentDate) && (
-                <span className="ml-2 text-indigo-600">(Today)</span>
+                <span className="ml-2 text-purple-700">(Today)</span>
               )}
             </h2>
 

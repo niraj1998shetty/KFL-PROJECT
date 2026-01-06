@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import axios from "axios";
 import TopBar from "../components/TopBar";
-import { getFirstName } from "../helpers/functions";
 import UserStatsCard from "../components/UserStatsCard";
 import RecentPerformanceCard from "../components/RecentPerformanceCard";
+import { formatUsername } from "../helpers/functions";
+
 
 const PredictionStats = () => {
   const { currentUser } = useAuth();
@@ -282,11 +283,14 @@ const PredictionStats = () => {
                             return (
                               <tr
                                 key={user.id}
-                                className={`${isInTop3 ? "bg-blue-50" : ""} ${isCurrentUser ? "bg-yellow-50" : ""}`}
+                                className={`${isInTop3 ? "bg-blue-50" : ""} ${
+                                  isCurrentUser ? "bg-yellow-50" : ""
+                                }`}
                               >
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-medium text-gray-900">
-                                    {getFirstName(user.name)} {isCurrentUser && "(You)"}
+                                    {formatUsername(user.name)}{" "}
+                                    {isCurrentUser && "(You)"}
                                   </div>
                                 </td>
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
@@ -296,7 +300,8 @@ const PredictionStats = () => {
                                 </td>
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
                                   <div className="text-sm text-gray-900">
-                                    {user.correctPredictions}/{completedMatches} ({user.accuracy.toFixed(1)}%)
+                                    {user.correctPredictions}/{completedMatches}{" "}
+                                    ({user.accuracy.toFixed(1)}%)
                                   </div>
                                 </td>
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">

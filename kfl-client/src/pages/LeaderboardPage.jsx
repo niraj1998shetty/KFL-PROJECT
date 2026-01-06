@@ -3,7 +3,8 @@ import { useAuth } from "../contexts/AuthContext";
 import TopBar from "../components/TopBar";
 import WeekPointsModal from "../components/WeekPointsModal";
 import axios from "axios";
-import { formatUsername } from "../utils/formatUsername";
+import { formatUsername } from "../helpers/functions";
+
 
 const LeaderboardPage = () => {
   const { currentUser } = useAuth();
@@ -429,7 +430,7 @@ const LeaderboardPage = () => {
                 {currentUser && currentUser.isAdmin && (
                   <button
                     onClick={openUpdateModal}
-                    className="bg-white text-blue-600 px-2 py-1 rounded-md font-medium hover:bg-gray-100 transition duration-300 text-xs sm:text-sm"
+                    className="bg-white text-purple-700 px-2 py-1 rounded-md font-medium hover:bg-gray-100 transition duration-300 text-xs sm:text-sm"
                   >
                     Result
                   </button>
