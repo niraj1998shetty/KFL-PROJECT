@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Edit2, Copy, Check, Calendar, TrendingUp, Shield, LogOut } from "lucide-react";
 import "../styles/ProfilePage.css";
+import { capitalizeFirstLetter } from "../helpers/functions";
 
 const ProfilePage = () => {
   const { currentUser, logout } = useAuth();
@@ -150,7 +151,7 @@ const ProfilePage = () => {
                   placeholder="Your name"
                 />
               ) : (
-                profileData.name
+               capitalizeFirstLetter(profileData.name)
               )}
             </h1>
             {!isEditing && (

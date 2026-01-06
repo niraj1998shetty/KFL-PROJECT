@@ -1,14 +1,15 @@
-import React from 'react';
+import React from "react";
+import { capitalizeFirstLetter } from "../helpers/functions";
 
-const WeekPointsModal = ({ 
-  isOpen, 
-  onClose, 
-  weekPoints, 
-  leaderboardData, 
+const WeekPointsModal = ({
+  isOpen,
+  onClose,
+  weekPoints,
+  leaderboardData,
   onResetWeekPoints,
   onBonusPoints,
   onDeductPoints,
-  isAdmin = false 
+  isAdmin = false,
 }) => {
   if (!isOpen) return null;
 
@@ -16,22 +17,27 @@ const WeekPointsModal = ({
     .sort((a, b) => (weekPoints[b.id] || 0) - (weekPoints[a.id] || 0))
     .map((entry, index, arr) => {
       const entryPoints = weekPoints[entry.id] || 0;
-      const rank = arr.findIndex(
-        prevEntry => (weekPoints[prevEntry.id] || 0) === entryPoints
-      ) + 1;
+      const rank =
+        arr.findIndex(
+          (prevEntry) => (weekPoints[prevEntry.id] || 0) === entryPoints
+        ) + 1;
       return { ...entry, rank };
     });
 
   const findExtremeCases = () => {
-    const maxWeekPoints = Math.max(...sortedWeekPointsData.map(entry => weekPoints[entry.id] || 0));
-    const minWeekPoints = Math.min(...sortedWeekPointsData.map(entry => weekPoints[entry.id] || 0));
+    const maxWeekPoints = Math.max(
+      ...sortedWeekPointsData.map((entry) => weekPoints[entry.id] || 0)
+    );
+    const minWeekPoints = Math.min(
+      ...sortedWeekPointsData.map((entry) => weekPoints[entry.id] || 0)
+    );
 
     const highestPointUsers = sortedWeekPointsData.filter(
-      entry => (weekPoints[entry.id] || 0) === maxWeekPoints
+      (entry) => (weekPoints[entry.id] || 0) === maxWeekPoints
     );
 
     const lowestPointUsers = sortedWeekPointsData.filter(
-      entry => (weekPoints[entry.id] || 0) === minWeekPoints
+      (entry) => (weekPoints[entry.id] || 0) === minWeekPoints
     );
 
     return { highestPointUsers, lowestPointUsers };
@@ -40,7 +46,9 @@ const WeekPointsModal = ({
   const { highestPointUsers, lowestPointUsers } = findExtremeCases();
 
   const handleReset = () => {
-    const confirmReset = window.confirm('Are you sure you want to reset week points for all users?');
+    const confirmReset = window.confirm(
+      "Are you sure you want to reset week points for all users?"
+    );
     if (confirmReset) {
       onResetWeekPoints();
       onClose();
@@ -48,19 +56,27 @@ const WeekPointsModal = ({
   };
 
   const handleBonusPoints = () => {
-    const userNames = highestPointUsers.map(user => user.username).join(', ');
-    const confirmBonus = window.confirm(`Do you want to give 2 bonus points to ${userNames}?`);
+    const userNames = highestPointUsers
+      .map((user) => capitalizeFirstLetter(user.username))
+      .join(", ");
+    const confirmBonus = window.confirm(
+      `Do you want to give 2 bonus points to ${userNames}?`
+    );
     if (confirmBonus) {
-      highestPointUsers.forEach(user => onBonusPoints(user.id));
+      highestPointUsers.forEach((user) => onBonusPoints(user.id));
       onClose();
     }
   };
 
   const handleDeductPoints = () => {
-    const userNames = lowestPointUsers.map(user => user.username).join(', ');
-    const confirmDeduct = window.confirm(`Do you want to deduct 2 points from ${userNames}?`);
+    const userNames = lowestPointUsers
+      .map((user) => capitalizeFirstLetter(user.username))
+      .join(", ");
+    const confirmDeduct = window.confirm(
+      `Do you want to deduct 2 points from ${userNames}?`
+    );
     if (confirmDeduct) {
-      lowestPointUsers.forEach(user => onDeductPoints(user.id));
+      lowestPointUsers.forEach((user) => onDeductPoints(user.id));
       onClose();
     }
   };
@@ -151,7 +167,7 @@ const WeekPointsModal = ({
                     </td>
                     <td className="px-4 sm:px-6 py-4">
                       <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
-                        {entry.username}
+                        {capitalizeFirstLetter(entry.username)}
                       </div>
                     </td>
                     <td className="px-4 sm:px-6 py-4">
