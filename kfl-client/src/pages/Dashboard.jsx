@@ -517,7 +517,7 @@ const Dashboard = () => {
                                   onClick={() =>
                                     handlePredictionClick(match._id)
                                   }
-                                  className="text-purple-700 hover:text-indigo-800 font-medium text-sm"
+                                  className="text-purple-700 hover:text-purple-500 font-medium text-sm"
                                 >
                                   Give Prediction
                                 </button>
