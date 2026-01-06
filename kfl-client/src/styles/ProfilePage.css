@@ -480,6 +480,40 @@
   cursor: not-allowed;
 }
 
+/* ========================
+   LOGOUT BUTTON
+   ======================== */
+
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  margin-top: 20px;
+  color: #fc5c65;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid #fc5c65;
+  box-shadow: 0 10px 30px rgba(252, 92, 101, 0.3);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(252, 92, 101, 0.4);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
 .loading-spinner {
   display: flex;
   align-items: center;
