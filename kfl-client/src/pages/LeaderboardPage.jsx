@@ -1,78 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import TopBar from '../components/TopBar';
-import WeekPointsModal from '../components/WeekPointsModal';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import TopBar from "../components/TopBar";
+import WeekPointsModal from "../components/WeekPointsModal";
+import axios from "axios";
+import { formatUsername } from "../utils/formatUsername";
 
-  const LeaderboardPage = () => {
-    const { currentUser } = useAuth();
-    const [leaderboardData, setLeaderboardData] = useState([]);
-    const [weekPoints, setWeekPoints] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [isWeekPointsModalOpen, setIsWeekPointsModalOpen] = useState(false);
-    const [matchLoading, setMatchLoading] = useState(false);
-    const [updateError, setUpdateError] = useState('');
-    const [updateSuccess, setUpdateSuccess] = useState('');
-    const [matches, setMatches] = useState([]);
-    const [selectedMatch, setSelectedMatch] = useState(null);
-    const [players, setPlayers] = useState([]);
-    const [userPredictions, setUserPredictions] = useState([]);
-    const [processingUpdate, setProcessingUpdate] = useState(false);
-    const [formData, setFormData] = useState({
-      matchNumber: '',
-      matchType: 'league',
-      winner: '',
-      manOfTheMatch: '',
-      winningType: '',
-    });
-    
-    const isNoResultMatch = formData.matchType === "noResult";
-  
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-  
-    useEffect(() => {
-      fetchLeaderboardData();
-      fetchAllMatches();
-    }, []);
-  
-    const fetchLeaderboardData = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`${API_URL}/auth/allUsers`);
-        
-        const transformedData = res.data.map((user) => ({
-          id: user._id,
-          username: user.name,
-          totalPoints: user.points,
-          weekPoints: user.weekPoints,
-          mobile: user.mobile,
-        }));
-        
-        const sortedData = transformedData.sort((a, b) => b.totalPoints - a.totalPoints);
-        setLeaderboardData(sortedData);
-  
-        const weekPointsObj = transformedData.reduce((acc, user) => {
-          acc[user.id] = user.weekPoints || 0;
-          return acc;
-        }, {});
-        setWeekPoints(weekPointsObj);
-  
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching users for leaderboard:", error);
-        setLoading(false);
-      }
-    };
+const LeaderboardPage = () => {
+  const { currentUser } = useAuth();
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [weekPoints, setWeekPoints] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isWeekPointsModalOpen, setIsWeekPointsModalOpen] = useState(false);
+  const [matchLoading, setMatchLoading] = useState(false);
+  const [updateError, setUpdateError] = useState("");
+  const [updateSuccess, setUpdateSuccess] = useState("");
+  const [matches, setMatches] = useState([]);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [players, setPlayers] = useState([]);
+  const [userPredictions, setUserPredictions] = useState([]);
+  const [processingUpdate, setProcessingUpdate] = useState(false);
+  const [formData, setFormData] = useState({
+    matchNumber: "",
+    matchType: "league",
+    winner: "",
+    manOfTheMatch: "",
+    winningType: "",
+  });
+
+  const isNoResultMatch = formData.matchType === "noResult";
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+  useEffect(() => {
+    fetchLeaderboardData();
+    fetchAllMatches();
+  }, []);
+
+  const fetchLeaderboardData = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${API_URL}/auth/allUsers`);
+
+      const transformedData = res.data.map((user) => ({
+        id: user._id,
+        username: user.name,
+        totalPoints: user.points,
+        weekPoints: user.weekPoints,
+        mobile: user.mobile,
+      }));
+
+      const sortedData = transformedData.sort(
+        (a, b) => b.totalPoints - a.totalPoints
+      );
+      setLeaderboardData(sortedData);
+
+      const weekPointsObj = transformedData.reduce((acc, user) => {
+        acc[user.id] = user.weekPoints || 0;
+        return acc;
+      }, {});
+      setWeekPoints(weekPointsObj);
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching users for leaderboard:", error);
+      setLoading(false);
+    }
+  };
 
   const fetchAllMatches = async () => {
     try {
       const res = await axios.get(`${API_URL}/matches`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      const sortedMatches = res.data.sort((a, b) => a.matchNumber - b.matchNumber);
+      const sortedMatches = res.data.sort(
+        (a, b) => a.matchNumber - b.matchNumber
+      );
       setMatches(sortedMatches);
     } catch (error) {
       console.error("Error fetching matches:", error);
@@ -84,15 +89,15 @@ import axios from 'axios';
       setMatchLoading(true);
       const res = await axios.get(`${API_URL}/matches/${matchId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
       setSelectedMatch(res.data);
-      
+
       await fetchPredictionsForMatch(matchId);
-      
+
       await fetchPlayersForTeams([res.data.team1, res.data.team2]);
-      
+
       setMatchLoading(false);
     } catch (error) {
       console.error("Error fetching match details:", error);
@@ -103,11 +108,14 @@ import axios from 'axios';
 
   const fetchPredictionsForMatch = async (matchId) => {
     try {
-      const res = await axios.get(`${API_URL}/predictions/match/${matchId}/all`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+      const res = await axios.get(
+        `${API_URL}/predictions/match/${matchId}/all`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      });
+      );
       setUserPredictions(res.data);
     } catch (error) {
       console.error("Error fetching predictions:", error);
@@ -116,17 +124,17 @@ import axios from 'axios';
 
   const fetchPlayersForTeams = async (teamCodes) => {
     try {
-      const playerPromises = teamCodes.map(teamCode => 
+      const playerPromises = teamCodes.map((teamCode) =>
         axios.get(`${API_URL}/players/team/${teamCode}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         })
       );
-      
+
       const responses = await Promise.all(playerPromises);
-      
-      const allPlayers = responses.flatMap(response => response.data);
+
+      const allPlayers = responses.flatMap((response) => response.data);
       setPlayers(allPlayers);
     } catch (error) {
       console.error("Error fetching players:", error);
@@ -136,17 +144,17 @@ import axios from 'axios';
 
   const openUpdateModal = () => {
     setIsUpdateModalOpen(true);
-    setUpdateError('');
-    setUpdateSuccess('');
+    setUpdateError("");
+    setUpdateSuccess("");
     setSelectedMatch(null);
     setPlayers([]);
     setUserPredictions([]);
     setFormData({
-      matchNumber: '',
-      matchType: 'league',
-      winner: '',
-      manOfTheMatch: '',
-      winningType: '',
+      matchNumber: "",
+      matchType: "league",
+      winner: "",
+      manOfTheMatch: "",
+      winningType: "",
     });
   };
 
@@ -156,17 +164,19 @@ import axios from 'axios';
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    if (name === 'matchNumber') {
+
+    if (name === "matchNumber") {
       setFormData({
         ...formData,
         matchNumber: value,
-        winner: '',
-        manOfTheMatch: '',
+        winner: "",
+        manOfTheMatch: "",
       });
-      
-      const matchToSelect = matches.find(match => match.matchNumber === parseInt(value));
-      
+
+      const matchToSelect = matches.find(
+        (match) => match.matchNumber === parseInt(value)
+      );
+
       if (matchToSelect) {
         fetchMatchById(matchToSelect._id);
       } else {
@@ -177,7 +187,7 @@ import axios from 'axios';
     } else {
       setFormData({
         ...formData,
-        [name]: value
+        [name]: value,
       });
     }
   };
@@ -186,21 +196,21 @@ import axios from 'axios';
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
   const getRankMedal = (index, entry) => {
     let rank = 1;
-  
+
     for (let i = 0; i < leaderboardData.length; i++) {
       if (leaderboardData[i].totalPoints > entry.totalPoints) {
         rank++;
       }
     }
-    
-    if (rank === 1) return "🥇"; 
-    if (rank === 2) return "🥈"; 
+
+    if (rank === 1) return "🥇";
+    if (rank === 2) return "🥈";
     if (rank === 3) return "🥉";
     return "";
   };
@@ -212,17 +222,17 @@ import axios from 'axios';
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
-      
+
       await fetchLeaderboardData();
     } catch (error) {
       console.error(`Error adding bonus points for user ${userId}:`, error);
     }
   };
-  
+
   const handleDeductPoints = async (userId) => {
     try {
       await axios.put(
@@ -230,11 +240,11 @@ import axios from 'axios';
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
-      
+
       await fetchLeaderboardData();
     } catch (error) {
       console.error(`Error deducting points for user ${userId}:`, error);
@@ -243,147 +253,160 @@ import axios from 'axios';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
+
     // Special validation for "no result" matches
     if (formData.matchType === "noResult") {
       // For "no result" matches, we don't require winner or MOTM
       if (!formData.matchNumber) {
-        setUpdateError('Please select a match number');
+        setUpdateError("Please select a match number");
         return;
       }
     } else {
       // Normal validation for other match types
-      if (!formData.matchNumber || !formData.winner || !formData.manOfTheMatch) {
-        setUpdateError('Please fill in all required fields');
+      if (
+        !formData.matchNumber ||
+        !formData.winner ||
+        !formData.manOfTheMatch
+      ) {
+        setUpdateError("Please fill in all required fields");
         return;
       }
     }
- 
+
     if (!selectedMatch) {
-      setUpdateError('Please select a valid match number');
+      setUpdateError("Please select a valid match number");
       return;
     }
- 
+
     setProcessingUpdate(true);
-    setUpdateError('');
-    setUpdateSuccess('');
- 
+    setUpdateError("");
+    setUpdateSuccess("");
+
     try {
       // For no result matches, set winner and playerOfTheMatch to empty strings
-      const winnerValue = formData.matchType === "noResult" ? "" : formData.winner;
-      const motmValue = formData.matchType === "noResult" ? "" : formData.manOfTheMatch;
-      
+      const winnerValue =
+        formData.matchType === "noResult" ? "" : formData.winner;
+      const motmValue =
+        formData.matchType === "noResult" ? "" : formData.manOfTheMatch;
+
       await axios.put(
         `${API_URL}/matches/${selectedMatch._id}/result`,
         {
           winner: winnerValue,
           playerOfTheMatch: motmValue,
-          noResult: formData.matchType === "noResult" // Add this flag to API
+          noResult: formData.matchType === "noResult", // Add this flag to API
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
-     
+
       // For no result matches, skip awarding points
       if (formData.matchType !== "noResult" && userPredictions.length > 0) {
         const selectedPlayerName = players.find(
-          player => player._id === formData.manOfTheMatch
+          (player) => player._id === formData.manOfTheMatch
         )?.name;
-        
-        const updatePromises = userPredictions.map(async prediction => {
+
+        const updatePromises = userPredictions.map(async (prediction) => {
           const correctTeam = prediction.predictedWinner === formData.winner;
-         
+
           const correctMOM =
             prediction.playerOfTheMatch === formData.manOfTheMatch ||
             prediction.playerOfTheMatch === selectedPlayerName;
-         
+
           let pointsToAward = 0;
-          if (formData.matchType === 'league') {
+          if (formData.matchType === "league") {
             if (correctTeam) pointsToAward += 5;
             if (correctMOM) pointsToAward += 4;
-          } else if (formData.matchType === 'semifinal') {
+          } else if (formData.matchType === "semifinal") {
             if (correctTeam) pointsToAward += 7;
             if (correctMOM) pointsToAward += 5;
-          } else if (formData.matchType === 'final') {
+          } else if (formData.matchType === "final") {
             if (correctTeam) pointsToAward += 10;
             if (correctMOM) pointsToAward += 7;
           }
-         
-          if (correctTeam && (formData.winningType === '10wickets' || formData.winningType === '100runs')) {
+
+          if (
+            correctTeam &&
+            (formData.winningType === "10wickets" ||
+              formData.winningType === "100runs")
+          ) {
             pointsToAward += 2;
           }
-         
+
           if (pointsToAward > 0) {
             await axios.put(
               `${API_URL}/users/admin/addPoints/${prediction.user._id}/${pointsToAward}`,
               {},
               {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
               }
             );
-           
+
             await axios.put(
               `${API_URL}/users/weekPoints/add/${prediction.user._id}/${pointsToAward}`,
               {},
               {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
               }
             );
           }
           return Promise.resolve();
         });
-       
+
         await Promise.all(updatePromises);
       }
-     
-      setUpdateSuccess('Match result updated successfully!');
-     
+
+      setUpdateSuccess("Match result updated successfully!");
+
       await fetchLeaderboardData();
-     
+
       setTimeout(() => {
         closeUpdateModal();
       }, 1500);
-     
     } catch (error) {
       console.error("Error updating match result:", error);
-      setUpdateError('Failed to update result. Please try again.');
+      setUpdateError("Failed to update result. Please try again.");
     } finally {
       setProcessingUpdate(false);
     }
-};
-      
-      const handleResetWeekPoints = async () => {
-         try {
-              await axios.put(`${API_URL}/users/weekPoints/reset`, {}, {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
-              });
-        
-              const resetWeekPoints = leaderboardData.reduce((acc, user) => {
-                acc[user.id] = 0;
-                return acc;
-              }, {});
-        
-              setWeekPoints(resetWeekPoints);
-        
-              fetchLeaderboardData();
-            } catch (error) {
-              console.error("Error resetting week points:", error);
-            }
-      };
-    
-      const openWeekPointsModal = () => {
-        setIsWeekPointsModalOpen(true);
-      };
-    
+  };
+
+  const handleResetWeekPoints = async () => {
+    try {
+      await axios.put(
+        `${API_URL}/users/weekPoints/reset`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const resetWeekPoints = leaderboardData.reduce((acc, user) => {
+        acc[user.id] = 0;
+        return acc;
+      }, {});
+
+      setWeekPoints(resetWeekPoints);
+
+      fetchLeaderboardData();
+    } catch (error) {
+      console.error("Error resetting week points:", error);
+    }
+  };
+
+  const openWeekPointsModal = () => {
+    setIsWeekPointsModalOpen(true);
+  };
+
   return (
     <>
       <TopBar />
@@ -469,7 +492,7 @@ import axios from 'axios';
                               </td>
                               <td className="px-4 sm:px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
-                                  {entry.username}
+                                  {formatUsername(entry.username)}
                                 </div>
                               </td>
                               <td className="px-4 sm:px-6 py-4">
