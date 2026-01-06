@@ -3,6 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import { Edit2, Copy, Check, Calendar, TrendingUp, Shield } from "lucide-react";
 import "../styles/ProfilePage.css";
+import { capitalizeFirstLetter } from "../helpers/functions";
 
 const ProfilePage = () => {
   const { currentUser } = useAuth();
@@ -143,7 +144,7 @@ const ProfilePage = () => {
                   placeholder="Your name"
                 />
               ) : (
-                profileData.name
+               capitalizeFirstLetter(profileData.name)
               )}
             </h1>
             {!isEditing && (
