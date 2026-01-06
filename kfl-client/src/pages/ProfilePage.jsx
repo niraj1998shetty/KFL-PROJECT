@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Edit2, Copy, Check, Calendar, TrendingUp, Shield } from "lucide-react";
+import { Edit2, Copy, Check, Calendar, TrendingUp, Shield, LogOut } from "lucide-react";
 import "../styles/ProfilePage.css";
 
 const ProfilePage = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -104,6 +106,11 @@ const ProfilePage = () => {
       month: "long",
       day: "numeric"
     });
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
   if (loading) {
@@ -294,6 +301,15 @@ const ProfilePage = () => {
               </button>
             </div>
           )}
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="logout-btn"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
         </div>
             </div>
             </>

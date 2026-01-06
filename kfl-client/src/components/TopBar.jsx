@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, ArrowLeft } from "lucide-react";
 import SemifinalPredictionModal from "./SemifinalPredictionModal";
 import SemifinalPredictionViewModal from "./SemifinalPredictionViewModal";
 import logo from '../assets/logo.png';
 import axios from "axios";
 
-const TopBar = () => {
+const TopBar = ({ showProfile = false }) => {
   const { currentUser, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSemifinalOptions, setShowSemifinalOptions] = useState(false);
@@ -148,104 +148,123 @@ const TopBar = () => {
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center flex-shrink-0">
-              <div className="h-12 w-12">
-                <img
-                  src={logo}
-                  alt="KattheGang Logo"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-
-              <div className="font-bold">
-                <span className="hidden md:inline text-xl">
-                  KattheGang Fantasy League
-                </span>
-                <span className="md:hidden text-xl">KFL</span>
-              </div>
-            </div>
-
-            <div className="flex-grow"></div>
-
-            <div className="flex items-center space-x-1">
-              <div className="relative" ref={semifinalOptionsRef}>
-                <button
-                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300"
-                  onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
-                >
-                  Semifinal Prediction
-                </button>
-
-                {showSemifinalOptions && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-10">
-                    {!hasSemifinalPrediction && editingAllowed && (
-                      <button
-                        onClick={() => {
-                          setPredictionTeams(["", "", "", "", ""]);
-                          setShowSemifinalPredictionModal(true);
-                          setShowSemifinalOptions(false);
-                        }}
-                        className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                      >
-                        Give Semifinal Prediction
-                      </button>
-                    )}
-                    {hasSemifinalPrediction && editingAllowed && (
-                      <button
-                        onClick={() => {
-                          handleEditPrediction();
-                          setShowSemifinalOptions(false);
-                        }}
-                        className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                      >
-                        Edit Your Prediction
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        setShowSemifinalViewModal(true);
-                        setShowSemifinalOptions(false);
-                      }}
-                      className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                    >
-                      View All Predictions
-                    </button>
+            {showProfile ? (
+              // Profile Page Header
+              <>
+                <div className="flex items-center flex-shrink-0">
+                  <button
+                    onClick={() => navigate(-1)}
+                    className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
+                  >
+                    <ArrowLeft className="h-6 w-6" />
+                  </button>
+                  <span className="text-xl font-bold">Profile</span>
+                </div>
+                <div className="flex-grow"></div>
+              </>
+            ) : (
+              // Default Header
+              <>
+                <div className="flex items-center flex-shrink-0">
+                  <div className="h-12 w-12">
+                    <img
+                      src={logo}
+                      alt="KattheGang Logo"
+                      className="h-full w-full object-contain"
+                    />
                   </div>
-                )}
-              </div>
 
-              <div className="relative" ref={profileMenuRef}>
-                <button
-                  className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none"
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
-                >
-                  <User className="h-6 w-6" />
-                </button>
-
-                {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                    <button
-                      onClick={() => {
-                        navigate("/profile");
-                        setShowProfileMenu(false);
-                      }}
-                      className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Profile
-                    </button>
-                    
-                    <button
-                      onClick={handleLogout}
-                      className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </button>
+                  <div className="font-bold">
+                    <span className="hidden md:inline text-xl">
+                      KattheGang Fantasy League
+                    </span>
+                    <span className="md:hidden text-xl">KFL</span>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+
+                <div className="flex-grow"></div>
+
+                <div className="flex items-center space-x-1">
+                  <div className="relative" ref={semifinalOptionsRef}>
+                    <button
+                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300"
+                      onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
+                    >
+                      Semifinal Prediction
+                    </button>
+
+                    {showSemifinalOptions && (
+                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-10">
+                        {!hasSemifinalPrediction && editingAllowed && (
+                          <button
+                            onClick={() => {
+                              setPredictionTeams(["", "", "", "", ""]);
+                              setShowSemifinalPredictionModal(true);
+                              setShowSemifinalOptions(false);
+                            }}
+                            className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                          >
+                            Give Semifinal Prediction
+                          </button>
+                        )}
+                        {hasSemifinalPrediction && editingAllowed && (
+                          <button
+                            onClick={() => {
+                              handleEditPrediction();
+                              setShowSemifinalOptions(false);
+                            }}
+                            className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                          >
+                            Edit Your Prediction
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            setShowSemifinalViewModal(true);
+                            setShowSemifinalOptions(false);
+                          }}
+                          className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                        >
+                          View All Predictions
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="relative" ref={profileMenuRef}>
+                    <button
+                      className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none"
+                      onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    >
+                      <User className="h-6 w-6" />
+                    </button>
+
+                    {showProfileMenu && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                        <button
+                          onClick={() => {
+                            navigate("/profile");
+                            setShowProfileMenu(false);
+                          }}
+                          className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                        >
+                          <User className="h-4 w-4 mr-2" />
+                          Profile
+                        </button>
+                        
+                        <button
+                          onClick={handleLogout}
+                          className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                        >
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

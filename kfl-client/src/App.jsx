@@ -34,6 +34,21 @@ const AppLayout = ({ children }) => {
   );
 };
 
+const ProfileLayout = ({ children }) => {
+  return (
+    <div className="flex flex-col h-screen">
+      <TopBar showProfile={true} />
+      <div className="flex flex-1 pt-16 overflow-hidden">
+        <Sidebar />
+        <main className="flex-1 bg-gray-100 overflow-auto pb-16 md:pb-0">
+          {children}
+        </main>
+      </div>
+      <Footer />
+    </div>
+  );
+};
+
 const App = () => {
   return (
     <AuthProvider>
@@ -108,9 +123,9 @@ const App = () => {
             path="/profile" 
             element={
               <AuthGuard>
-                <AppLayout>
+                <ProfileLayout>
                   <ProfilePage />
-                </AppLayout>
+                </ProfileLayout>
               </AuthGuard>
             } 
           />
