@@ -782,7 +782,7 @@ const LeaderboardPage = () => {
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2  bg-gradient-to-r from-indigo-600 rounded-md font-medium text-white hover:bg-purple-700  ${
+                    className={`px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-md font-medium text-white hover:bg-purple-700  ${
                       !selectedMatch || matchLoading || processingUpdate
                         ? "opacity-50 cursor-not-allowed"
                         : ""
