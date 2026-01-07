@@ -191,7 +191,7 @@ const TopBar = ({ showProfile = false }) => {
                 <div className="flex items-center space-x-1">
                   <div className="relative" ref={semifinalOptionsRef}>
                     <button
-                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300"
+                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-800 hover:bg-opacity-50 transition duration-300"
                       onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
                     >
                       Semifinal Prediction
@@ -237,7 +237,7 @@ const TopBar = ({ showProfile = false }) => {
 
                   <div className="relative" ref={profileMenuRef}>
                     <button
-                      className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none"
+                      className="p-2 rounded-full hover:bg-purple-800 hover:bg-opacity-50 transition duration-300 focus:outline-none"
                       onClick={() => setShowProfileMenu(!showProfileMenu)}
                     >
                       <User className="h-6 w-6" />
