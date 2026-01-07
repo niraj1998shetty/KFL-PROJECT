@@ -24,6 +24,8 @@ const TopBar = ({ showProfile = false }) => {
 
   const profileMenuRef = useRef(null);
   const semifinalOptionsRef = useRef(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -253,9 +255,12 @@ const TopBar = ({ showProfile = false }) => {
                         </button>
                         
                         <button
-                          onClick={handleLogout}
-                          className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                        >
+                           onClick={() => {
+    setShowLogoutConfirm(true);
+    setShowProfileMenu(false);
+  }}
+  className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+>
                           <LogOut className="h-4 w-4 mr-2" />
                           Logout
                         </button>
@@ -268,6 +273,39 @@ const TopBar = ({ showProfile = false }) => {
           </div>
         </div>
       </div>
+
+      {showLogoutConfirm && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm ">
+    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-6 animate-fade-in">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+        Confirm Logout
+      </h2>
+
+      <p className="text-gray-600 mb-6">
+        Are you sure you want to logout?
+      </p>
+
+      <div className="flex justify-end space-x-3">
+        <button
+          onClick={() => setShowLogoutConfirm(false)}
+          className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => {
+            setShowLogoutConfirm(false);
+            handleLogout();
+          }}
+          className="px-4 py-2 rounded-md text-sm font-medium text-white bg-purple-700 hover:bg-purple-700 transition"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {showToast && (
         <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-fade-in-out">
