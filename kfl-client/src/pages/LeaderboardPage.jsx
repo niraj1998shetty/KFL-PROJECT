@@ -536,7 +536,7 @@ const LeaderboardPage = () => {
       {isUpdateModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 backdrop-blur-sm  bg-opacity-50"
             onClick={closeUpdateModal}
           ></div>
 
@@ -775,14 +775,14 @@ const LeaderboardPage = () => {
                   <button
                     type="button"
                     onClick={closeUpdateModal}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     disabled={processingUpdate}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className={`px-4 py-2 bg-blue-600 border border-transparent rounded-md font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    className={`px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-md font-medium text-white hover:bg-purple-700  ${
                       !selectedMatch || matchLoading || processingUpdate
                         ? "opacity-50 cursor-not-allowed"
                         : ""

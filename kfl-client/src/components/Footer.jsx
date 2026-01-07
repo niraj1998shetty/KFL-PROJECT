@@ -167,7 +167,7 @@ const Footer = () => {
       <footer className="bg-gray-800 text-white p-6 hidden md:block">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
-            <p className="text-sm">© 2025 Cricket Prediction League. All rights reserved.</p>
+            <p className="text-sm">© 2026 KattheGang Fantasy League. All rights reserved.</p>
           </div>
         </div>
       </footer>
@@ -262,7 +262,7 @@ const Footer = () => {
       {isRulesModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 backdrop-blur-sm   bg-opacity-50"
             onClick={closeRulesModal}
           ></div>
 
@@ -389,7 +389,7 @@ const Footer = () => {
       {isPrizeModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 backdrop-blur-sm  bg-opacity-50"
             onClick={closePrizeModal}
           >
             <div

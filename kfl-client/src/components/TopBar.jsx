@@ -6,6 +6,8 @@ import SemifinalPredictionModal from "./SemifinalPredictionModal";
 import SemifinalPredictionViewModal from "./SemifinalPredictionViewModal";
 import logo from '../assets/logo.png';
 import axios from "axios";
+import LogoutConfirmModal from "../components/LogoutConfirmModal";
+
 
 const TopBar = ({ showProfile = false }) => {
   const { currentUser, logout } = useAuth();
@@ -24,6 +26,8 @@ const TopBar = ({ showProfile = false }) => {
 
   const profileMenuRef = useRef(null);
   const semifinalOptionsRef = useRef(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -253,9 +257,12 @@ const TopBar = ({ showProfile = false }) => {
                         </button>
                         
                         <button
-                          onClick={handleLogout}
-                          className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                        >
+                           onClick={() => {
+    setShowLogoutConfirm(true);
+    setShowProfileMenu(false);
+  }}
+  className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+>
                           <LogOut className="h-4 w-4 mr-2" />
                           Logout
                         </button>
@@ -268,8 +275,7 @@ const TopBar = ({ showProfile = false }) => {
           </div>
         </div>
       </div>
-
-      {showToast && (
+   {showToast && (
         <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-fade-in-out">
           {toastMessage}
         </div>
@@ -292,6 +298,15 @@ const TopBar = ({ showProfile = false }) => {
           currentUser={currentUser}
         />
       )}
+      <LogoutConfirmModal
+  isOpen={showLogoutConfirm}
+  onCancel={() => setShowLogoutConfirm(false)}
+  onConfirm={() => {
+    setShowLogoutConfirm(false);
+    handleLogout();
+  }}
+/>
+
     </>
   );
 };

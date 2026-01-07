@@ -5,6 +5,7 @@ import axios from "axios";
 import { Edit2, Copy, Check, Calendar, TrendingUp, Shield, LogOut } from "lucide-react";
 import "../styles/ProfilePage.css";
 import { capitalizeFirstLetter } from "../helpers/functions";
+import LogoutConfirmModal from "../components/LogoutConfirmModal";
 
 const ProfilePage = () => {
   const { currentUser, logout } = useAuth();
@@ -20,6 +21,8 @@ const ProfilePage = () => {
   const [success, setSuccess] = useState("");
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";//Do not remove anywhere
 
@@ -305,7 +308,7 @@ const ProfilePage = () => {
 
           {/* Logout Button */}
           <button
-            onClick={handleLogout}
+           onClick={() => setShowLogoutConfirm(true)}
             className="logout-btn"
           >
             <LogOut size={18} />
@@ -313,7 +316,16 @@ const ProfilePage = () => {
           </button>
         </div>
             </div>
-            </>
+            <LogoutConfirmModal
+  isOpen={showLogoutConfirm}
+  onCancel={() => setShowLogoutConfirm(false)}
+  onConfirm={() => {
+    setShowLogoutConfirm(false);
+    handleLogout();
+  }}
+/>
+
+ </>
   );
 };
 

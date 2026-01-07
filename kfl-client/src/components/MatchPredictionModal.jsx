@@ -23,7 +23,7 @@ const MatchPredictionModal = ({ match, onClose, onSubmit, players, isEditing, in
   );
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 backdrop-blur-sm  bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-4 rounded-t-lg">
           <h3 className="text-lg font-semibold">
