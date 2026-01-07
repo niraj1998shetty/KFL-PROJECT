@@ -190,7 +190,7 @@ const TopBar = ({ showProfile = false }) => {
                       className="px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-800 hover:bg-opacity-50 transition duration-300"
                       onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
                     >
-                      Semifinal Prediction
+                      Semifinal Predictions
                     </button>
 
                     {showSemifinalOptions && (
