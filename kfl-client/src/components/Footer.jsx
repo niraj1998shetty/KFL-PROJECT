@@ -167,7 +167,7 @@ const Footer = () => {
       <footer className="bg-gray-800 text-white p-6 hidden md:block">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
-            <p className="text-sm">© 2025 Cricket Prediction League. All rights reserved.</p>
+            <p className="text-sm">© 2026 KattheGang Fantacy League. All rights reserved.</p>
           </div>
         </div>
       </footer>
