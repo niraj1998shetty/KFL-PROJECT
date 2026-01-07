@@ -20,6 +20,8 @@ const ProfilePage = () => {
   const [success, setSuccess] = useState("");
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";//Do not remove anywhere
 
@@ -305,7 +307,7 @@ const ProfilePage = () => {
 
           {/* Logout Button */}
           <button
-            onClick={handleLogout}
+           onClick={() => setShowLogoutConfirm(true)}
             className="logout-btn"
           >
             <LogOut size={18} />
@@ -313,6 +315,37 @@ const ProfilePage = () => {
           </button>
         </div>
             </div>
+            {showLogoutConfirm && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-6 animate-fade-in">
+      
+      <p className="text-gray-600 text-center mb-6">
+        Are you sure you want to logout?
+      </p>
+
+      <div className="flex justify-center space-x-5">
+        <button
+          onClick={() => setShowLogoutConfirm(false)}
+          className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => {
+            setShowLogoutConfirm(false);
+            handleLogout();
+          }}
+          className="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-700 transition"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
             </>
   );
 };

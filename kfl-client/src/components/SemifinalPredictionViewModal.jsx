@@ -31,7 +31,7 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
   }, [currentUser, API_URL]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 backdrop-blur-sm  bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full flex flex-col max-h-[90vh]">
         <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-4 rounded-t-lg flex-shrink-0">
           <h3 className="text-lg font-semibold">Semifinal Predictions</h3>
