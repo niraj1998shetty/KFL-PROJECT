@@ -147,6 +147,43 @@ const TopBar = ({ showProfile = false }) => {
     }
   };
 
+  const ProfileMenu = () => (
+    <div className="relative" ref={profileMenuRef}>
+      <button
+        className="p-2 rounded-full hover:bg-purple-800 hover:bg-opacity-50 transition duration-300 focus:outline-none"
+        onClick={() => setShowProfileMenu(!showProfileMenu)}
+      >
+        <User className="h-6 w-6" />
+      </button>
+
+      {showProfileMenu && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+          <button
+            onClick={() => {
+              navigate("/profile");
+              setShowProfileMenu(false);
+            }}
+            className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Profile
+          </button>
+          
+          <button
+            onClick={() => {
+              setShowLogoutConfirm(true);
+              setShowProfileMenu(false);
+            }}
+            className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
@@ -155,16 +192,28 @@ const TopBar = ({ showProfile = false }) => {
             {showProfile ? (
               // Profile Page Header
               <>
+                <div className="hidden md:flex items-center flex-shrink-0 w-64">
+                  <div className="h-12 w-12 mx-auto">
+                    <img
+                      src={logo}
+                      alt="KattheGang Logo"
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                </div>
                 <div className="flex items-center flex-shrink-0">
                   <button
                     onClick={() => navigate(-1)}
-                    className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
+                    className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
                   >
                     <ArrowLeft className="h-6 w-6" />
                   </button>
                   <span className="text-xl font-bold">Profile</span>
                 </div>
                 <div className="flex-grow"></div>
+                <div className="flex items-center">
+                  <ProfileMenu />
+                </div>
               </>
             ) : (
               // Default Header
@@ -235,40 +284,7 @@ const TopBar = ({ showProfile = false }) => {
                     )}
                   </div>
 
-                  <div className="relative" ref={profileMenuRef}>
-                    <button
-                      className="p-2 rounded-full hover:bg-purple-800 hover:bg-opacity-50 transition duration-300 focus:outline-none"
-                      onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    >
-                      <User className="h-6 w-6" />
-                    </button>
-
-                    {showProfileMenu && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                        <button
-                          onClick={() => {
-                            navigate("/profile");
-                            setShowProfileMenu(false);
-                          }}
-                          className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                        >
-                          <User className="h-4 w-4 mr-2" />
-                          Profile
-                        </button>
-                        
-                        <button
-                           onClick={() => {
-    setShowLogoutConfirm(true);
-    setShowProfileMenu(false);
-  }}
-  className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
->
-                          <LogOut className="h-4 w-4 mr-2" />
-                          Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <ProfileMenu />
                 </div>
               </>
             )}
