@@ -5,6 +5,7 @@ import axios from "axios";
 import { Edit2, Copy, Check, Calendar, TrendingUp, Shield, LogOut } from "lucide-react";
 import "../styles/ProfilePage.css";
 import { capitalizeFirstLetter } from "../helpers/functions";
+import LogoutConfirmModal from "../components/LogoutConfirmModal";
 
 const ProfilePage = () => {
   const { currentUser, logout } = useAuth();
@@ -315,38 +316,16 @@ const ProfilePage = () => {
           </button>
         </div>
             </div>
-            {showLogoutConfirm && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
-    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-6 animate-fade-in">
-      
-      <p className="text-gray-600 text-center mb-6">
-        Are you sure you want to logout?
-      </p>
+            <LogoutConfirmModal
+  isOpen={showLogoutConfirm}
+  onCancel={() => setShowLogoutConfirm(false)}
+  onConfirm={() => {
+    setShowLogoutConfirm(false);
+    handleLogout();
+  }}
+/>
 
-      <div className="flex justify-center space-x-5">
-        <button
-          onClick={() => setShowLogoutConfirm(false)}
-          className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
-        >
-          Cancel
-        </button>
-
-        <button
-          onClick={() => {
-            setShowLogoutConfirm(false);
-            handleLogout();
-          }}
-          className="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-700 transition"
-        >
-          Yes
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
-            </>
+ </>
   );
 };
 
