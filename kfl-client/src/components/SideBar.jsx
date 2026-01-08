@@ -106,6 +106,11 @@ const Sidebar = () => {
       icon: <FileText className="w-5 h-5" />,
     },
     {
+      path: "/users",
+      label: "Users",
+      icon: <Users className="w-5 h-5" />,
+    },
+    {
       label: "Prize Pool",
       icon: <Gift className="w-5 h-5" />,
       modal: true,
@@ -116,11 +121,6 @@ const Sidebar = () => {
       icon: <FileText className="w-5 h-5" />,
       modal: true,
       modalName: "rules",
-    },
-    {
-      path: "/users",
-      label: "Users",
-      icon: <Users className="w-5 h-5" />,
     },
   ];
 
@@ -152,9 +152,7 @@ const Sidebar = () => {
 
   return (
     <div className="w-64 bg-gray-800 text-white p-4 h-full overflow-y-auto hidden md:block">
-      <h2 className="text-xl font-bold mb-6 pb-2 border-b border-gray-700">
-        
-      </h2>
+     
 
       <div className="space-y-2">
         {menuItems.map((item, index) => (
@@ -219,63 +217,7 @@ const Sidebar = () => {
             </div>
           )}
         </div>
-
-        {/* Users Dropdown */}
-        {/* <div className="pt-2">
-          <button
-            onClick={() => setShowUsers(!showUsers)}
-            className="flex items-center justify-between space-x-3 p-2 rounded transition duration-300 hover:bg-gray-700 w-full"
-          >
-            <div className="flex items-center space-x-3">
-              <User className="w-5 h-5" />
-              <span>Users</span>
-            </div>
-            {showUsers ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          
-          {showUsers && (
-            <div className="pl-2 mt-2 space-y-2 max-h-64 overflow-y-auto">
-              {loading ? (
-                <div className="flex justify-center items-center p-4">
-                  <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-primary rounded-full"></span>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {users.map((user) => {
-                    const isCurrentUser = currentUser && currentUser._id === user._id;
-
-                    return (
-                      <div
-                        key={user._id}
-                        className={`flex items-center space-x-3 p-2 rounded transition duration-300 ${
-                          isCurrentUser ? "bg-gradient-to-r from-indigo-600 to-purple-700" : "hover:bg-gray-700"
-                        }`}
-                      >
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            isCurrentUser ? "bg-gradient-to-r from-indigo-600 to-purple-700" : "bg-gradient-to-r from-indigo-600 to-purple-700"
-                          }`}
-                        >
-                          {getCapitalizedInitial(user.name)}
-                        </div>
-                        <div>
-                          <div className="font-medium">
-                            {capitalizeFirstLetter(user.name)}
-                            {isCurrentUser && (
-                              <span className="ml-2 text-xs">(You)</span>
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-400">{user.mobile}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </div> */}
-      </div>
+     </div>
     </div>
   );
 };
