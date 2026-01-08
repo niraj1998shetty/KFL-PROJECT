@@ -192,8 +192,25 @@ const TopBar = ({ showProfile = false }) => {
             {showProfile ? (
               // Profile Page Header
               <>
-                <div className="hidden md:flex items-center space-x-25  ">
-                  <div className="h-12 w-12 ">
+                {/* MOBILE HEADER */}
+                <div className="flex md:hidden items-center justify-between w-full">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => navigate(-1)}
+                      className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none"
+                    >
+                      <ArrowLeft className="h-6 w-6" />
+                    </button>
+
+                    <span className="text-lg font-bold">Profile</span>
+                  </div>
+
+                  <ProfileMenu />
+                </div>
+
+                {/* DESKTOP HEADER (UNCHANGED) */}
+                <div className="hidden md:flex items-center space-x-25">
+                  <div className="h-12 w-12">
                     <img
                       src={logo}
                       alt="KattheGang Logo"
@@ -203,14 +220,18 @@ const TopBar = ({ showProfile = false }) => {
 
                   <button
                     onClick={() => navigate(-1)}
-                    className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2 "
+                    className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
                   >
                     <ArrowLeft className="h-6 w-6" />
                   </button>
+
                   <span className="text-xl font-bold">Profile</span>
                 </div>
 
-                <ProfileMenu />
+                {/* DESKTOP PROFILE ICON */}
+                <div className="hidden md:block">
+                  <ProfileMenu />
+                </div>
               </>
             ) : (
               // Default Header
