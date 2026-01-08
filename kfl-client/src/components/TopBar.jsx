@@ -192,33 +192,30 @@ const TopBar = ({ showProfile = false }) => {
             {showProfile ? (
               // Profile Page Header
               <>
-                <div className="hidden md:flex items-center flex-shrink-0 w-64">
-                  <div className="h-12 w-12 mx-auto">
+                <div className="hidden md:flex items-center space-x-25  ">
+                  <div className="h-12 w-12 ">
                     <img
                       src={logo}
                       alt="KattheGang Logo"
                       className="h-full w-full object-contain"
                     />
                   </div>
-                </div>
-                <div className="flex items-center flex-shrink-0">
+
                   <button
                     onClick={() => navigate(-1)}
-                    className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
+                    className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2 "
                   >
                     <ArrowLeft className="h-6 w-6" />
                   </button>
                   <span className="text-xl font-bold">Profile</span>
                 </div>
-                <div className="flex-grow"></div>
-                <div className="flex items-center">
-                  <ProfileMenu />
-                </div>
+
+                <ProfileMenu />
               </>
             ) : (
               // Default Header
               <>
-                <div className="flex items-center flex-shrink-0">
+                <div className="flex items-center space-x-3 ">
                   <div className="h-12 w-12">
                     <img
                       src={logo}
@@ -241,7 +238,9 @@ const TopBar = ({ showProfile = false }) => {
                   <div className="relative" ref={semifinalOptionsRef}>
                     <button
                       className="px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-800 hover:bg-opacity-50 transition duration-300"
-                      onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
+                      onClick={() =>
+                        setShowSemifinalOptions(!showSemifinalOptions)
+                      }
                     >
                       Semifinal Prediction
                     </button>
@@ -291,7 +290,7 @@ const TopBar = ({ showProfile = false }) => {
           </div>
         </div>
       </div>
-   {showToast && (
+      {showToast && (
         <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-fade-in-out">
           {toastMessage}
         </div>
@@ -315,14 +314,13 @@ const TopBar = ({ showProfile = false }) => {
         />
       )}
       <LogoutConfirmModal
-  isOpen={showLogoutConfirm}
-  onCancel={() => setShowLogoutConfirm(false)}
-  onConfirm={() => {
-    setShowLogoutConfirm(false);
-    handleLogout();
-  }}
-/>
-
+        isOpen={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          handleLogout();
+        }}
+      />
     </>
   );
 };
