@@ -74,36 +74,53 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { path: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
-    { path: "/leaderboard", label: "Leaderboard", icon: <Trophy className="w-5 h-5" /> },
-    { path: "/stats", label: "Statistics", icon: <BarChart2 className="w-5 h-5" /> },
-    { 
-      path: "/posts", 
-      label: "Posts", 
+    {
+      path: "/dashboard",
+      label: "Dashboard",
+      icon: <Home className="w-5 h-5" />,
+    },
+    {
+      path: "/leaderboard",
+      label: "Leaderboard",
+      icon: <Trophy className="w-5 h-5" />,
+    },
+    {
+      path: "/stats",
+      label: "Statistics",
+      icon: <BarChart2 className="w-5 h-5" />,
+    },
+    {
+      path: "/posts",
+      label: "Posts",
       icon: <MessageSquare className="w-5 h-5" />,
-      badge: unreadPostsCount > 0 ? unreadPostsCount : null
+      badge: unreadPostsCount > 0 ? unreadPostsCount : null,
     },
-    { 
-      path: "/teams-players", 
-      label: "Teams & Players", 
-      icon: <Users className="w-5 h-5" /> 
+    {
+      path: "/teams-players",
+      label: "Teams & Players",
+      icon: <Users className="w-5 h-5" />,
     },
-    { 
-      path: "/match-results", 
-      label: "IPL Results", 
-      icon: <FileText className="w-5 h-5" /> 
+    {
+      path: "/match-results",
+      label: "IPL Results",
+      icon: <FileText className="w-5 h-5" />,
     },
-    { 
-      label: "Prize Pool", 
-      icon: <Gift className="w-5 h-5" />, 
-      modal: true, 
-      modalName: "prize" 
+    {
+      label: "Prize Pool",
+      icon: <Gift className="w-5 h-5" />,
+      modal: true,
+      modalName: "prize",
     },
-    { 
-      label: "Rules", 
-      icon: <FileText className="w-5 h-5" />, 
-      modal: true, 
-      modalName: "rules" 
+    {
+      label: "Rules",
+      icon: <FileText className="w-5 h-5" />,
+      modal: true,
+      modalName: "rules",
+    },
+    {
+      path: "/users",
+      label: "Users",
+      icon: <Users className="w-5 h-5" />,
     },
   ];
 
@@ -204,7 +221,7 @@ const Sidebar = () => {
         </div>
 
         {/* Users Dropdown */}
-        <div className="pt-2">
+        {/* <div className="pt-2">
           <button
             onClick={() => setShowUsers(!showUsers)}
             className="flex items-center justify-between space-x-3 p-2 rounded transition duration-300 hover:bg-gray-700 w-full"
@@ -257,7 +274,7 @@ const Sidebar = () => {
               )}
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );
