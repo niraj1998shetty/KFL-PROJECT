@@ -140,7 +140,13 @@ const allUsers = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/forgot-password
 // @access  Public
 const forgotPassword = asyncHandler(async (req, res) => {
-  const { recoveryCode } = req.body;
+  const { mobile, recoveryCode } = req.body;
+
+  // Validate mobile number provided
+  if (!mobile || mobile.trim() === '') {
+    res.status(400);
+    throw new Error('Please provide your mobile number');
+  }
 
   // Validate recovery code provided
   if (!recoveryCode || recoveryCode.trim() === '') {
@@ -148,12 +154,18 @@ const forgotPassword = asyncHandler(async (req, res) => {
     throw new Error('Please provide your recovery code');
   }
 
-  // Check if user exists with this recovery code
-  const user = await User.findOne({ recoveryCode: recoveryCode.toUpperCase().trim() });
+  // Check if user exists with this mobile number
+  const user = await User.findOne({ mobile: mobile.trim() });
 
   if (!user) {
     res.status(404);
-    throw new Error('Invalid recovery code. Please contact the admin to get a new recovery code.');
+    throw new Error('User not found with this mobile number');
+  }
+
+  // Verify the recovery code matches this user's recovery code
+  if (user.recoveryCode !== recoveryCode.toUpperCase().trim()) {
+    res.status(401);
+    throw new Error('Wrong recovery code. Please check your recovery code and try again.');
   }
 
   res.status(200).json({
