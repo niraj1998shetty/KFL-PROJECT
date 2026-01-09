@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { capitalizeFirstLetter } from "../helpers/functions";
+import { useAuth } from "../contexts/AuthContext";
+
+
 
 const UsersPage = () => {
+  const { currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +57,7 @@ const UsersPage = () => {
                         Name
                       </th>
                       <th className="w-1/3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Mobile Number
+                        Mobile No
                       </th>
                     </tr>
                   </thead>
@@ -65,19 +69,27 @@ const UsersPage = () => {
                 <table className="w-full table-fixed">
                   <tbody className="bg-white divide-y divide-gray-200">
                     {users.length > 0 ? (
-                      users.map((user, index) => (
+                      users.map((user, index) => {
+                        const isCurrentUser = user._id === currentUser?._id;
+                        return(
                         <tr key={user._id}>
                           <td className="w-16 px-6 py-4 text-sm text-gray-900">
                             {index + 1}
                           </td>
                           <td className="w-1/2 px-6 py-4 text-sm font-medium text-gray-900 text-center truncate">
                             {capitalizeFirstLetter(user.name)}
+                             {isCurrentUser && (
+                                <span className="ml-1 text-purple-600 font-semibold">
+                                  (You)
+                                </span>
+                             )}
                           </td>
                           <td className="w-1/3 px-6 py-4 text-sm text-gray-900">
                             {user.mobile}
                           </td>
                         </tr>
-                      ))
+                        );
+  })
                     ) : (
                       <tr>
                         <td

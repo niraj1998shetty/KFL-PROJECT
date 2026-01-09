@@ -108,7 +108,6 @@ const Sidebar = () => {
     {
       path: "/users",
       label: "Users",
-      modal: true,
       icon: <Users className="w-5 h-5" />,
     },
     {
