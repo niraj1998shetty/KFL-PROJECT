@@ -284,7 +284,7 @@ const PredictionStats = () => {
                               <tr
                                 key={user.id}
                                 className={`${isInTop3 ? "bg-blue-50" : ""} ${
-                                  isCurrentUser ? "bg-yellow-50" : ""
+                                  isCurrentUser ? "text-purple-500" : ""
                                 }`}
                               >
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
