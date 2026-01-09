@@ -279,7 +279,7 @@ const PredictionStats = () => {
                         {statsData.length > 0 ? (
                           statsData.map((user, index) => {
                             const isInTop3 = index < 3 && sortField === "totalPoints" && sortDirection === "desc";
-                            const isCurrentUser = user.id === currentUser?.id;
+                            const isCurrentUser = user.id === currentUser?._id;
                             return (
                               <tr
                                 key={user.id}
@@ -289,8 +289,14 @@ const PredictionStats = () => {
                               >
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-medium text-gray-900">
-                                    {capitalizeFirstLetter(getFirstName(user.name))}
-                                    {isCurrentUser && "(You)"}
+                                    {capitalizeFirstLetter(
+                                      getFirstName(user.name)
+                                    )}
+                                    {isCurrentUser && (
+                                      <span className="ml-1 text-purple-600 font-semibold">
+                                        (You)
+                                      </span>
+                                    )}
                                   </div>
                                 </td>
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">

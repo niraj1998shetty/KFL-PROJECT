@@ -57,7 +57,7 @@ const UsersPage = () => {
                         Name
                       </th>
                       <th className="w-1/3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Mobile No
+                        Mobile No.
                       </th>
                     </tr>
                   </thead>
