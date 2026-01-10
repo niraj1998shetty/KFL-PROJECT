@@ -171,68 +171,21 @@ const formatResult = (match) => {
 };
 
 /**
- * Format venue name to short form
- * Extracts text after comma if present
+ * Format venue name - returns full venue name
  * @param {string} venue - Full venue name
- * @returns {string} - Short venue name
+ * @returns {string} - Full venue name
  */
 const formatVenue = (venue) => {
   if (!venue) return 'N/A';
-
-  let venueText = venue;
-  if (venue.includes(',')) {
-    const parts = venue.split(',');
-    venueText = parts[parts.length - 1].trim();
-  }
-
-  const venueMap = {
-    'wankhede': 'Wankhede',
-    'chinnaswamy': 'Chinnaswamy',
-    'chepauk': 'Chepauk',
-    'chidambaram': 'Chepauk',
-    'arun jaitley': 'Arun Jaitley',
-    'feroz shah kotla': 'Feroz Shah Kotla',
-    'narendra modi': 'Narendra Modi',
-    'rajiv gandhi': 'Rajiv Gandhi',
-    'bharat ratna': 'Bharat Ratna',
-    'holkar': 'Holkar',
-    'barsapara': 'Barsapara',
-    'greenfield': 'Greenfield',
-    'adarsh': 'Adarsh',
-    'eden gardens': 'Eden Gardens',
-    'sheikh zayed': 'Sheikh Zayed',
-    'ekana': 'Ekana',
-    'lucknow': 'Ekana',
-    'mumbai': 'Wankhede',
-    'bangalore': 'Chinnaswamy',
-    'bengaluru': 'Chinnaswamy',
-    'hyderabad': 'Rajiv Gandhi',
-    'kolkata': 'Eden Gardens',
-    'delhi': 'Arun Jaitley',
-    'new delhi': 'Arun Jaitley',
-    'chennai': 'Chepauk',
-    'pune': 'MCA Stadium',
-    'jaipur': 'Sawai Man Singh',
-    'indore': 'Holkar',
-    'guwahati': 'Barsapara',
-    'kochi': 'Greenfield',
-    'visakhapatnam': 'Adarsh',
-    'ahmedabad': 'Narendra Modi',
-  };
-
-  const lowerVenue = venueText.toLowerCase().trim();
   
-  if (venueMap[lowerVenue]) {
-    return venueMap[lowerVenue];
+  // If there's a comma, return everything after it (trimmed)
+  const parts = venue.split(',');
+  if (parts.length > 1) {
+    return parts[1].trim();
   }
-
-  for (const [key, value] of Object.entries(venueMap)) {
-    if (lowerVenue.includes(key)) {
-      return value;
-    }
-  }
-
-  return venueText.length > 0 ? venueText : venue;
+  
+  // If no comma, return the full venue name
+  return venue.trim();
 };
 
 
