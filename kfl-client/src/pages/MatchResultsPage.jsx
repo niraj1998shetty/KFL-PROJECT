@@ -11,6 +11,8 @@ const MatchResultsPage = () => {
   const [error, setError] = useState(null);
   const [is2026Open, setIs2026Open] = useState(true);
   const [is2025Open, setIs2025Open] = useState(false);
+  const [search2026, setSearch2026] = useState('');
+  const [search2025, setSearch2025] = useState('');
 
   useEffect(() => {
     loadMatchResults();
@@ -31,31 +33,49 @@ const MatchResultsPage = () => {
     }
   };
 
+  // Filter function for search
+  const filterMatches = (matchList, searchQuery) => {
+    if (!searchQuery.trim()) return matchList;
+    
+    const query = searchQuery.toLowerCase();
+    return matchList.filter(match => {
+      const matchNo = match.matchNo?.toString().toLowerCase() || '';
+      const team1 = match.team1?.toLowerCase() || '';
+      const team2 = match.team2?.toLowerCase() || '';
+      const venue = match.venue?.toLowerCase() || '';
+      const result = match.result?.toLowerCase() || '';
+      const manOfTheMatch = match.manOfTheMatch?.toLowerCase() || '';
+      const date = match.date?.toLowerCase() || '';
+      
+      return (
+        matchNo.includes(query) ||
+        team1.includes(query) ||
+        team2.includes(query) ||
+        venue.includes(query) ||
+        result.includes(query) ||
+        manOfTheMatch.includes(query) ||
+        date.includes(query)
+      );
+    });
+  };
+
   // Separate matches by year
-  const matches2026 = matches.filter(match => {
+  const matches2026Raw = matches.filter(match => {
     const year = new Date(match.date).getFullYear();
     return year === 2026;
   });
 
-  const matches2025 = matches.filter(match => {
+  const matches2025Raw = matches.filter(match => {
     const year = new Date(match.date).getFullYear();
     return year === 2025;
   });
 
+  // Apply search filters
+  const matches2026 = filterMatches(matches2026Raw, search2026);
+  const matches2025 = filterMatches(matches2025Raw, search2025);
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-gray-200 rounded-full transition-colors"
-            title="Go back"
-          >
-            <ArrowLeft size={24} className="text-gray-700" />
-          </button>
-        </div>
-      </div>
 
       {/* IPL 2026 Section */}
       <div className="mb-4">
@@ -79,6 +99,8 @@ const MatchResultsPage = () => {
                 loading={loading}
                 error={error}
                 year="2026"
+                searchValue={search2026}
+                onSearchChange={setSearch2026}
               />
             </div>
           )}
@@ -107,6 +129,8 @@ const MatchResultsPage = () => {
                 loading={loading}
                 error={error}
                 year="2025"
+                searchValue={search2025}
+                onSearchChange={setSearch2025}
               />
             </div>
           )}
