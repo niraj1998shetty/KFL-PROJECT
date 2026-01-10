@@ -1,143 +1,212 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import MatchResultsTable from '../components/MatchResultsTable';
-import { fetchIPL2025Results } from '../services/matchResultsService';
+import React from 'react';
+import { ChevronDown, Search, X } from 'lucide-react';
 
-const MatchResultsPage = () => {
-  const navigate = useNavigate();
-  const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [is2026Open, setIs2026Open] = useState(true);
-  const [is2025Open, setIs2025Open] = useState(false);
-  const [search2026, setSearch2026] = useState('');
-  const [search2025, setSearch2025] = useState('');
-
-  useEffect(() => {
-    loadMatchResults();
-  }, []);
-
-  const loadMatchResults = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchIPL2025Results();
-      setMatches(data);
-    } catch (err) {
-      setError(err.message || 'Failed to fetch match results. Please try again.');
-      setMatches([]);
-      console.error('Error loading match results:', err);
-    } finally {
-      setLoading(false);
-    }
+const MatchResultsTable = ({ matches, loading, error, year, searchValue, onSearchChange }) => {
+  const getHeaderColor = () => {
+    return year === '2026' 
+      ? 'from-blue-600 to-purple-700' 
+      : 'from-indigo-600 to-purple-700';
   };
 
-  // Filter function for search
-  const filterMatches = (matchList, searchQuery) => {
-    if (!searchQuery.trim()) return matchList;
-    
-    const query = searchQuery.toLowerCase();
-    return matchList.filter(match => {
-      const matchNo = match.matchNo?.toString().toLowerCase() || '';
-      const team1 = match.team1?.toLowerCase() || '';
-      const team2 = match.team2?.toLowerCase() || '';
-      const venue = match.venue?.toLowerCase() || '';
-      const result = match.result?.toLowerCase() || '';
-      const manOfTheMatch = match.manOfTheMatch?.toLowerCase() || '';
-      const date = match.date?.toLowerCase() || '';
-      
-      return (
-        matchNo.includes(query) ||
-        team1.includes(query) ||
-        team2.includes(query) ||
-        venue.includes(query) ||
-        result.includes(query) ||
-        manOfTheMatch.includes(query) ||
-        date.includes(query)
-      );
-    });
+  const getFocusColor = () => {
+    return year === '2026' ? 'focus:ring-blue-500' : 'focus:ring-indigo-500';
   };
 
-  // Separate matches by year
-  const matches2026Raw = matches.filter(match => {
-    const year = new Date(match.date).getFullYear();
-    return year === 2026;
-  });
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+          <p className="text-gray-600">Loading match results for {year}...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const matches2025Raw = matches.filter(match => {
-    const year = new Date(match.date).getFullYear();
-    return year === 2025;
-  });
-
-  // Apply search filters
-  const matches2026 = filterMatches(matches2026Raw, search2026);
-  const matches2025 = filterMatches(matches2025Raw, search2025);
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <p className="text-red-700 font-semibold mb-2">Failed to load match results</p>
+        <p className="text-red-600 text-sm">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-6">
-
-      {/* IPL 2026 Section */}
+    <div>
+      {/* Search Bar */}
       <div className="mb-4">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <button
-            onClick={() => setIs2026Open(!is2026Open)}
-            className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-600 to-purple-700 text-white hover:from-blue-700 hover:to-purple-800 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg md:text-xl font-bold">IPL 2026</h2>
-              <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-                {matches2026.length} {matches2026.length === 1 ? 'match' : 'matches'}
-              </span>
-            </div>
-            {is2026Open ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-          </button>
-          {is2026Open && (
-            <div className="p-4">
-              <MatchResultsTable
-                matches={matches2026}
-                loading={loading}
-                error={error}
-                year="2026"
-                searchValue={search2026}
-                onSearchChange={setSearch2026}
-              />
-            </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search by match no, teams, venue, player, date..."
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className={`w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg ${getFocusColor()} focus:border-transparent transition-all text-sm md:text-base`}
+          />
+          {searchValue && (
+            <button
+              onClick={() => onSearchChange('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <X size={20} />
+            </button>
           )}
         </div>
       </div>
 
-      {/* IPL 2025 Section */}
-      <div className="mb-4">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <button
-            onClick={() => setIs2025Open(!is2025Open)}
-            className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-indigo-600 to-purple-700 text-white hover:from-indigo-700 hover:to-purple-800 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg md:text-xl font-bold">IPL 2025</h2>
-              <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-                {matches2025.length} {matches2025.length === 1 ? 'match' : 'matches'}
-              </span>
+      {/* No Matches Message */}
+      {(!matches || matches.length === 0) && (
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-8 md:p-12 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="text-gray-400">
+              <svg 
+                className="w-16 h-16 md:w-20 md:h-20" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={1.5} 
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" 
+                />
+              </svg>
             </div>
-            {is2025Open ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-          </button>
-          {is2025Open && (
-            <div className="p-4">
-              <MatchResultsTable
-                matches={matches2025}
-                loading={loading}
-                error={error}
-                year="2025"
-                searchValue={search2025}
-                onSearchChange={setSearch2025}
-              />
-            </div>
-          )}
+            <p className="text-gray-700 font-semibold text-lg md:text-xl">No matches yet</p>
+            <p className="text-gray-500 text-sm md:text-base max-w-md">
+              No IPL match results available for {year}. Matches will appear here once they are completed.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Desktop Table View */}
+      {matches && matches.length > 0 && (
+        <div className="hidden md:block bg-white rounded-lg shadow-md max-h-[600px] overflow-auto">
+          <table className="w-full">
+            <thead>
+              <tr className={`bg-gradient-to-r ${getHeaderColor()} text-white`}>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Match No</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Team 1</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Team 2</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Venue</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Result</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Man of the Match</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matches.map((match, index) => (
+                <tr
+                  key={match.id || index}
+                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                    {match.matchNo}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    <div className="font-medium">{match.team1}</div>
+                    <div className="text-xs text-gray-500">{formatDate(match.date)}</div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700 font-medium">
+                    {match.team2}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                      {match.venue}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    <div className="max-w-xs">
+                      {match.result === 'No result' ? (
+                        <p className="font-medium text-gray-500 italic">No result</p>
+                      ) : (
+                        <p className="font-medium text-green-700">{match.result}</p>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {match.manOfTheMatch === 'No-one' ? (
+                      <span className="text-gray-400 italic text-xs">No-one</span>
+                    ) : match.manOfTheMatch ? (
+                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-medium">
+                        {match.manOfTheMatch}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 italic text-xs">No-one</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Mobile Card View */}
+      {matches && matches.length > 0 && (
+        <div className="md:hidden bg-white rounded-lg shadow-md p-2 max-h-[600px] overflow-y-auto">
+          {matches.map((match, index) => (
+            <div
+              key={match.id || index}
+              className="border-b border-gray-200 p-4 last:border-b-0 bg-indigo-50 rounded-lg mb-3"
+            >
+              <div className="mb-2 flex justify-between items-start">
+                <h3 className="font-semibold text-gray-900">Match {match.matchNo}</h3>
+                <span className="text-xs text-gray-500">{formatDate(match.date)}</span>
+              </div>
+              <div className="mb-3 bg-purple-100 p-2 rounded">
+                <p className="font-medium text-center text-gray-900 mb-2">
+                  {match.team1} vs {match.team2}
+                </p>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Venue:</span>
+                  <span className="font-medium">{match.venue}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Result:</span>
+                  <span className="font-medium text-right flex-1 ml-2">
+                    {match.result === 'No result' ? (
+                      <span className="text-gray-400 italic">No result</span>
+                    ) : (
+                      <span className="text-green-700">{match.result}</span>
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">MOM:</span>
+                  <span className="font-medium">
+                    {match.manOfTheMatch === 'No-one' ? (
+                      <span className="text-gray-400 italic">No-one</span>
+                    ) : (
+                      match.manOfTheMatch
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default MatchResultsPage;
+const formatDate = (dateString) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch (error) {
+    return 'N/A';
+  }
+};
+
+export default MatchResultsTable;
