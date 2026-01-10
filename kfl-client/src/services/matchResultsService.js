@@ -60,12 +60,13 @@ export const fetchIPL2025Results = async () => {
     // Fetch player cache for resolving Man of the Match
     const players = await fetchPlayersCache();
 
-    // Filter for completed matches from 2025
+    // Filter for completed matches from 2025 and 2026
     const completedMatches = response.data
       .filter(match => {
         const matchDate = parseMatchDate(match.date);
+        const year = matchDate.getFullYear();
         return (
-          matchDate.getFullYear() === 2025 &&
+          (year === 2025 || year === 2026) &&
           match.result &&
           match.result.completed === true
         );
