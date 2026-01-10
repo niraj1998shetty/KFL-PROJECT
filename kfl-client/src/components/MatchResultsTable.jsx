@@ -24,11 +24,28 @@ const MatchResultsTable = ({ matches, loading, error, year }) => {
 
   if (!matches || matches.length === 0) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-12 text-center">
-        <p className="text-gray-600 font-semibold mb-2">No matches found</p>
-        <p className="text-gray-500 text-sm">
-          No IPL match results available for {year}. Please try another year.
-        </p>
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-8 md:p-12 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="text-gray-400">
+            <svg 
+              className="w-16 h-16 md:w-20 md:h-20" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={1.5} 
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" 
+              />
+            </svg>
+          </div>
+          <p className="text-gray-700 font-semibold text-lg md:text-xl">No matches yet</p>
+          <p className="text-gray-500 text-sm md:text-base max-w-md">
+            No IPL match results available for {year}. Matches will appear here once they are completed.
+          </p>
+        </div>
       </div>
     );
   }
