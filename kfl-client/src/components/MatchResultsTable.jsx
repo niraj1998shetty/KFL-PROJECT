@@ -33,9 +33,9 @@ const MatchResultsTable = ({ matches, loading, error, year, searchValue, onSearc
   }
 
   return (
-    <div>
-      {/* Search Bar */}
-      <div className="mb-4">
+    <div className="relative">
+      {/* Fixed Search Bar */}
+      <div className="sticky top-0 z-20 bg-gray-50 pb-4 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
@@ -43,7 +43,7 @@ const MatchResultsTable = ({ matches, loading, error, year, searchValue, onSearc
             placeholder="Search by match no, teams, venue, player, date..."
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            className={`w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg ${getFocusColor()} focus:border-transparent transition-all text-sm md:text-base`}
+            className={`w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg ${getFocusColor()} focus:border-transparent transition-all text-sm md:text-base bg-white`}
           />
           {searchValue && (
             <button
@@ -87,7 +87,7 @@ const MatchResultsTable = ({ matches, loading, error, year, searchValue, onSearc
       {matches && matches.length > 0 && (
         <div className="hidden md:block bg-white rounded-lg shadow-md max-h-[600px] overflow-auto">
           <table className="w-full">
-            <thead>
+            <thead className="sticky top-0 z-10">
               <tr className={`bg-gradient-to-r ${getHeaderColor()} text-white`}>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Match No</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Team 1</th>
