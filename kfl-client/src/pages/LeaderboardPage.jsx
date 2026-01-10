@@ -6,6 +6,7 @@ import axios from "axios";
 import { capitalizeFirstLetter } from "../helpers/functions";
 
 
+
 const LeaderboardPage = () => {
   const { currentUser } = useAuth();
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -477,6 +478,7 @@ const LeaderboardPage = () => {
                           }
 
                           const isInTop3 = rank <= 3;
+                          const isCurrentUser = entry.id === currentUser?._id;
 
                           return (
                             <tr
@@ -494,6 +496,11 @@ const LeaderboardPage = () => {
                               <td className="px-4 sm:px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
                                   {capitalizeFirstLetter(entry.username)}
+                                  {isCurrentUser && (
+                                    <span className="ml-1 text-purple-600 font-semibold">
+                                      (You)
+                                    </span>
+                                  )}
                                 </div>
                               </td>
                               <td className="px-4 sm:px-6 py-4">

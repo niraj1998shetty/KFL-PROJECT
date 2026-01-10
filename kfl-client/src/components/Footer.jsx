@@ -125,39 +125,45 @@ const Footer = () => {
 
   // Other menu items (for mobile)
   const otherMenuItems = [
-    { 
-      label: "Teams & Players", 
+    {
+      label: "Teams & Players",
       path: "/teams-players",
-      action: () => setIsOtherMenuOpen(false)
+      action: () => setIsOtherMenuOpen(false),
     },
-    { 
-      label: "IPL Results", 
+    {
+      label: "IPL Results",
       path: "/match-results",
-      action: () => setIsOtherMenuOpen(false)
+      action: () => setIsOtherMenuOpen(false),
     },
-    { 
-      label: "Prize Pool", 
+    {
+      label: "Users",
+      path: "/users",
+      action: () => setIsOtherMenuOpen(false),
+    },
+
+    {
+      label: "Prize Pool",
       action: () => {
         setIsPrizeModalOpen(true);
         setIsOtherMenuOpen(false);
-      } 
+      },
     },
-    { 
-      label: "Rules", 
+    {
+      label: "Rules",
       action: () => {
         setIsRulesModalOpen(true);
         setIsOtherMenuOpen(false);
-      } 
+      },
     },
-    { 
-      label: "Excel Sheet Leaderboard", 
+    {
+      label: "Excel Sheet Leaderboard",
       external: true,
-      href: "https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing" 
+      href: "https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing",
     },
-    { 
-      label: "Instagram", 
+    {
+      label: "Instagram",
       external: true,
-      href: "https://www.instagram.com/katthe_gang/" 
+      href: "https://www.instagram.com/katthe_gang/",
     },
   ];
 
