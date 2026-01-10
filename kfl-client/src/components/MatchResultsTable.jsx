@@ -151,13 +151,13 @@ const MatchResultsTable = ({ matches, loading, error, year, searchValue, onSearc
           {matches.map((match, index) => (
             <div
               key={match.id || index}
-              className="border-b border-gray-200 p-4 last:border-b-0 bg-purple-50 rounded-lg mb-3"
+              className="border-b border-gray-200 p-4 last:border-b-0 bg-indigo-50 rounded-lg mb-3"
             >
               <div className="mb-2 flex justify-between items-start">
                 <h3 className="font-semibold text-gray-900">Match {match.matchNo}</h3>
                 <span className="text-xs text-gray-500">{formatDate(match.date)}</span>
               </div>
-              <div className="mb-3 bg-gray-50 p-2 rounded">
+              <div className="mb-3 bg-purple-100 p-2 rounded">
                 <p className="font-medium text-center text-gray-900 mb-2">
                   {match.team1} vs {match.team2}
                 </p>
