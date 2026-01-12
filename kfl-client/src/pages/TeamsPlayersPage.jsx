@@ -142,7 +142,11 @@ const TeamsPlayersPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-16 md:pb-4">
-      <TopBar />
+      <TopBar
+        pageTitle={selectedTeam ? selectedTeam.name : "Teams & Players"}
+        showBackButton={selectedTeam !== null}
+        onBackClick={selectedTeam ? handleBackToTeams : null}
+      />
 
       <div className="pt-5 px-4 md:px-6 max-w-7xl mx-auto">
         {/* Teams View */}
@@ -155,14 +159,14 @@ const TeamsPlayersPage = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="mb-8">
+              {/* <div className="mb-8">
                 <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mb-2">
                   Teams
                 </h1>
                 <p className="text-gray-600">
                   Select a team to view its players
                 </p>
-              </div>
+              </div> */}
 
               {error && (
                 <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
@@ -203,20 +207,20 @@ const TeamsPlayersPage = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-8">
-                <button
+                {/* <button
                   onClick={handleBackToTeams}
                   className="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-lg hover:from-indigo-700 hover:to-purple-800 transition-colors duration-200"
                 >
                   <span>←</span>
                   <span>Back to Teams</span>
-                </button>
+                </button> */}
 
-                <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mb-2">
+                {/* <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mb-2">
                   {selectedTeam.name}
-                </h1>
+                </h1> */}
                 <p className="text-gray-600">
-                  {players.length}{" "}
-                  {players.length === 1 ? "player" : "players"} in this team
+                  {players.length} {players.length === 1 ? "player" : "players"}{" "}
+                  in this team
                 </p>
               </div>
 
