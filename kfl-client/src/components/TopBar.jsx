@@ -192,8 +192,8 @@ const TopBar = ({ showProfile = false }) => {
             {showProfile ? (
               // Profile Page Header
               <>
-                <div className="hidden md:flex items-center flex-shrink-0 w-64">
-                  <div className="h-12 w-12 mx-auto">
+                <div className="hidden md:flex items-center flex-shrink-0 gap-3 ml-20 ">
+                  <div className="h-12 w-12 flex-shrink-0">
                     <img
                       src={logo}
                       alt="KattheGang Logo"
@@ -201,7 +201,7 @@ const TopBar = ({ showProfile = false }) => {
                     />
                   </div>
                 </div>
-                <div className="flex items-center flex-shrink-0">
+                <div className="flex items-center flex-shrink-0 ml-0 md:ml-22">
                   <button
                     onClick={() => navigate(-1)}
                     className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
