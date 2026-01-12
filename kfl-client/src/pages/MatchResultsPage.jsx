@@ -3,10 +3,9 @@ import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MatchResultsTable from '../components/MatchResultsTable';
 import { fetchIPL2025Results } from '../services/matchResultsService';
-import TopBar from '../components/TopBar';
+
 
 const MatchResultsPage = () => {
-  const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

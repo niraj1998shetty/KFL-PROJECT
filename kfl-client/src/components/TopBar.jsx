@@ -197,7 +197,7 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            {showProfile || pageTitle ? (
+            {showProfile || pageTitle || showBackButton ? (
               // Profile Page Header
               <>
                 <div className="hidden md:flex items-center flex-shrink-0 gap-3 ml-20 ">
@@ -210,6 +210,7 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
                   </div>
                 </div>
                 <div className="flex items-center flex-shrink-0 ml-0 md:ml-22">
+                  
                   <button
                     onClick={handleBackButtonClick}
                     className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
