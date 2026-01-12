@@ -187,7 +187,7 @@ const TopBar = ({ showProfile = false }) => {
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             {showProfile ? (
               // Profile Page Header
@@ -218,8 +218,8 @@ const TopBar = ({ showProfile = false }) => {
             ) : (
               // Default Header
               <>
-                <div className="flex items-center flex-shrink-0">
-                  <div className="h-12 w-12">
+                <div className="flex items-center flex-shrink-0 gap-2">
+                  <div className="h-12 w-12 flex-shrink-0">
                     <img
                       src={logo}
                       alt="KattheGang Logo"
@@ -227,7 +227,7 @@ const TopBar = ({ showProfile = false }) => {
                     />
                   </div>
 
-                  <div className="font-bold">
+                  <div className="font-bold whitespace-nowrap">
                     <span className="hidden md:inline text-xl">
                       KattheGang Fantasy League
                     </span>
@@ -240,8 +240,10 @@ const TopBar = ({ showProfile = false }) => {
                 <div className="flex items-center space-x-1">
                   <div className="relative" ref={semifinalOptionsRef}>
                     <button
-                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-800 hover:bg-opacity-50 transition duration-300"
-                      onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
+                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-800 hover:bg-opacity-50 transition duration-300 whitespace-nowrap"
+                      onClick={() =>
+                        setShowSemifinalOptions(!showSemifinalOptions)
+                      }
                     >
                       Semifinal Prediction
                     </button>
@@ -291,7 +293,7 @@ const TopBar = ({ showProfile = false }) => {
           </div>
         </div>
       </div>
-   {showToast && (
+      {showToast && (
         <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-fade-in-out">
           {toastMessage}
         </div>
@@ -315,14 +317,13 @@ const TopBar = ({ showProfile = false }) => {
         />
       )}
       <LogoutConfirmModal
-  isOpen={showLogoutConfirm}
-  onCancel={() => setShowLogoutConfirm(false)}
-  onConfirm={() => {
-    setShowLogoutConfirm(false);
-    handleLogout();
-  }}
-/>
-
+        isOpen={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          handleLogout();
+        }}
+      />
     </>
   );
 };
