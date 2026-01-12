@@ -187,7 +187,7 @@ const TopBar = ({ showProfile = false }) => {
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             {showProfile ? (
               // Profile Page Header
@@ -236,8 +236,8 @@ const TopBar = ({ showProfile = false }) => {
             ) : (
               // Default Header
               <>
-                <div className="flex items-center space-x-3 ">
-                  <div className="h-12 w-12">
+                <div className="flex items-center flex-shrink-0 gap-2">
+                  <div className="h-12 w-12 flex-shrink-0">
                     <img
                       src={logo}
                       alt="KattheGang Logo"
@@ -245,7 +245,7 @@ const TopBar = ({ showProfile = false }) => {
                     />
                   </div>
 
-                  <div className="font-bold">
+                  <div className="font-bold whitespace-nowrap">
                     <span className="hidden md:inline text-xl">
                       KattheGang Fantasy League
                     </span>
@@ -258,7 +258,7 @@ const TopBar = ({ showProfile = false }) => {
                 <div className="flex items-center space-x-1">
                   <div className="relative" ref={semifinalOptionsRef}>
                     <button
-                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-800 hover:bg-opacity-50 transition duration-300"
+                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-800 hover:bg-opacity-50 transition duration-300 whitespace-nowrap"
                       onClick={() =>
                         setShowSemifinalOptions(!showSemifinalOptions)
                       }

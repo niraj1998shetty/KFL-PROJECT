@@ -252,7 +252,7 @@ const ProfilePage = () => {
           <div className="profile-info-card recovery-code-card">
             <div className="info-label-with-icon">
               <Shield size={16} />
-              <span>Recovery Code</span>
+              <span>Password Recovery Code</span>
             </div>
             <p className="recovery-code-description">
               Use this code to reset your password if you forget it. Keep it safe and don't share it with anyone.
