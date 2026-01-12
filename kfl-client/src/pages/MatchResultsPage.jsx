@@ -77,7 +77,6 @@ const MatchResultsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-6">
-      <TopBar pageTitle="IPL Results" showBackButton={true} />
 
       {/* IPL 2026 Section */}
       <div className="mb-4">
