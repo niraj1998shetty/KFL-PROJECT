@@ -4,11 +4,36 @@ import { motion } from "framer-motion";
 const RecentPerformanceCard = ({ recentMatches, loading }) => {
   const [activeMatchIndex, setActiveMatchIndex] = useState(null);
 
-  if (loading || !recentMatches?.length) {
+  // Enhanced: Handle loading, invalid, or empty data
+  const isValidArray = Array.isArray(recentMatches);
+  const hasValidData = isValidArray && recentMatches.some(
+    (m) => m && typeof m === 'object' && (m.matchShort || m.match)
+  );
+
+  if (loading) {
     return (
       <div className="bg-white shadow-md rounded-lg p-3 flex items-center justify-center h-36">
         <div className="animate-spin h-6 w-6 border-t-2 border-b-2 border-blue-600 rounded-full"></div>
       </div>
+    );
+  }
+
+  if (!isValidArray || !hasValidData) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="bg-white shadow-md rounded-lg overflow-hidden h-full"
+      >
+        <div className="p-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
+          <h2 className="text-sm font-semibold">Your Recent Performance</h2>
+          <p className="text-xs text-white mt-0.5">Last 7 matches</p>
+        </div>
+        <div className="p-3 flex items-center justify-center h-24">
+          <span className="text-gray-500 text-sm">No recent completed matches</span>
+        </div>
+      </motion.div>
     );
   }
 
