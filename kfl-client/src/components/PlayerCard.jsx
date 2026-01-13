@@ -84,7 +84,7 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
             <span
               className={`inline-block px-3 py-1 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${colorGradient}`}
             >
-              {player.team}
+              {player.role}
             </span>
           </div>
           
@@ -98,9 +98,16 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
             transition={{ duration: 0.2 }}
             className="pt-3 border-t border-gray-200"
           >
-            <p className="text-xs text-gray-600 text-center">
-              Player • {team.name}
-            </p>
+            <div className="text-center space-y-1">
+              <p className="text-xs text-gray-600 font-semibold">
+                No. of MOM since 2025
+              </p>
+              {player.momfrom25 > -1 && (
+                <p className="text-xs text-black-600 font-bold">
+                  {player.momfrom25}
+                </p>
+              )}
+            </div>
           </motion.div>
         </div>
       </div>

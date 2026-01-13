@@ -13,8 +13,11 @@ const TeamsPlayersPage = () => {
   const [playersLoading, setPlayersLoading] = useState(false);
   const [error, setError] = useState(null);
   const [playersError, setPlayersError] = useState(null);
+  const [selectedRole, setSelectedRole] = useState("All");
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  
+  const roles = ["All", "Batter", "Bowler", "All-Rounder", "Wk-Batter"];
 
   // Extract unique teams from players data
   useEffect(() => {
@@ -93,7 +96,13 @@ const TeamsPlayersPage = () => {
   const handleBackToTeams = () => {
     setSelectedTeam(null);
     setPlayers([]);
+    setSelectedRole("All");
   };
+  
+  // Filter players by selected role
+  const filteredPlayers = selectedRole === "All" 
+    ? players 
+    : players.filter(player => player.role === selectedRole);
 
   // Map team codes to team names
   const getTeamName = (code) => {
@@ -218,10 +227,34 @@ const TeamsPlayersPage = () => {
                 {/* <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mb-2">
                   {selectedTeam.name}
                 </h1> */}
-                <p className="text-gray-600">
-                  {players.length} {players.length === 1 ? "player" : "players"}{" "}
-                  in this team
-                </p>
+                
+                {/* Role Filter Dropdown */}
+                <div className="mb-4">
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="role-filter" className="text-sm font-semibold text-gray-700">
+                      Filter by Role:
+                    </label>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                      <select
+                        id="role-filter"
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent shadow-sm hover:border-gray-400 transition-all duration-200 cursor-pointer"
+                      >
+                        {roles.map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
+                      
+                      <p className="text-xs sm:text-sm text-gray-600">
+                        {filteredPlayers.length} {filteredPlayers.length === 1 ? "player" : "players"}{" "}
+                        {selectedRole !== "All" ? `(${selectedRole})` : ""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {playersError && (
@@ -239,19 +272,21 @@ const TeamsPlayersPage = () => {
                     </p>
                   </div>
                 </div>
-              ) : players.length === 0 ? (
+              ) : filteredPlayers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20">
                   <div className="text-6xl mb-4">👥</div>
                   <h2 className="text-lg sm:text-2xl font-semibold text-gray-700 mb-2">
                     No Players Found
                   </h2>
                   <p className="text-gray-600">
-                    No players are currently assigned to this team.
+                    {selectedRole === "All" 
+                      ? "No players are currently assigned to this team."
+                      : `No ${selectedRole} players found in this team.`}
                   </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {players.map((player, index) => (
+                  {filteredPlayers.map((player, index) => (
                     <PlayerCard
                       key={player._id || index}
                       player={player}
