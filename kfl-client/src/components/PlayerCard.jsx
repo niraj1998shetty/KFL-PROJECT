@@ -57,9 +57,19 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
           {/* Avatar */}
           <motion.div
             animate={{ scale: isHovered ? 1.1 : 1 }}
-            className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-700 flex items-center justify-center text-white font-bold text-lg shadow-lg border-4 border-white"
+            className="w-16 h-16 rounded-full  flex items-center justify-center  font-bold text-lg shadow-lg border-2 border-white"
           >
-            {getPlayerInitials(player.name)}
+            {teamLogo ? (
+              <img
+                src={teamLogo}
+                alt={`${player.team} logo`}
+                className="w-12 h-12 object-contain"
+              />
+            ) : (
+              <span className="text-2xl font-bold text-gray-700">
+                {getPlayerInitials(player.name)}
+              </span>
+            )}
           </motion.div>
         </div>
 
@@ -71,25 +81,13 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
 
           {/* Team Badge */}
           <div className="flex justify-center mb-3">
-              {teamLogo ? (
-              // <div
-              //   className={`inline-flex items-center justify-center px-3 py-2 rounded-full bg-gradient-to-r ${colorGradient} shadow-md`}
-              // >
-                <img
-                  src={teamLogo}
-                  alt={`${player.team} logo`}
-                  className="w-8 h-8 object-contain"
-                />
-              // </div>
-            ) : (
             <span
               className={`inline-block px-3 py-1 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${colorGradient}`}
             >
               {player.team}
             </span>
-            )}
           </div>
-
+          
           {/* Additional Info */}
           <motion.div
             initial={{ opacity: 0, height: 0 }}
