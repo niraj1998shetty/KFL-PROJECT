@@ -35,11 +35,15 @@ const AppLayout = ({ children }) => {
     </div>
   );
 };
-
-const ProfileLayout = ({ children }) => {
+const PageLayout = ({ children, pageTitle, showProfile = false, showBackButton = false, onBackClick = null }) => {
   return (
     <div className="flex flex-col h-screen">
-      <TopBar showProfile={true} />
+      <TopBar 
+        pageTitle={pageTitle}
+        showProfile={showProfile}
+        showBackButton={showBackButton}
+        onBackClick={onBackClick}
+      />
       <div className="flex flex-1 pt-16 overflow-hidden">
         <Sidebar />
         <main className="flex-1 bg-gray-100 overflow-auto pb-16 md:pb-0">
@@ -105,9 +109,9 @@ const App = () => {
             path="/teams-players"
             element={
               <AuthGuard>
-                <AppLayout>
+                 <PageLayout pageTitle="Teams & Players" showBackButton={true}>
                   <TeamsPlayersPage />
-                </AppLayout>
+                 </PageLayout>
               </AuthGuard>
             }
           />
@@ -115,9 +119,9 @@ const App = () => {
             path="/match-results"
             element={
               <AuthGuard>
-                <AppLayout>
+                <PageLayout pageTitle="IPL Results" showBackButton={true}>
                   <MatchResultsPage />
-                </AppLayout>
+                 </PageLayout>
               </AuthGuard>
             }
           />
@@ -125,9 +129,9 @@ const App = () => {
             path="/users"
             element={
               <AuthGuard>
-                <ProfileLayout>
+               <PageLayout showProfile={true}>
                   <UsersPage />
-                </ProfileLayout>
+                 </PageLayout>
               </AuthGuard>
             }
           />
@@ -136,9 +140,9 @@ const App = () => {
             path="/profile"
             element={
               <AuthGuard>
-                <ProfileLayout>
+               <PageLayout showProfile={true}>
                   <ProfilePage />
-                </ProfileLayout>
+               </PageLayout>
               </AuthGuard>
             }
           />

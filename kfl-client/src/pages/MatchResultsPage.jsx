@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import MatchResultsTable from '../components/MatchResultsTable';
 import { fetchIPL2025Results } from '../services/matchResultsService';
 
+
 const MatchResultsPage = () => {
-  const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -87,7 +87,8 @@ const MatchResultsPage = () => {
             <div className="flex items-center gap-3">
               <h2 className="text-lg md:text-xl font-bold">IPL 2026</h2>
               <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-                {matches2026.length} {matches2026.length === 1 ? 'match' : 'matches'}
+                {matches2026.length}
+                {matches2026.length === 1 ? "match" : "matches"}
               </span>
             </div>
             {is2026Open ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
@@ -117,7 +118,8 @@ const MatchResultsPage = () => {
             <div className="flex items-center gap-3">
               <h2 className="text-lg md:text-xl font-bold">IPL 2025</h2>
               <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
-                {matches2025.length} {matches2025.length === 1 ? 'match' : 'matches'}
+                {matches2025.length}
+                {matches2025.length === 1 ? "match" : "matches"}
               </span>
             </div>
             {is2025Open ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
