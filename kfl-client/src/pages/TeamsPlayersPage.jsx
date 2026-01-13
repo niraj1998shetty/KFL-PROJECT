@@ -33,6 +33,11 @@ const TeamsPlayersPage = () => {
         // Extract unique teams with team codes
         const uniqueTeams = {};
         response.data.forEach((player) => {
+          // Skip players with empty or no team
+          if (!player.team || player.team.trim() === "") {
+            return;
+          }
+          
           if (!uniqueTeams[player.team]) {
             uniqueTeams[player.team] = {
               code: player.team,
