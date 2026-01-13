@@ -1,15 +1,15 @@
 import React from "react";
 import { motion } from "framer-motion";
-import cskLogo from "../assets/csk-logo.jpg";
-import miLogo from "../assets/mi-logo.jpg";
-import rcbLogo from "../assets/rcb-logo.jpg";
-import srhLogo from "../assets/srh-logo.jpg";
-import kkrLogo from "../assets/kkr-logo.jpg";
-import dcLogo from "../assets/dc-logo.jpg";
-import pbksLogo from "../assets/pbks-logo.jpg";
-import rrLogo from "../assets/rr-logo.jpg";
-import gtLogo from "../assets/gt-logo.jpg";
-import lsgLogo from "../assets/lsg-logo.jpg";
+import cskLogo from "../assets/csk-logo.png";
+import miLogo from "../assets/mi-logo.png";
+import rcbLogo from "../assets/rcb-logo.png";
+import srhLogo from "../assets/srh-logo.png";
+import kkrLogo from "../assets/kkr-logo.png";
+import dcLogo from "../assets/dc-logo.png";
+import pbksLogo from "../assets/pbks-logo.png";
+import rrLogo from "../assets/rr-logo.png";
+import gtLogo from "../assets/gt-logo.png";
+import lsgLogo from "../assets/lsg-logo.png";
 
 
 const TeamCard = ({ team, onSelect, colorGradient }) => {
@@ -75,7 +75,7 @@ const TeamCard = ({ team, onSelect, colorGradient }) => {
         {/* Content */}
         <div className="relative h-55 p-6 flex flex-col justify-between text-white z-10">
           {/* Team Icon/Avatar */}
-          <div className="flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 mb-2">
+          <div className="flex items-center justify-center w-16 h-16  mb-2">
             {teamLogo ? (
               <img
                 src={teamLogo}

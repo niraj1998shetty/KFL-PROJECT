@@ -124,7 +124,7 @@ const TeamsPlayersPage = () => {
       PBKS: "from-red-400 to-red-600",
       RR: "from-pink-500 to-pink-700",
       GT: "from-cyan-400 to-cyan-600",
-      LSG: "from-blue-900 to-blue-400",
+      LSG: "from-blue-400 to-blue-900",
     };
     return teamColors[code] || "from-gray-500 to-gray-700";
   };

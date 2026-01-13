@@ -1,8 +1,34 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import cskLogo from "../assets/csk-logo.png";
+import miLogo from "../assets/mi-logo.png";
+import rcbLogo from "../assets/rcb-logo.png";
+import srhLogo from "../assets/srh-logo.png";
+import kkrLogo from "../assets/kkr-logo.png";
+import dcLogo from "../assets/dc-logo.png";
+import pbksLogo from "../assets/pbks-logo.png";
+import rrLogo from "../assets/rr-logo.png";
+import gtLogo from "../assets/gt-logo.png";
+import lsgLogo from "../assets/lsg-logo.png";
 
 const PlayerCard = ({ player, team, index, colorGradient }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const getTeamLogo = (code) => {
+       const teamLogos = {
+         CSK: cskLogo,
+         MI: miLogo,
+         RCB: rcbLogo,
+         SRH: srhLogo,
+         KKR: kkrLogo,
+         DC: dcLogo,
+         PBKS: pbksLogo,
+         RR: rrLogo,
+         GT: gtLogo,
+         LSG: lsgLogo,
+       };
+       return teamLogos[code] || null;
+     };
+     const teamLogo = getTeamLogo(team.code);
 
   // Generate a consistent color based on player name
   const getPlayerInitials = (name) => {
@@ -45,11 +71,23 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
 
           {/* Team Badge */}
           <div className="flex justify-center mb-3">
+              {teamLogo ? (
+              // <div
+              //   className={`inline-flex items-center justify-center px-3 py-2 rounded-full bg-gradient-to-r ${colorGradient} shadow-md`}
+              // >
+                <img
+                  src={teamLogo}
+                  alt={`${player.team} logo`}
+                  className="w-8 h-8 object-contain"
+                />
+              // </div>
+            ) : (
             <span
               className={`inline-block px-3 py-1 rounded-full text-sm font-semibold text-white bg-gradient-to-r ${colorGradient}`}
             >
               {player.team}
             </span>
+            )}
           </div>
 
           {/* Additional Info */}
