@@ -1,8 +1,34 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import cskLogo from "../assets/csk-logo.png";
+import miLogo from "../assets/mi-logo.png";
+import rcbLogo from "../assets/rcb-logo.png";
+import srhLogo from "../assets/srh-logo.png";
+import kkrLogo from "../assets/kkr-logo.png";
+import dcLogo from "../assets/dc-logo.png";
+import pbksLogo from "../assets/pbks-logo.png";
+import rrLogo from "../assets/rr-logo.png";
+import gtLogo from "../assets/gt-logo.png";
+import lsgLogo from "../assets/lsg-logo.png";
 
 const PlayerCard = ({ player, team, index, colorGradient }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const getTeamLogo = (code) => {
+       const teamLogos = {
+         CSK: cskLogo,
+         MI: miLogo,
+         RCB: rcbLogo,
+         SRH: srhLogo,
+         KKR: kkrLogo,
+         DC: dcLogo,
+         PBKS: pbksLogo,
+         RR: rrLogo,
+         GT: gtLogo,
+         LSG: lsgLogo,
+       };
+       return teamLogos[code] || null;
+     };
+     const teamLogo = getTeamLogo(team.code);
 
   // Generate a consistent color based on player name
   const getPlayerInitials = (name) => {
@@ -31,9 +57,19 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
           {/* Avatar */}
           <motion.div
             animate={{ scale: isHovered ? 1.1 : 1 }}
-            className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-700 flex items-center justify-center text-white font-bold text-lg shadow-lg border-4 border-white"
+            className="w-16 h-16 rounded-full  flex items-center justify-center  font-bold text-lg shadow-lg border-2 border-white"
           >
-            {getPlayerInitials(player.name)}
+            {teamLogo ? (
+              <img
+                src={teamLogo}
+                alt={`${player.team} logo`}
+                className="w-12 h-12 object-contain"
+              />
+            ) : (
+              <span className="text-2xl font-bold text-gray-700">
+                {getPlayerInitials(player.name)}
+              </span>
+            )}
           </motion.div>
         </div>
 
@@ -51,7 +87,7 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
               {player.team}
             </span>
           </div>
-
+          
           {/* Additional Info */}
           <motion.div
             initial={{ opacity: 0, height: 0 }}
