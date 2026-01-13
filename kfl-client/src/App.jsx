@@ -35,46 +35,12 @@ const AppLayout = ({ children }) => {
     </div>
   );
 };
-
-const ProfileLayout = ({ children }) => {
+const PageLayout = ({ children, pageTitle, showProfile = false, showBackButton = false, onBackClick = null }) => {
   return (
     <div className="flex flex-col h-screen">
-      <TopBar showProfile={true} />
-      <div className="flex flex-1 pt-16 overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 bg-gray-100 overflow-auto pb-16 md:pb-0">
-          {children}
-        </main>
-      </div>
-      <Footer />
-    </div>
-  );
-};
-
-const MatchResultsLayout = ({ children }) => {
-  return (
-    <div className="flex flex-col h-screen">
-      <TopBar pageTitle="IPL Results" showBackButton={true} />
-      <div className="flex flex-1 pt-16 overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 bg-gray-100 overflow-auto pb-16 md:pb-0">
-          {children}
-        </main>
-      </div>
-      <Footer />
-    </div>
-  );
-};
-const TeamsPlayersLayout = ({
-  children,
-  pageTitle,
-  showBackButton,
-  onBackClick,
-}) => {
-  return (
-    <div className="flex flex-col h-screen">
-      <TopBar
+      <TopBar 
         pageTitle={pageTitle}
+        showProfile={showProfile}
         showBackButton={showBackButton}
         onBackClick={onBackClick}
       />
@@ -88,6 +54,7 @@ const TeamsPlayersLayout = ({
     </div>
   );
 };
+
 const App = () => {
   return (
     <AuthProvider>
@@ -142,9 +109,9 @@ const App = () => {
             path="/teams-players"
             element={
               <AuthGuard>
-                <TeamsPlayersLayout>
+                 <PageLayout pageTitle="Teams & Players" showBackButton={true}>
                   <TeamsPlayersPage />
-                </TeamsPlayersLayout>
+                 </PageLayout>
               </AuthGuard>
             }
           />
@@ -152,9 +119,9 @@ const App = () => {
             path="/match-results"
             element={
               <AuthGuard>
-                <MatchResultsLayout>
+                <PageLayout pageTitle="IPL Results" showBackButton={true}>
                   <MatchResultsPage />
-                </MatchResultsLayout>
+                 </PageLayout>
               </AuthGuard>
             }
           />
@@ -162,9 +129,9 @@ const App = () => {
             path="/users"
             element={
               <AuthGuard>
-                <ProfileLayout>
+               <PageLayout showProfile={true}>
                   <UsersPage />
-                </ProfileLayout>
+                 </PageLayout>
               </AuthGuard>
             }
           />
@@ -173,9 +140,9 @@ const App = () => {
             path="/profile"
             element={
               <AuthGuard>
-                <ProfileLayout>
+               <PageLayout showProfile={true}>
                   <ProfilePage />
-                </ProfileLayout>
+               </PageLayout>
               </AuthGuard>
             }
           />
