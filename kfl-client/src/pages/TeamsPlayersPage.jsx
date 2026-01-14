@@ -8,6 +8,9 @@ import TopBar from "../components/TopBar";
 const TeamsPlayersPage = () => {
   const [teams, setTeams] = useState([]);
   const [players, setPlayers] = useState([]);
+  const[filteredPlayers, setFilteredPlayers] = useState([]);
+  const[selectedRole, setSelectedRole] = useState("All");
+  const[showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teamsLoading, setTeamsLoading] = useState(true);
   const [playersLoading, setPlayersLoading] = useState(false);
@@ -16,6 +19,7 @@ const TeamsPlayersPage = () => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+  const roles = ["All", "Batter", "Bowler", "All-Rounder", "Wk-Batter"];
   // Extract unique teams from players data
   useEffect(() => {
     const fetchTeams = async () => {
@@ -63,9 +67,20 @@ const TeamsPlayersPage = () => {
     fetchTeams();
   }, [API_URL]);
 
+  useEffect(() => {
+    if (selectedRole === "All") {
+      setFilteredPlayers(players);
+    } else {
+      setFilteredPlayers(
+        players.filter((player) => player.role === selectedRole)
+      );
+    }
+  }, [selectedRole, players]);
+
   // Fetch players for selected team
   const handleTeamSelect = async (team) => {
     setSelectedTeam(team);
+    setSelectedRole("All");
     setPlayersLoading(true);
     setPlayersError(null);
 
@@ -98,6 +113,8 @@ const TeamsPlayersPage = () => {
   const handleBackToTeams = () => {
     setSelectedTeam(null);
     setPlayers([]);
+    setFilteredPlayers([]);
+    setSelectedRole("All");
   };
 
   // Map team codes to team names
@@ -212,21 +229,67 @@ const TeamsPlayersPage = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="mb-8">
-                {/* <button
-                  onClick={handleBackToTeams}
-                  className="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-lg hover:from-indigo-700 hover:to-purple-800 transition-colors duration-200"
-                >
-                  <span>←</span>
-                  <span>Back to Teams</span>
-                </button> */}
+                <div className="mb-4">
+                  {/* Title */}
+                  <span className="block text-gray-700 font-medium mb-2">
+                    Filter by Role:
+                  </span>
 
-                {/* <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mb-2">
-                  {selectedTeam.name}
-                </h1> */}
-                <p className="text-gray-600">
-                  {players.length} {players.length === 1 ? "player" : "players"}{" "}
-                  in this team
-                </p>
+                  {/* Dropdown + count */}
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                        className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 rounded-lg hover:border-gray-400 transition-colors min-w-[180px] justify-between"
+                      >
+                        <span className="text-gray-700 font-medium">
+                          {selectedRole}
+                        </span>
+                        <svg
+                          className={`w-5 h-5 transition-transform ${
+                            showRoleDropdown ? "rotate-180" : ""
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+
+                      {showRoleDropdown && (
+                        <div className="absolute top-full mt-2 w-full bg-white border-2 border-gray-300 rounded-lg shadow-lg z-10 overflow-hidden">
+                          {roles.map((role) => (
+                            <button
+                              key={role}
+                              onClick={() => {
+                                setSelectedRole(role);
+                                setShowRoleDropdown(false);
+                              }}
+                              className={`w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors ${
+                                selectedRole === role
+                                  ? "bg-blue-500 text-white hover:bg-blue-600"
+                                  : "text-gray-700"
+                              }`}
+                            >
+                              {role}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <span className="text-gray-600">
+                      {filteredPlayers.length}{" "}
+                      {filteredPlayers.length === 1 ? "player" : "players"}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {playersError && (
@@ -244,19 +307,21 @@ const TeamsPlayersPage = () => {
                     </p>
                   </div>
                 </div>
-              ) : players.length === 0 ? (
+              ) : filteredPlayers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20">
                   <div className="text-6xl mb-4">👥</div>
                   <h2 className="text-lg sm:text-2xl font-semibold text-gray-700 mb-2">
                     No Players Found
                   </h2>
                   <p className="text-gray-600">
-                    No players are currently assigned to this team.
+                    {selectedRole === "All"
+                      ? "No players are currently assigned to this team."
+                      : `No ${selectedRole} players found in this team.`}
                   </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {players.map((player, index) => (
+                  {filteredPlayers.map((player, index) => (
                     <PlayerCard
                       key={player._id || index}
                       player={player}
