@@ -57,7 +57,7 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
       case "All-Rounder":
         return<img src={allround} alt="Bat" className="w-4 h-4 ml-2" />;
         
-      case "WK-Batter":
+      case "Wk-Batter":
         return (
           <div className="flex gap-1 ml-2">
             <img src={glovesIcon} alt="Gloves" className="w-4 h-4" />

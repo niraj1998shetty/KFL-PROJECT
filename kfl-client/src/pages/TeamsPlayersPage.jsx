@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import TeamCard from "../components/TeamCard";
@@ -16,6 +16,8 @@ const TeamsPlayersPage = () => {
   const [playersLoading, setPlayersLoading] = useState(false);
   const [error, setError] = useState(null);
   const [playersError, setPlayersError] = useState(null);
+  const roleDropdownRef = useRef(null);
+
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -66,6 +68,24 @@ const TeamsPlayersPage = () => {
 
     fetchTeams();
   }, [API_URL]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        roleDropdownRef.current &&
+        !roleDropdownRef.current.contains(event.target)
+      ) {
+        setShowRoleDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
 
   useEffect(() => {
     if (selectedRole === "All") {
@@ -237,7 +257,7 @@ const TeamsPlayersPage = () => {
 
                   {/* Dropdown + count */}
                   <div className="flex items-center gap-4">
-                    <div className="relative">
+                    <div className="relative" ref={roleDropdownRef}>
                       <button
                         onClick={() => setShowRoleDropdown(!showRoleDropdown)}
                         className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 rounded-lg hover:border-gray-400 transition-colors min-w-[180px] justify-between"
