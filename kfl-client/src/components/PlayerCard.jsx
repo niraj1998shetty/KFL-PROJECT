@@ -131,10 +131,10 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
             className="pt-3 border-t border-gray-200"
           >
             <div className="text-center">
-              <p className="text-xs  font-bold text-gray-500">
+              <p className="text-xs text-gray-500">
                 No. of MOM since 2025
               </p>
-              <p className="text-l font-bold text-gray-800">
+              <p className="text-xs font-bold text-gray-800">
                 {player.momfrom25}
               </p>
             </div>
