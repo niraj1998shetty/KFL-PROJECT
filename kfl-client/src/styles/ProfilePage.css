@@ -233,6 +233,7 @@
   max-width: 500px;
   display: flex;
   justify-content: center;
+  transform: translateX(15px);
 }
 
 .inline-edit-wrapper-horizontal {
@@ -241,6 +242,7 @@
   gap: 10px;
   width: 100%;
   justify-content: center;
+
 }
 
 .profile-input-name-inline {
@@ -254,6 +256,7 @@
   max-width: 250px;
   font-family: inherit;
   text-align: center;
+  margin-top: 15px;
 }
 
 .profile-input-name-inline:focus {
@@ -392,6 +395,11 @@
   color: #a0aec0;
   margin-top: 8px;
   text-align: right;
+}
+.name-input-with-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* ========================

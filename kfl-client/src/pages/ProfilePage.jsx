@@ -162,16 +162,21 @@ const ProfilePage = () => {
               <div className="editable-field-container">
                 {editingField === "name" ? (
                   <div className="inline-edit-wrapper-horizontal">
-                    <input
-                      type="text"
-                      name="name"
-                      maxLength="25"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="profile-input-name-inline"
-                      placeholder="Your name"
-                      autoFocus
-                    />
+                    <div className="name-input-with-count">
+                      <input
+                        type="text"
+                        name="name"
+                        maxLength="25"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="profile-input-name-inline"
+                        placeholder="Your name"
+                        autoFocus
+                      />
+                      <p className="char-count">
+                        {25 - formData.name.length}/25 characters
+                      </p>
+                    </div>
                     {/* <div className="inline-edit-actions"> */}
                     <button
                       onClick={handleSaveField}
@@ -253,7 +258,7 @@ const ProfilePage = () => {
                       className="inline-action-btn save-btn"
                     >
                       <Check size={16} />
-                      </button>
+                    </button>
                     <button
                       onClick={handleCancelEdit}
                       className="inline-action-btn cancel-btn"
