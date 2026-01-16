@@ -195,7 +195,10 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  /* transition: all 0.3s ease; */
+  transition: background-color 0.2s ease,
+      box-shadow 0.2s ease,
+      color 0.2s ease;
 }
 
 .inline-action-btn.save-btn {
@@ -205,7 +208,7 @@
 }
 
 .inline-action-btn.save-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #5a6fe0 0%, #6b3fa0 100%);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
@@ -221,8 +224,9 @@
 }
 
 .inline-action-btn.cancel-btn:hover {
-  background: #fff5f5;
-  transform: translateY(-2px);
+background: #fff5f5;
+  color: #fc5c65;
+  box-shadow: 0 4px 10px rgba(252, 92, 101, 0.25);
 }
 /* ========================
    HORIZONTAL INLINE EDIT FOR NAME
