@@ -107,7 +107,9 @@ const createPlayers = async () => {
       playerNames.forEach(name => {
         players.push({
           name,
-          team
+          team,
+          role: '',
+          momfrom25: 0
         });
       });
     }
