@@ -615,7 +615,8 @@ export const ipl2025Matches = [
     "result": {
       "winner": null,
       "playerOfTheMatch": null,
-      "completed": false
+      "completed": false,
+      "noResult": true
     }
   },
   {
