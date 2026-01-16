@@ -47,7 +47,7 @@
 .profile-wrapper {
   position: relative;
   z-index: 10;
-  max-width: 600px;
+  max-width: 480px;
   margin: 0 auto;
 }
 /* 
@@ -161,11 +161,6 @@
 
 }
 
-.profile-input-name:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
 .inline-edit-icon {
   background: transparent;
   border: none;
@@ -256,7 +251,7 @@
   border-radius: 12px;
   padding: 8px 12px;
   flex: 1;
-  max-width: 350px;
+  max-width: 250px;
   font-family: inherit;
   text-align: center;
 }
@@ -753,12 +748,15 @@
   }
 
  .inline-edit-actions {
-   width: 100%;
+  width: auto;
+  justify-content: center;
  }
 
  .inline-action-btn {
-   flex: 1;
-   justify-content: center;
+  flex: 0;
+  padding: 8px;
+  min-width: 58px;
+  justify-content: center;
  }
  
 }

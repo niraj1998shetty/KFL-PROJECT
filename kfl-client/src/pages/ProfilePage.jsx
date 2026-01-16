@@ -96,32 +96,7 @@ const ProfilePage = () => {
       }
     };
 
-  // const handleSaveProfile = async () => {
-  //   if (!formData.name.trim()) {
-  //     setError("Name cannot be empty");
-  //     return;
-  //   }
-
-  //   try {
-  //     setError("");
-  //     setSuccess("");
-  //     setIsSaving(true);
-
-  //     const response = await axios.put(`${API_URL}/users/profile`, formData);
-      
-  //     setProfileData(response.data.user);
-  //     setSuccess("Profile updated successfully!");
-  //     setIsEditing(false);
-
-  //     setTimeout(() => setSuccess(""), 3000);
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Failed to update profile");
-  //   } finally {
-  //     setIsSaving(false);
-  //   }
-  // };
-
-  const handleCopyCode = () => {
+   const handleCopyCode = () => {
     if (profileData?.recoveryCode) {
       navigator.clipboard.writeText(profileData.recoveryCode);
       setCopiedCode(true);
@@ -190,6 +165,7 @@ const ProfilePage = () => {
                     <input
                       type="text"
                       name="name"
+                      maxLength="25"
                       value={formData.name}
                       onChange={handleInputChange}
                       className="profile-input-name-inline"
@@ -197,24 +173,24 @@ const ProfilePage = () => {
                       autoFocus
                     />
                     {/* <div className="inline-edit-actions"> */}
-                      <button
-                        onClick={handleSaveField}
-                        disabled={isSaving}
-                        className="inline-action-btn save-btn"
-                        title="Save"
-                      >
-                        <Check size={18} />
-                      </button>
-                      <button
-                        onClick={handleCancelEdit}
-                        className="inline-action-btn cancel-btn"
-                        title="Cancel"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                  // </div>
+                    <button
+                      onClick={handleSaveField}
+                      disabled={isSaving}
+                      className="inline-action-btn save-btn"
+                      title="Save"
+                    >
+                      <Check size={18} />
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="inline-action-btn cancel-btn"
+                      title="Cancel"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
                 ) : (
+                  // </div>
                   <div className="profile-name-display">
                     <h1 className="profile-name">
                       {capitalizeFirstLetter(profileData.name)}
@@ -277,14 +253,12 @@ const ProfilePage = () => {
                       className="inline-action-btn save-btn"
                     >
                       <Check size={16} />
-                      <span>Save</span>
-                    </button>
+                      </button>
                     <button
                       onClick={handleCancelEdit}
                       className="inline-action-btn cancel-btn"
                     >
-                      <X size={16} />
-                      <span>Cancel</span>
+                      <X size={12} />
                     </button>
                   </div>
                 </>
@@ -295,45 +269,7 @@ const ProfilePage = () => {
                   )}
                 </div>
               )}
-              {/* {isEditing && (
-                <p className="char-count">
-                  {formData.about.length}/200 characters
-                </p>
-              )} */}
             </div>
-
-            {/* Stats Grid */}
-            {/* <div className="profile-stats-grid">
-            <div className="stat-card">
-              <div className="stat-icon points">
-                <TrendingUp size={24} />
-              </div>
-              <div className="stat-content">
-                <div className="stat-label">Total Points</div>
-                <div className="stat-value">{profileData.points}</div>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon week-points">
-                <Shield size={24} />
-              </div>
-              <div className="stat-content">
-                <div className="stat-label">Weekly Points</div>
-                <div className="stat-value">{profileData.weekPoints}</div>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon win-percentage">
-                <span className="percentage-icon">%</span>
-              </div>
-              <div className="stat-content">
-                <div className="stat-label">Win Percentage</div>
-                <div className="stat-value">{calculateWinPercentage()}%</div>
-              </div>
-            </div>
-          </div> */}
 
             {/* Member Since */}
             <div className="profile-info-card">
@@ -378,32 +314,6 @@ const ProfilePage = () => {
                 </button>
               </div>
             </div>
-
-            {/* Action Buttons */}
-            {/* {isEditing && (
-              <div className="profile-actions">
-                <button
-                  onClick={() => {
-                    setIsEditing(false);
-                    setFormData({
-                      name: profileData.name,
-                      about: profileData.about,
-                    });
-                    setError("");
-                  }}
-                  className="btn-cancel"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveProfile}
-                  disabled={isSaving}
-                  className="btn-save"
-                >
-                  {isSaving ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            )} */}
 
             {/* Logout Button */}
             <button
