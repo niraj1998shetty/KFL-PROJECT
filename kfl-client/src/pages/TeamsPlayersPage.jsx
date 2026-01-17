@@ -271,7 +271,7 @@ const TeamsPlayersPage = () => {
           >
             {/* Team Logo Background Watermark */}
             {selectedTeam && getTeamLogo(selectedTeam.code) && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+              <div className="fixed inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0">
                 <img
                   src={getTeamLogo(selectedTeam.code)}
                   alt={`${selectedTeam.name} logo`}
