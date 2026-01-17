@@ -202,15 +202,15 @@
 }
 
 .inline-action-btn.save-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+  color: rgb(85, 8, 208);
+  /* box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); */
 }
 
-.inline-action-btn.save-btn:hover:not(:disabled) {
+/* .inline-action-btn.save-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #5a6fe0 0%, #6b3fa0 100%);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
+} */
 
 .inline-action-btn.save-btn:disabled {
   opacity: 0.6;
@@ -218,16 +218,16 @@
 }
 
 .inline-action-btn.cancel-btn {
-  background: white;
+  /* background: white; */
   color: #fc5c65;
-  border: 2px solid #fc5c65;
+  /* border: 2px solid #fc5c65; */
 }
 
-.inline-action-btn.cancel-btn:hover {
+/* .inline-action-btn.cancel-btn:hover {
 background: #fff5f5;
   color: #fc5c65;
   box-shadow: 0 4px 10px rgba(252, 92, 101, 0.25);
-}
+} */
 /* ========================
    HORIZONTAL INLINE EDIT FOR NAME
    ======================== */
@@ -257,7 +257,7 @@ background: #fff5f5;
   border-radius: 12px;
   padding: 8px 12px;
   flex: 1;
-  max-width: 250px;
+  max-width: 280px;
   font-family: inherit;
   text-align: center;
   margin-top: 25px;
@@ -398,12 +398,13 @@ background: #fff5f5;
   font-size: 12px;
   color: #a0aec0;
   margin-top: 8px;
-  text-align: right;
+  text-align: left;
 }
 .name-input-with-count {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
+  
 }
 
 /* ========================

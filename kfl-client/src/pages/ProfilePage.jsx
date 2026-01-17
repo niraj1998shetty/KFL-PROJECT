@@ -174,7 +174,7 @@ const ProfilePage = () => {
                         autoFocus
                       />
                       <p className="char-count">
-                        {25 - formData.name.length}/25 characters
+                        {formData.name.length}/25 characters
                       </p>
                     </div>
                     {/* <div className="inline-edit-actions"> */}
