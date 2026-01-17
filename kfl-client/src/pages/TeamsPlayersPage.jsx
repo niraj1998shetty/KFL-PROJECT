@@ -4,6 +4,16 @@ import axios from "axios";
 import TeamCard from "../components/TeamCard";
 import PlayerCard from "../components/PlayerCard";
 import TopBar from "../components/TopBar";
+import cskLogo from "../assets/csk-logo.png";
+import miLogo from "../assets/mi-logo.png";
+import rcbLogo from "../assets/rcb-logo.png";
+import srhLogo from "../assets/srh-logo.png";
+import kkrLogo from "../assets/kkr-logo.png";
+import dcLogo from "../assets/dc-logo.png";
+import pbksLogo from "../assets/pbks-logo.png";
+import rrLogo from "../assets/rr-logo.png";
+import gtLogo from "../assets/gt-logo.png";
+import lsgLogo from "../assets/lsg-logo.png";
 
 const TeamsPlayersPage = () => {
   const [teams, setTeams] = useState([]);
@@ -171,6 +181,23 @@ const TeamsPlayersPage = () => {
     return teamColors[code] || "from-gray-500 to-gray-700";
   };
 
+  // Get team logo
+  const getTeamLogo = (code) => {
+    const teamLogos = {
+      CSK: cskLogo,
+      MI: miLogo,
+      RCB: rcbLogo,
+      SRH: srhLogo,
+      KKR: kkrLogo,
+      DC: dcLogo,
+      PBKS: pbksLogo,
+      RR: rrLogo,
+      GT: gtLogo,
+      LSG: lsgLogo,
+    };
+    return teamLogos[code] || null;
+  };
+
   if (teamsLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -183,33 +210,25 @@ const TeamsPlayersPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-16 md:pb-4">
+    <div className="h-full bg-gray-100 flex flex-col">
       <TopBar
         pageTitle={selectedTeam ? selectedTeam.name : "Teams & Players"}
         showBackButton={selectedTeam !== null}
         onBackClick={selectedTeam ? handleBackToTeams : null}
       />
 
-      <div className="pt-5 px-4 md:px-6 max-w-7xl mx-auto">
-        {/* Teams View */}
-        <AnimatePresence mode="wait">
-          {!selectedTeam ? (
-            <motion.div
-              key="teams-view"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* <div className="mb-8">
-                <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-gray-800 mb-2">
-                  Teams
-                </h1>
-                <p className="text-gray-600">
-                  Select a team to view its players
-                </p>
-              </div> */}
-
+      {/* Teams View */}
+      <AnimatePresence mode="wait">
+        {!selectedTeam ? (
+          <motion.div
+            key="teams-view"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="flex-1 overflow-y-auto pt-5 px-4 md:px-6 pb-4"
+          >
+            <div className="max-w-7xl mx-auto">
               {error && (
                 <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                   {error}
@@ -238,124 +257,141 @@ const TeamsPlayersPage = () => {
                   ))}
                 </div>
               )}
-            </motion.div>
-          ) : (
-            // Players View
-            <motion.div
-              key="players-view"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="mb-8">
-                <div className="mb-4">
-                  {/* Title */}
-                  <span className="block text-gray-700 font-medium mb-2">
-                    Filter by Role:
-                  </span>
-
-                  {/* Dropdown + count */}
-                  <div className="flex items-center gap-4">
-                    <div className="relative" ref={roleDropdownRef}>
-                      <button
-                        onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 rounded-lg hover:border-gray-400 transition-colors min-w-[180px] justify-between"
-                      >
-                        <span className="text-gray-700 font-medium">
-                          {selectedRole}
-                        </span>
-                        <svg
-                          className={`w-5 h-5 transition-transform ${
-                            showRoleDropdown ? "rotate-180" : ""
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                      </button>
-
-                      {showRoleDropdown && (
-                        <div className="absolute top-full mt-2 w-full bg-white border-2 border-gray-300 rounded-lg shadow-lg z-10 overflow-hidden">
-                          {roles.map((role) => (
-                            <button
-                              key={role}
-                              onClick={() => {
-                                setSelectedRole(role);
-                                setShowRoleDropdown(false);
-                              }}
-                              className={`w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors ${
-                                selectedRole === role
-                                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                                  : "text-gray-700"
-                              }`}
-                            >
-                              {role}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <span className="text-gray-600">
-                      {filteredPlayers.length}{" "}
-                      {filteredPlayers.length === 1 ? "player" : "players"}
-                    </span>
-                  </div>
-                </div>
+            </div>
+          </motion.div>
+        ) : (
+          // Players View with Sticky Filter
+          <motion.div
+            key="players-view"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="flex-1 flex flex-col overflow-y-auto relative"
+          >
+            {/* Team Logo Background Watermark */}
+            {selectedTeam && getTeamLogo(selectedTeam.code) && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+                <img
+                  src={getTeamLogo(selectedTeam.code)}
+                  alt={`${selectedTeam.name} logo`}
+                  className="w-[600px] h-[600px] md:w-[800px] md:h-[800px] object-contain opacity-[0.15] select-none"
+                  style={{
+                    filter: 'grayscale(5%)',
+                  }}
+                />
               </div>
+            )}
 
-              {playersError && (
-                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                  {playersError}
+            {/* Sticky Filter Section */}
+            <div className="sticky top-0 flex-shrink-0 bg-gray-100/95 backdrop-blur-sm px-4 md:px-6 py-3 border-b border-gray-200 relative z-50">
+              <div className="max-w-7xl mx-auto flex items-center gap-3 md:gap-4">
+                <span className="text-sm md:text-base text-gray-700 font-medium whitespace-nowrap">
+                  Filter:
+                </span>
+
+                <div className="relative" ref={roleDropdownRef}>
+                  <button
+                    onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                    className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-white border-2 border-gray-300 rounded-lg hover:border-gray-400 transition-colors min-w-[120px] md:min-w-[180px] justify-between text-sm md:text-base"
+                  >
+                    <span className="text-gray-700 font-medium">
+                      {selectedRole}
+                    </span>
+                    <svg
+                      className={`w-4 h-4 md:w-5 md:h-5 transition-transform ${
+                        showRoleDropdown ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {showRoleDropdown && (
+                    <div className="absolute top-full mt-2 w-full bg-white border-2 border-gray-300 rounded-lg shadow-lg z-100 overflow-hidden">
+                      {roles.map((role) => (
+                        <button
+                          key={role}
+                          onClick={() => {
+                            setSelectedRole(role);
+                            setShowRoleDropdown(false);
+                          }}
+                          className={`w-full px-3 md:px-4 py-2 md:py-3 text-left text-sm md:text-base hover:bg-blue-50 transition-colors ${
+                            selectedRole === role
+                              ? "bg-blue-500 text-white hover:bg-blue-600"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {role}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {playersLoading ? (
-                <div className="flex justify-center py-20">
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
-                    <p className="text-gray-600 font-semibold">
-                      Loading players...
+                <span className="text-sm md:text-base text-gray-600 whitespace-nowrap">
+                  {filteredPlayers.length}{" "}
+                  {filteredPlayers.length === 1 ? "player" : "players"}
+                </span>
+              </div>
+            </div>
+
+            {/* Scrollable Players Content */}
+            <div className="px-4 md:px-6 pt-5 pb-4 relative z-10">
+              <div className="max-w-7xl mx-auto">
+                {playersError && (
+                  <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    {playersError}
+                  </div>
+                )}
+
+                {playersLoading ? (
+                  <div className="flex justify-center py-20">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+                      <p className="text-gray-600 font-semibold">
+                        Loading players...
+                      </p>
+                    </div>
+                  </div>
+                ) : filteredPlayers.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20">
+                    <div className="text-6xl mb-4">👥</div>
+                    <h2 className="text-lg sm:text-2xl font-semibold text-gray-700 mb-2">
+                      No Players Found
+                    </h2>
+                    <p className="text-gray-600">
+                      {selectedRole === "All"
+                        ? "No players are currently assigned to this team."
+                        : `No ${selectedRole} players found in this team.`}
                     </p>
                   </div>
-                </div>
-              ) : filteredPlayers.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20">
-                  <div className="text-6xl mb-4">👥</div>
-                  <h2 className="text-lg sm:text-2xl font-semibold text-gray-700 mb-2">
-                    No Players Found
-                  </h2>
-                  <p className="text-gray-600">
-                    {selectedRole === "All"
-                      ? "No players are currently assigned to this team."
-                      : `No ${selectedRole} players found in this team.`}
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {filteredPlayers.map((player, index) => (
-                    <PlayerCard
-                      key={player._id || index}
-                      player={player}
-                      team={selectedTeam}
-                      index={index}
-                      colorGradient={getTeamColor(selectedTeam.code)}
-                    />
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {filteredPlayers.map((player, index) => (
+                      <PlayerCard
+                        key={player._id || index}
+                        player={player}
+                        team={selectedTeam}
+                        index={index}
+                        colorGradient={getTeamColor(selectedTeam.code)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
