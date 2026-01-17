@@ -187,22 +187,23 @@ const ProfilePage = () => {
                       {formData.name.length}/25 characters
                     </p>
                   </div>
-                  {/* <div className="inline-edit-actions"> */}
-                  <button
-                    onClick={handleSaveField}
-                    disabled={isSaving}
-                    className="inline-action-btn save-btn"
-                    title="Save"
-                  >
-                    <Check size={16} />
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="inline-action-btn cancel-btn"
-                    title="Cancel"
-                  >
-                    <X size={16} />
-                  </button>
+                  <div className="inline-edit-actions">
+                    <button
+                      onClick={handleSaveField}
+                      disabled={isSaving}
+                      className="inline-action-btn save-btn"
+                      title="Save"
+                    >
+                      <Check size={16} />
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="inline-action-btn cancel-btn"
+                      title="Cancel"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
               ) : (
                 // </div>

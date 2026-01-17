@@ -36,7 +36,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -158,7 +159,6 @@
   /* max-width: 400px; */
   font-family: inherit;
   text-align: center;
-
 }
 
 .inline-edit-icon {
@@ -196,9 +196,7 @@
   font-weight: 600;
   cursor: pointer;
   /* transition: all 0.3s ease; */
-  transition: background-color 0.2s ease,
-      box-shadow 0.2s ease,
-      color 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
 }
 
 .inline-action-btn.save-btn {
@@ -246,7 +244,6 @@ background: #fff5f5;
   gap: 10px;
   width: 100%;
   justify-content: center;
-
 }
 
 .profile-input-name-inline {
@@ -273,6 +270,7 @@ background: #fff5f5;
 @media (max-width: 480px) {
   .inline-edit-wrapper-horizontal {
     gap: 8px;
+    margin-top: -25px;
   }
 
   .profile-input-name-inline {
@@ -285,7 +283,7 @@ background: #fff5f5;
     padding: 8px;
     min-width: auto;
   }
-  
+
   .inline-edit-wrapper-horizontal .inline-action-btn span {
     display: none;
   }
@@ -331,7 +329,11 @@ background: #fff5f5;
 }
 
 .recovery-code-card {
-  background: linear-gradient(135deg, #f7fafc 0%, rgba(102, 126, 234, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    #f7fafc 0%,
+    rgba(102, 126, 234, 0.05) 100%
+  );
   border-color: #667eea;
 }
 
@@ -404,7 +406,6 @@ background: #fff5f5;
   display: flex;
   flex-direction: column;
   align-items: left;
-  
 }
 
 /* ========================
@@ -675,7 +676,7 @@ background: #fff5f5;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  color: white;
+  color: gray;
   font-size: 18px;
   font-weight: 600;
 }
@@ -760,16 +761,15 @@ background: #fff5f5;
     justify-content: center;
   }
 
- .inline-edit-actions {
-  width: auto;
-  justify-content: center;
- }
+  .inline-edit-actions {
+    width: auto;
+    justify-content: center;
+  }
 
- .inline-action-btn {
-  flex: 0;
-  padding: 8px;
-  min-width: 58px;
-  justify-content: center;
- }
- 
+  .inline-action-btn {
+    flex: 0;
+    padding: 8px;
+    min-width: 58px;
+    justify-content: center;
+  }
 }
