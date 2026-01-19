@@ -46,6 +46,7 @@ const MatchResultsPage = () => {
       const result = match.result?.toLowerCase() || '';
       const manOfTheMatch = match.manOfTheMatch?.toLowerCase() || '';
       const date = match.date?.toLowerCase() || '';
+      const noResult = match.result?.noResult ? 'no result' : '';
       
       return (
         matchNo.includes(query) ||
@@ -54,7 +55,8 @@ const MatchResultsPage = () => {
         venue.includes(query) ||
         result.includes(query) ||
         manOfTheMatch.includes(query) ||
-        date.includes(query)
+        date.includes(query) ||
+        noResult.includes(query)
       );
     });
   };
