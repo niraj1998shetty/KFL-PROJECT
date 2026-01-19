@@ -32,6 +32,29 @@ const TeamsPlayersPage = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   const roles = ["All", "Batter", "Bowler", "All-Rounder", "Wk-Batter"];
+
+  // Sort players by role: Batter -> Wk-Batter -> All-Rounder -> Bowler -> No Role
+  const sortPlayersByRole = (playersToSort) => {
+    const roleOrder = {
+      "Batter": 1,
+      "Wk-Batter": 2,
+      "All-Rounder": 3,
+      "Bowler": 4,
+    };
+
+    return playersToSort.sort((a, b) => {
+      const roleA = roleOrder[a.role] || 5;
+      const roleB = roleOrder[b.role] || 5;
+      
+      if (roleA !== roleB) {
+        return roleA - roleB;
+      }
+      
+      // If roles are the same, sort by name
+      return a.name.localeCompare(b.name);
+    });
+  };
+
   // Extract unique teams from players data
   useEffect(() => {
     const fetchTeams = async () => {
@@ -98,13 +121,16 @@ const TeamsPlayersPage = () => {
 
 
   useEffect(() => {
+    let filtered;
     if (selectedRole === "All") {
-      setFilteredPlayers(players);
+      filtered = [...players];
     } else {
-      setFilteredPlayers(
-        players.filter((player) => player.role === selectedRole)
-      );
+      filtered = players.filter((player) => player.role === selectedRole);
     }
+    
+    // Sort players by role
+    const sorted = sortPlayersByRole(filtered);
+    setFilteredPlayers(sorted);
   }, [selectedRole, players]);
 
   // Fetch players for selected team
@@ -124,9 +150,7 @@ const TeamsPlayersPage = () => {
         }
       );
 
-      const sortedPlayers = response.data.sort((a, b) =>
-        a.name.localeCompare(b.name)
-      );
+      const sortedPlayers = sortPlayersByRole(response.data);
 
       setPlayers(sortedPlayers);
       setPlayersLoading(false);
