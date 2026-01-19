@@ -28,7 +28,7 @@ const UserStatsCard = ({ userData, loading }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white shadow-md rounded-lg overflow-hidden"
+      className="bg-white shadow-md rounded-lg overflow-hidden p-0 sm:pb-4"
     >
       <div className="p-4 bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
         <h2 className="text-sm font-semibold">Your Accuracy</h2>
