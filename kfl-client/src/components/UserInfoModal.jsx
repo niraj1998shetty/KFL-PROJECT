@@ -2,15 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { capitalizeFirstLetter } from "../helpers/functions";
 
-const UserInfoModal = ({
-  isOpen,
-  onClose,
-  userId,
-  userName,
-  userMobile,
-  userPoints,
-  userWeekPoints,
-}) => {
+const UserInfoModal = ({ isOpen, onClose, userId, userName, userMobile }) => {
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +20,7 @@ const UserInfoModal = ({
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        `${API_URL}/predictions/user_stats/${userId}`,
+        `${API_URL}/predictions/user-stats/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
