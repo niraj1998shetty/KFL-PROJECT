@@ -1,0 +1,116 @@
+.mention-modal {
+  position: absolute;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  min-width: 250px;
+  max-width: 300px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.mention-modal-header {
+  padding: 10px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #f9f9f9;
+}
+
+.mention-modal-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mention-modal-content {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.mention-user-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.mention-user-item:hover {
+  background-color: #f5f5f5;
+}
+
+.mention-user-item:last-child {
+  border-bottom: none;
+}
+
+.mention-user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.mention-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mention-user-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mention-user-mobile {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mention-no-results {
+  padding: 20px 15px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
+/* Scrollbar styling */
+.mention-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mention-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mention-modal-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.mention-modal-content::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

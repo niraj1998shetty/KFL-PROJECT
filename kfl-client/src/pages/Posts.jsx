@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import axios from "axios";
 import TopBar from "../components/TopBar";
 import ReactionUsersModal from "../components/ReactionUsersModal";
+import MentionModal from "../components/MentionModal";
 import {
   getFirstName,
   capitalizeFirstLetter,
@@ -45,17 +46,25 @@ const Posts = () => {
   const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null, postId: null });
   const [longPressTimer, setLongPressTimer] = useState(null);
 
-  
+  // Mention feature states
+  const [allUsers, setAllUsers] = useState([]);
+  const [showMentionModal, setShowMentionModal] = useState(false);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [mentionSearchQuery, setMentionSearchQuery] = useState("");
+  const [mentionModalPosition, setMentionModalPosition] = useState({ top: 0, left: 0 });
+  const textInputRef = useRef(null);
 
   // New refs for click outside detection
   const dropdownRef = useRef(null);
   const reactionButtonsRef = useRef(null);
+  const mentionModalRef = useRef(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     fetchPosts();
     fetchUnreadPostsCount();
+    fetchAllUsers();
   }, []);
 
   // Separate useEffect for event listeners to avoid unnecessary re-renders
@@ -64,6 +73,11 @@ const Posts = () => {
       // Don't close anything if clicking on reaction modal
       if (event.target.closest('[data-reaction-modal]')) {
         return;
+      }
+
+      // Handle closing mention modal
+      if (mentionModalRef.current && !mentionModalRef.current.contains(event.target)) {
+        setShowMentionModal(false);
       }
       
       // Handle closing emoji picker
@@ -112,6 +126,9 @@ const Posts = () => {
     };
   }, [activeReactionPost, activeDropdownId, longPressTimer]);
 
+  useEffect(() => {
+  }, [allUsers]);
+
   const fetchPosts = async () => {
     try {
       setLoading(true);
@@ -135,8 +152,116 @@ const Posts = () => {
         detail: { count: 0 } 
       }));
     } catch (error) {
-      console.error("Error fetching posts:", error);
       setLoading(false);
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    try {
+      const url = `${API_URL}/auth/allUsers`;
+      const token = localStorage.getItem('token');
+      
+      
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Handle both array and object responses
+      let users = [];
+      if (Array.isArray(response.data)) {
+        users = response.data;
+      } else if (response.data && typeof response.data === 'object') {
+        users = response.data.users || [];
+      }
+      
+      setAllUsers(users);
+    } catch (error) {
+      console.error("Error data:", error.response?.data);
+      setAllUsers([]);
+    }
+  };
+
+  const handleMentionInput = (e) => {
+    const value = e.target.value;
+    setNewPostContent(value);
+
+    // Get the textarea element and its properties
+    const textarea = e.target;
+    const cursorPos = textarea.selectionStart;
+    
+    // Get text from last @ symbol to current cursor position
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex !== -1) {
+      // Check if @ is preceded by a space or at the start (avoid matching email addresses)
+      const charBeforeAt = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
+      if (charBeforeAt === ' ' || charBeforeAt === '\n' || lastAtIndex === 0) {
+        const searchQuery = textBeforeCursor.substring(lastAtIndex + 1);
+        
+        // Show modal if @ is just typed or there's no space after it
+        if (!searchQuery.includes(' ')) {
+          setMentionSearchQuery(searchQuery);
+          
+          // Filter users based on search query (show all if query is empty)
+          let filtered = allUsers;
+          if (searchQuery.length > 0) {
+            filtered = allUsers.filter(user =>
+              user.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+          }
+          setFilteredUsers(filtered);
+          
+          // Calculate modal position relative to the textarea
+          const rect = textarea.getBoundingClientRect();
+          const containerRect = textarea.parentElement.getBoundingClientRect();
+          
+          // Calculate line number where cursor is
+          const lines = textBeforeCursor.split('\n').length - 1;
+          const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 24;
+          const paddingTop = parseInt(window.getComputedStyle(textarea).paddingTop) || 12;
+          
+          const top = paddingTop + (lines * lineHeight) + 30;
+          const left = 12;
+          
+          setMentionModalPosition({ top, left });
+          setShowMentionModal(true);
+        } else {
+          setShowMentionModal(false);
+        }
+      } else {
+        setShowMentionModal(false);
+      }
+    } else {
+      setShowMentionModal(false);
+    }
+  };
+
+  const handleSelectMentionedUser = (user) => {
+    const value = newPostContent;
+    const textarea = textInputRef.current;
+    const cursorPos = textarea?.selectionStart || value.length;
+
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex !== -1) {
+      // Replace from @ to cursor with @username
+      const beforeAt = value.substring(0, lastAtIndex);
+      const afterCursor = value.substring(cursorPos);
+      const newContent = `${beforeAt}@${user.name} ${afterCursor}`;
+      
+      setNewPostContent(newContent);
+      setShowMentionModal(false);
+      
+      // Restore focus and set cursor position after the mention
+      if (textarea) {
+        setTimeout(() => {
+          textarea.focus();
+          const newCursorPos = beforeAt.length + user.name.length + 2; // @username + space
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+        }, 0);
+      }
     }
   };
     
@@ -195,7 +320,6 @@ const Posts = () => {
       setShowCreatePost(false);
       fetchPosts();
     } catch (error) {
-      console.error("Error creating post:", error);
       setError(error.response?.data?.message || "Failed to create post");
     }
   };
@@ -221,7 +345,6 @@ const Posts = () => {
       setEditContent("");
       fetchPosts();
     } catch (error) {
-      console.error("Error updating post:", error);
       setError(error.response?.data?.message || "Failed to update post");
     }
   };
@@ -239,7 +362,6 @@ const Posts = () => {
       // Close dropdown after action
       setActiveDropdownId(null);
     } catch (error) {
-      console.error("Error deleting post:", error);
       setError(error.response?.data?.message || "Failed to delete post");
     }
   };
@@ -540,7 +662,7 @@ const Posts = () => {
 
           {/* Create Post Form */}
           {showCreatePost && (
-            <div className="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
+            <div className="bg-white rounded-lg shadow-md mb-6 overflow-visible">
               <div className="p-4 border-b">
                 <h2 className="text-lg font-semibold text-gray-800">
                   Create Post
@@ -554,12 +676,26 @@ const Posts = () => {
                   </div>
                 )}
 
-                <textarea
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                  placeholder="What's on your mind? Use @ to tag others"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 min-h-[120px]"
-                />
+                <div className="relative overflow-visible">
+                  <textarea
+                    ref={textInputRef}
+                    value={newPostContent}
+                    onChange={handleMentionInput}
+                    placeholder="What's on your mind? Use @ to tag others"
+                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 min-h-[120px]"
+                  />
+
+                  {/* Mention Modal */}
+                  <div ref={mentionModalRef} className="overflow-visible">
+                    <MentionModal
+                      users={filteredUsers}
+                      onSelectUser={handleSelectMentionedUser}
+                      isOpen={showMentionModal}
+                      position={mentionModalPosition}
+                      searchQuery={mentionSearchQuery}
+                    />
+                  </div>
+                </div>
 
                 {/* Poll toggle */}
                 {/* <div className="flex items-center mb-4">
