@@ -66,14 +66,22 @@ const PredictionStats = () => {
     }
   };
 
-  const handleUserClick = (user) => {
-    setSelectedUser({
-      id: user.id,
-      name: user.name,
-      mobile: user.mobile,
-    });
-    setIsUserInfoModalOpen(true);
-  };
+const handleUserClick = (user) => {
+  setSelectedUser({
+    id: user.id,
+    name: user.name,
+    mobile: user.mobile,
+    totalPoints: user.totalPoints,
+    correctPredictions: user.correctPredictions,
+    accuracy: user.accuracy,
+    correctPotmPredictions: user.correctPotmPredictions,
+    bothCorrectPredictions: user.bothCorrectPredictions,
+    noPredictionCount: user.noPredictionCount,
+  });
+  setIsUserInfoModalOpen(true);
+  
+};
+
 
   const fetchUserSpecificStats = async () => {
     try {
@@ -537,9 +545,7 @@ const PredictionStats = () => {
         <UserInfoModal
           isOpen={isUserInfoModalOpen}
           onClose={() => setIsUserInfoModalOpen(false)}
-          userId={selectedUser?.id}
-          userName={selectedUser?.name}
-          userMobile={selectedUser?.mobile}
+          user={selectedUser}
         />
       </main>
     </>

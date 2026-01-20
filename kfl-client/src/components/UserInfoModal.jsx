@@ -2,37 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { capitalizeFirstLetter } from "../helpers/functions";
 
-const UserInfoModal = ({ isOpen, onClose, userId, userName, userMobile }) => {
-  const [userStats, setUserStats] = useState(null);
-  const [loading, setLoading] = useState(false);
+const UserInfoModal = ({ isOpen, onClose, user }) => {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-  useEffect(() => {
-    if (isOpen && userId) {
-      fetchUserStats();
-    }
-  }, [isOpen, userId]);
+ 
 
-  const fetchUserStats = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-
-      const response = await axios.get(
-        `${API_URL}/predictions/user-stats/${userId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setUserStats(response.data.userStats);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching user stats:", error);
-      setLoading(false);
-    }
-  };
+ 
 
   if (!isOpen) return null;
 
@@ -43,9 +19,9 @@ const UserInfoModal = ({ isOpen, onClose, userId, userName, userMobile }) => {
         onClick={onClose}
       ></div>
 
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 z-10 relative">
+      <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 z-10 relative">
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-t-lg relative">
+        <div className="p-4 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-t-lg relative">
           <h2 className="text-lg font-semibold">User Information</h2>
           <button
             onClick={onClose}
@@ -69,72 +45,62 @@ const UserInfoModal = ({ isOpen, onClose, userId, userName, userMobile }) => {
 
         {/* Content */}
         <div className="p-6">
-          {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-indigo-600 rounded-full"></div>
-            </div>
-          ) : userStats ? (
+          {user ? (
             <>
               {/* User Avatar and Name */}
               <div className="flex items-center mb-6">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
-                  {userName ? userName.charAt(0).toUpperCase() : "U"}
+                <div className="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-600 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
+                  {user?.name?.charAt(0).toUpperCase()}
                 </div>
                 <div className="ml-4">
                   <h3 className="text-xl font-semibold text-gray-900">
-                    {capitalizeFirstLetter(userName || "User")}
+                    {capitalizeFirstLetter(user.name)}
                   </h3>
                   <p className="text-sm text-gray-500">User Profile</p>
                 </div>
               </div>
-
               {/* Stats Grid */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
+              <div className="space-y-3">
+                <div className="flex justify-between py-2">
                   <span className="text-sm font-medium text-gray-600">
                     Mobile Number:
                   </span>
                   <span className="text-sm text-gray-900">
-                    {userMobile || userStats.mobile || "N/A"}
+                    {user.mobile ?? "-"}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">
-                    Total Points:
-                  </span>
-                  <span className="text-sm font-semibold text-blue-600">
-                    {userStats.totalPoints || 0}
+                <div className="flex justify-between py-2">
+                  <span>Total Points:</span>
+                  <span className="text-sm font-semibold text-purple-600">
+                    {user.totalPoints ?? "-"}
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">
-                    Week Points:
-                  </span>
-                  <span className="text-sm text-gray-900">
-                    {userStats.weekPoints || 0}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center py-3 border-b border-gray-200">
-                  <span className="text-sm font-medium text-gray-600">
-                    Correct Predictions:
-                  </span>
-                  <span className="text-sm text-gray-900">
-                    {userStats.correctPredictions || 0}
+                <div className="flex justify-between py-2">
+                  <span>Team Win:</span>
+                  <span>
+                    {user.correctPredictions ?? "-"} (
+                    {user.accuracy != null
+                      ? `${user.accuracy.toFixed(1)}%`
+                      : "-"}
+                    )
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center py-3">
-                  <span className="text-sm font-medium text-gray-600">
-                    Accuracy:
-                  </span>
-                  <span className="text-sm text-gray-900">
-                    {userStats.accuracy
-                      ? `${userStats.accuracy.toFixed(1)}%`
-                      : "0%"}
-                  </span>
+                <div className="flex justify-between py-2">
+                  <span>POTM:</span>
+                  <span>{user.correctPotmPredictions ?? "-"}</span>
+                </div>
+
+                <div className="flex justify-between py-2">
+                  <span>Both:</span>
+                  <span>{user.bothCorrectPredictions ?? "-"}</span>
+                </div>
+
+                <div className="flex justify-between py-3">
+                  <span>No Prediction:</span>
+                  <span>{user.noPredictionCount ?? "-"}</span>
                 </div>
               </div>
             </>

@@ -31,14 +31,21 @@ const UsersPage = () => {
     }
   };
 
-  const handleUserClick = (user) => {
-  setSelectedUser({
-    id: user._id,
-    name: user.name,
-    mobile: user.mobile,
-  });
-  setIsUserInfoModalOpen(true);
-};
+ const handleUserClick = (user) => {
+   setSelectedUser({
+     id: user.id,
+     name: user.name,
+     mobile: user.mobile,
+     totalPoints: user.totalPoints,
+     correctPredictions: user.correctPredictions,
+     accuracy: user.accuracy,
+     correctPotmPredictions: user.correctPotmPredictions,
+     bothCorrectPredictions: user.bothCorrectPredictions,
+     noPredictionCount: user.noPredictionCount,
+   });
+   setIsUserInfoModalOpen(true);
+ };
+
 
   return (
     <main className="flex-grow bg-gray-100 py-4">
@@ -123,11 +130,10 @@ const UsersPage = () => {
           )}
         </div>
       </div>
-      <UserInfoModal isOpen={isUserInfoModalOpen}
-      onClose={() => setIsUserInfoModalOpen(false)}
-      userId={selectedUser?.id}
-      userName={selectedUser?.name}
-      userMobile={selectedUser?.mobile}
+      <UserInfoModal
+        isOpen={isUserInfoModalOpen}
+        onClose={() => setIsUserInfoModalOpen(false)}
+        user={selectedUser}
       />
     </main>
   );

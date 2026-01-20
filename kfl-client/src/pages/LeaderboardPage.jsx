@@ -70,16 +70,20 @@ const LeaderboardPage = () => {
       setLoading(false);
     }
   };
-  const handleUserClick = (user) => {
-    setSelectedUser({
-      id: user.id,
-      name: user.username,
-      mobile: user.mobile,
-      totalPoints: user.totalPoints,
-      weekPoints: user.weekPoints,
-    });
-    setIsUserInfoModalOpen(true);
-  };
+const handleUserClick = (user) => {
+  setSelectedUser({
+    id: user.id,
+    name: user.name,
+    mobile: user.mobile,
+    totalPoints: user.totalPoints,
+    correctPredictions: user.correctPredictions,
+    accuracy: user.accuracy,
+    correctPotmPredictions: user.correctPotmPredictions,
+    bothCorrectPredictions: user.bothCorrectPredictions,
+    noPredictionCount: user.noPredictionCount,
+  });
+  setIsUserInfoModalOpen(true);
+};
   const fetchAllMatches = async () => {
     try {
       const res = await axios.get(`${API_URL}/matches`, {
@@ -820,9 +824,7 @@ const LeaderboardPage = () => {
       <UserInfoModal
         isOpen={isUserInfoModalOpen}
         onClose={() => setIsUserInfoModalOpen(false)}
-        userId={selectedUser?._id}
-        userName={selectedUser?.name}
-        userMobile={selectedUser?.mobile}
+        user={selectedUser}
       />
     </>
   );
