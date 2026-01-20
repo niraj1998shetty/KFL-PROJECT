@@ -306,7 +306,7 @@ const ProfilePage = () => {
               <span>Password Recovery Code</span>
             </div>
             <p className="recovery-code-description">
-              Use this code to reset your password if you forget it. Keep it
+              Use this code to reset or change your password if you forget it or want to change it. Keep it
               safe and don't share it with anyone.
             </p>
             <div className="recovery-code-display">

@@ -9,7 +9,7 @@ const UserInfoModal = ({ isOpen, onClose, user, loading }) => {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 animate-fade-in">
         {/* Header with close button */}
         <div className="flex justify-between items-center p-5 border-b border-gray-200 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-t-lg">
-          <h2 className="text-xl font-semibold text-white">User Information</h2>
+          <h2 className="text-xl font-semibold text-white">User Info</h2>
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 transition-colors"
@@ -48,16 +48,11 @@ const UserInfoModal = ({ isOpen, onClose, user, loading }) => {
                 <h3 className="text-lg font-semibold text-gray-900">
                   {capitalizeFirstLetter(user.name)}
                 </h3>
-                <p className="text-sm text-gray-500">User Profile</p>
+                <p className="text-sm text-gray-500">{user.mobile || "N/A"}</p>
               </div>
             </div>
 
             <div className="border-t border-gray-200 pt-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">Mobile Number:</span>
-                <span className="text-sm text-gray-900">{user.mobile || "N/A"}</span>
-              </div>
-
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">Total Points:</span>
                 <span className="text-sm font-semibold text-indigo-600">{user.totalPoints || 0}</span>
@@ -86,14 +81,14 @@ const UserInfoModal = ({ isOpen, onClose, user, loading }) => {
         )}
 
         {/* Footer */}
-        <div className="p-4 bg-gray-50 rounded-b-lg flex justify-end">
+        {/* <div className="p-4 bg-gray-50 rounded-b-lg flex justify-end">
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 transition"
           >
             Close
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
