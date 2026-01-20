@@ -3,6 +3,8 @@ import axios from "axios";
 import { capitalizeFirstLetter } from "../helpers/functions";
 import { useAuth } from "../contexts/AuthContext";
 import UserInfoModal from "../components/UserInfoModal";
+import { fetchUserStats } from "../services/userService";
+
 
 
 
@@ -31,20 +33,21 @@ const UsersPage = () => {
     }
   };
 
- const handleUserClick = (user) => {
-   setSelectedUser({
-     id: user.id,
-     name: user.name,
-     mobile: user.mobile,
-     totalPoints: user.totalPoints,
-     correctPredictions: user.correctPredictions,
-     accuracy: user.accuracy,
-     correctPotmPredictions: user.correctPotmPredictions,
-     bothCorrectPredictions: user.bothCorrectPredictions,
-     noPredictionCount: user.noPredictionCount,
-   });
-   setIsUserInfoModalOpen(true);
- };
+const handleUserClick = async (user) => {
+  try {
+    setLoading(true);
+
+    const userStats = await fetchUserStats(user._id);
+
+    setSelectedUser(userStats);
+    setIsUserInfoModalOpen(true);
+  } catch (error) {
+    console.error("Failed to load user stats", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 
   return (
