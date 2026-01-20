@@ -42,7 +42,7 @@ const Posts = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [unreadPostsCount, setUnreadPostsCount] = useState(0);
   const [showReactionPopup, setShowReactionPopup] = useState(false);
-  const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null });
+  const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null, postId: null });
   const [longPressTimer, setLongPressTimer] = useState(null);
 
   
@@ -61,6 +61,11 @@ const Posts = () => {
   // Separate useEffect for event listeners to avoid unnecessary re-renders
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Don't close anything if clicking on reaction modal
+      if (event.target.closest('[data-reaction-modal]')) {
+        return;
+      }
+      
       // Handle closing emoji picker
       if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
         setShowEmojiPicker(false);
@@ -309,10 +314,38 @@ const Posts = () => {
     }
   };
 
-  const handleEmojiClick = (e, type, post) => {
+  const handleEmojiClick = (e, type, emoji, post) => {
     e.stopPropagation();
-    // Click should toggle the user's reaction
-    handleReact(post._id, type);
+    e.preventDefault();
+    // Click should show the modal with who reacted, not add reaction
+    const rect = e.currentTarget.getBoundingClientRect();
+    const users = post.reactionsByType && post.reactionsByType[type] 
+      ? post.reactionsByType[type] 
+      : [];
+    
+    // Get all users who reacted (for "All" tab)
+    const allUsers = [];
+    if (post.reactionsByType) {
+      Object.values(post.reactionsByType).forEach(userList => {
+        allUsers.push(...userList);
+      });
+    }
+    
+    // Calculate position - place below the emoji button
+    const position = {
+      x: Math.max(10, rect.left),
+      y: rect.bottom + 10
+    };
+    
+    setSelectedReaction({
+      emoji,
+      type,
+      users,
+      allUsers,
+      position,
+      postId: post._id
+    });
+    setShowReactionPopup(true);
   };
 
   const handleEmojiHover = (e, type, emoji, post) => {
@@ -376,14 +409,14 @@ const Posts = () => {
     setLongPressTimer(timer);
   };
 
-  const handleEmojiTouchEnd = (e, type, post) => {
+  const handleEmojiTouchEnd = (e, type, emoji, post) => {
     if (longPressTimer) {
       clearTimeout(longPressTimer);
       setLongPressTimer(null);
       
-      // If popup didn't show (short tap), trigger the reaction
+      // If popup didn't show (short tap), show the modal instead
       if (!showReactionPopup) {
-        handleEmojiClick(e, type, post);
+        handleEmojiClick(e, type, emoji, post);
       }
     }
   };
@@ -905,11 +938,11 @@ const Posts = () => {
                             post.reactionCounts[type] > 0 && (
                               <button
                                 key={type}
-                                onClick={(e) => handleEmojiClick(e, type, post)}
+                                onClick={(e) => handleEmojiClick(e, type, emoji, post)}
                                 onMouseEnter={(e) => handleEmojiHover(e, type, emoji, post)}
                                 onMouseLeave={handleEmojiLeave}
                                 onTouchStart={(e) => handleEmojiTouchStart(e, type, emoji, post)}
-                                onTouchEnd={(e) => handleEmojiTouchEnd(e, type, post)}
+                                onTouchEnd={(e) => handleEmojiTouchEnd(e, type, emoji, post)}
                                 className="flex items-center text-gray-500 text-xs hover:bg-gray-100 px-2 py-1 rounded-md transition-colors cursor-pointer"
                               >
                                 <span className="mr-1">{emoji}</span>
@@ -1071,6 +1104,9 @@ const Posts = () => {
         users={selectedReaction.users}
         allUsers={selectedReaction.allUsers}
         currentUserId={currentUser?._id}
+        reactionType={selectedReaction.type}
+        postId={selectedReaction.postId}
+        onRemoveReaction={handleReact}
       />
     </>
   );

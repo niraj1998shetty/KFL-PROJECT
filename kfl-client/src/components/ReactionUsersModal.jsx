@@ -1,9 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getFirstName } from '../helpers/functions';
 
-const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUserId, allUsers }) => {
+const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUserId, allUsers, reactionType, postId, onRemoveReaction }) => {
   const popupRef = useRef(null);
   const [adjustedPosition, setAdjustedPosition] = useState(position);
+
+  const handleRemoveReaction = async () => {
+    if (!postId || !reactionType || !onRemoveReaction) return;
+    
+    try {
+      // Call the parent's onRemoveReaction callback to handle the API call and UI update
+      await onRemoveReaction(postId, reactionType);
+      
+      // Small delay to ensure state updates are processed
+      setTimeout(() => {
+        onClose();
+      }, 100);
+    } catch (error) {
+      console.error("Error removing reaction:", error);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -12,54 +28,53 @@ const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUs
       }
     };
 
-    const handleScroll = () => {
-      // Close popup on any scroll
-      onClose();
-    };
-
-    const handleTouchMove = () => {
-      // Close popup on touch move (scrolling on mobile)
-      onClose();
-    };
-
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('scroll', handleScroll, true);
-      window.addEventListener('touchmove', handleTouchMove, { passive: true });
+      // Add a longer delay to prevent the opening click from immediately closing the modal
+      const timer = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', handleScroll, true);
-      window.removeEventListener('touchmove', handleTouchMove);
     };
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    if (isOpen && position && popupRef.current) {
-      const popup = popupRef.current;
-      const popupRect = popup.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      
-      let newX = position.x;
-      let newY = position.y;
-      
-      // Adjust horizontal position if out of bounds
-      if (newX + popupRect.width > viewportWidth - 10) {
-        newX = viewportWidth - popupRect.width - 10;
+    if (isOpen && position) {
+      // Set adjusted position immediately for faster rendering
+      setAdjustedPosition(position);
+
+      // Then adjust if needed after the component has rendered
+      if (popupRef.current) {
+        const popup = popupRef.current;
+        const popupRect = popup.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        
+        let newX = position.x;
+        let newY = position.y;
+        
+        // Adjust horizontal position if out of bounds
+        if (newX + popupRect.width > viewportWidth - 10) {
+          newX = viewportWidth - popupRect.width - 10;
+        }
+        if (newX < 10) {
+          newX = 10;
+        }
+        
+        // Adjust vertical position if out of bounds
+        if (newY - popupRect.height < 10) {
+          // Show below instead of above
+          newY = position.y + 40;
+        }
+        
+        setAdjustedPosition({ x: newX, y: newY });
       }
-      if (newX < 10) {
-        newX = 10;
-      }
-      
-      // Adjust vertical position if out of bounds
-      if (newY - popupRect.height < 10) {
-        // Show below instead of above
-        newY = position.y + 40;
-      }
-      
-      setAdjustedPosition({ x: newX, y: newY });
     }
   }, [isOpen, position]);
 
@@ -71,6 +86,8 @@ const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUs
   return (
     <div
       ref={popupRef}
+      onClick={(e) => e.stopPropagation()}
+      data-reaction-modal={true}
       className="fixed bg-white rounded-lg shadow-2xl border border-gray-200 z-50 w-[200px]"
       style={{
         left: `${finalPosition.x}px`,
@@ -107,7 +124,12 @@ const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUs
                       {user.userId === currentUserId ? 'You' : user.username}
                     </p>
                     {user.userId === currentUserId && (
-                      <p className="text-[10px] text-gray-500">Click to remove</p>
+                      <button
+                        onClick={handleRemoveReaction}
+                        className="text-[10px] text-gray-500 hover:text-red-600 hover:underline cursor-pointer transition-colors"
+                      >
+                        Click to remove
+                      </button>
                     )}
                   </div>
                 </div>
