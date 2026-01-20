@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import axios from "axios";
 import TopBar from "../components/TopBar";
+import ReactionUsersModal from "../components/ReactionUsersModal";
 import {
   getFirstName,
   capitalizeFirstLetter,
@@ -40,6 +41,9 @@ const Posts = () => {
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [unreadPostsCount, setUnreadPostsCount] = useState(0);
+  const [showReactionPopup, setShowReactionPopup] = useState(false);
+  const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null });
+  const [longPressTimer, setLongPressTimer] = useState(null);
 
   
 
@@ -84,14 +88,24 @@ const Posts = () => {
         setActiveDropdownId(null);
       }
     };
+
+    const handleScroll = () => {
+      // Clear long press timer on scroll
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+      }
+    };
     
     document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
     
     // Clean up event listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
     };
-  }, [activeReactionPost, activeDropdownId]);
+  }, [activeReactionPost, activeDropdownId, longPressTimer]);
 
   const fetchPosts = async () => {
     try {
@@ -242,6 +256,7 @@ const Posts = () => {
             ? {
                 ...post,
                 reactionCounts: response.data.reactionCounts,
+                reactionsByType: response.data.reactionsByType,
                 userReactions: response.data.userReactions
               }
             : post
@@ -291,6 +306,85 @@ const Posts = () => {
       );
     } catch (error) {
       console.error("Error voting on poll:", error);
+    }
+  };
+
+  const handleEmojiClick = (e, type, post) => {
+    e.stopPropagation();
+    // Click should toggle the user's reaction
+    handleReact(post._id, type);
+  };
+
+  const handleEmojiHover = (e, type, emoji, post) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const users = post.reactionsByType && post.reactionsByType[type] 
+      ? post.reactionsByType[type] 
+      : [];
+    
+    // Get all users who reacted (for "All" tab)
+    const allUsers = [];
+    if (post.reactionsByType) {
+      Object.values(post.reactionsByType).forEach(userList => {
+        allUsers.push(...userList);
+      });
+    }
+    
+    setSelectedReaction({
+      emoji,
+      type,
+      users,
+      allUsers,
+      position: {
+        x: rect.left + (rect.width / 2) - 100, // Center the popup (200px width / 2)
+        y: rect.top
+      }
+    });
+    setShowReactionPopup(true);
+  };
+
+  const handleEmojiLeave = () => {
+    setShowReactionPopup(false);
+  };
+
+  const handleEmojiTouchStart = (e, type, emoji, post) => {
+    const timer = setTimeout(() => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const users = post.reactionsByType && post.reactionsByType[type] 
+        ? post.reactionsByType[type] 
+        : [];
+      
+      const allUsers = [];
+      if (post.reactionsByType) {
+        Object.values(post.reactionsByType).forEach(userList => {
+          allUsers.push(...userList);
+        });
+      }
+      
+      setSelectedReaction({
+        emoji,
+        type,
+        users,
+        allUsers,
+        position: {
+          x: rect.left + (rect.width / 2) - 100, // Center the popup (200px width / 2)
+          y: rect.top
+        }
+      });
+      setShowReactionPopup(true);
+    }, 500); // 500ms long press
+    
+    setLongPressTimer(timer);
+  };
+
+  const handleEmojiTouchEnd = (e, type, post) => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+      
+      // If popup didn't show (short tap), trigger the reaction
+      if (!showReactionPopup) {
+        handleEmojiClick(e, type, post);
+      }
     }
   };
 
@@ -809,13 +903,18 @@ const Posts = () => {
                         {Object.entries(reactionEmojis).map(
                           ([type, emoji]) =>
                             post.reactionCounts[type] > 0 && (
-                              <div
+                              <button
                                 key={type}
-                                className="flex items-center text-gray-500 text-xs"
+                                onClick={(e) => handleEmojiClick(e, type, post)}
+                                onMouseEnter={(e) => handleEmojiHover(e, type, emoji, post)}
+                                onMouseLeave={handleEmojiLeave}
+                                onTouchStart={(e) => handleEmojiTouchStart(e, type, emoji, post)}
+                                onTouchEnd={(e) => handleEmojiTouchEnd(e, type, post)}
+                                className="flex items-center text-gray-500 text-xs hover:bg-gray-100 px-2 py-1 rounded-md transition-colors cursor-pointer"
                               >
                                 <span className="mr-1">{emoji}</span>
                                 <span>{post.reactionCounts[type]}</span>
-                              </div>
+                              </button>
                             )
                         )}
                       </div>
@@ -962,6 +1061,17 @@ const Posts = () => {
           </div>
         </div>
       </main>
+      
+      {/* Reaction Users Popup */}
+      <ReactionUsersModal 
+        isOpen={showReactionPopup}
+        onClose={() => setShowReactionPopup(false)}
+        emoji={selectedReaction.emoji}
+        position={selectedReaction.position}
+        users={selectedReaction.users}
+        allUsers={selectedReaction.allUsers}
+        currentUserId={currentUser?._id}
+      />
     </>
   );
 };
