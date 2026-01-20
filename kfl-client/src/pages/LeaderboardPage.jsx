@@ -4,8 +4,7 @@ import TopBar from "../components/TopBar";
 import WeekPointsModal from "../components/WeekPointsModal";
 import axios from "axios";
 import { capitalizeFirstLetter } from "../helpers/functions";
-
-
+import UserInfoModal from "../components/UserInfoModal";
 
 const LeaderboardPage = () => {
   const { currentUser } = useAuth();
@@ -19,6 +18,8 @@ const LeaderboardPage = () => {
   const [updateSuccess, setUpdateSuccess] = useState("");
   const [matches, setMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [isUserInfoModalOpen, setIsUserInfoModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [players, setPlayers] = useState([]);
   const [userPredictions, setUserPredictions] = useState([]);
   const [processingUpdate, setProcessingUpdate] = useState(false);
@@ -69,7 +70,16 @@ const LeaderboardPage = () => {
       setLoading(false);
     }
   };
-
+  const handleUserClick = (user) => {
+    setSelectedUser({
+      id: user.id,
+      name: user.username,
+      mobile: user.mobile,
+      totalPoints: user.totalPoints,
+      weekPoints: user.weekPoints,
+    });
+    setIsUserInfoModalOpen(true);
+  };
   const fetchAllMatches = async () => {
     try {
       const res = await axios.get(`${API_URL}/matches`, {
@@ -412,7 +422,6 @@ const LeaderboardPage = () => {
   return (
     <>
       <TopBar />
-
       <main className="flex-grow bg-gray-100 py-4">
         <div className="max-w-6xl mx-auto px-4">
           <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
@@ -494,7 +503,10 @@ const LeaderboardPage = () => {
                                 </div>
                               </td>
                               <td className="px-4 sm:px-6 py-4">
-                                <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
+                                <div
+                                  className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none cursor-pointer hover:text-indigo-600 transition-colors"
+                                  onClick={() => handleUserClick(entry)}
+                                >
                                   {capitalizeFirstLetter(entry.username)}
                                   {isCurrentUser && (
                                     <span className="ml-1 text-purple-600 font-semibold">
@@ -529,7 +541,6 @@ const LeaderboardPage = () => {
           </div>
         </div>
       </main>
-
       <WeekPointsModal
         isOpen={isWeekPointsModalOpen}
         onClose={() => setIsWeekPointsModalOpen(false)}
@@ -806,6 +817,13 @@ const LeaderboardPage = () => {
           </div>
         </div>
       )}
+      <UserInfoModal
+        isOpen={isUserInfoModalOpen}
+        onClose={() => setIsUserInfoModalOpen(false)}
+        userId={selectedUser?._id}
+        userName={selectedUser?.name}
+        userMobile={selectedUser?.mobile}
+      />
     </>
   );
 };

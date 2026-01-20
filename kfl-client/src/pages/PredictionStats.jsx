@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import TopBar from "../components/TopBar";
 import UserStatsCard from "../components/UserStatsCard";
 import RecentPerformanceCard from "../components/RecentPerformanceCard";
-import { capitalizeFirstLetter ,getFirstName} from "../helpers/functions";
-
+import { capitalizeFirstLetter, getFirstName } from "../helpers/functions";
+import UserInfoModal from "../components/UserInfoModal";
 
 const PredictionStats = () => {
   const { currentUser } = useAuth();
@@ -17,12 +17,13 @@ const PredictionStats = () => {
   // Sorting states
   const [sortField, setSortField] = useState("totalPoints");
   const [sortDirection, setSortDirection] = useState("desc");
-  
+  const [isUserInfoModalOpen, setIsUserInfoModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   // User specific stats
   const [currentUserStats, setCurrentUserStats] = useState(null);
   const [recentPerformance, setRecentPerformance] = useState([]);
   const [userStatsLoading, setUserStatsLoading] = useState(true);
-  
+
   // Initialize with empty values
   const [extraStats, setExtraStats] = useState({
     highestWeeklyScore: "",
@@ -32,7 +33,7 @@ const PredictionStats = () => {
     highestPlusPoints: "",
     highestMinusPoints: "",
   });
-  const [editableStats, setEditableStats] = useState({...extraStats});
+  const [editableStats, setEditableStats] = useState({ ...extraStats });
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -45,19 +46,19 @@ const PredictionStats = () => {
   const fetchStatsData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       // Use the optimized endpoint that returns all necessary data in one call
       const response = await axios.get(`${API_URL}/predictions/stats`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       // Set the stats data
       setStatsData(response.data.statsData);
-      
+
       // Set completed matches count
       setCompletedMatches(response.data.completedMatchesCount);
-      
+
       setLoading(false);
     } catch (error) {
       console.error("Error fetching stats data:", error);
@@ -65,23 +66,38 @@ const PredictionStats = () => {
     }
   };
 
+  const handleUserClick = (user) => {
+    setSelectedUser({
+      id: user.id,
+      name: user.name,
+      mobile: user.mobile,
+    });
+    setIsUserInfoModalOpen(true);
+  };
+
   const fetchUserSpecificStats = async () => {
     try {
       setUserStatsLoading(true);
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       // Fetch current user's stats
-      const userStatsResponse = await axios.get(`${API_URL}/predictions/user-stats`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const userStatsResponse = await axios.get(
+        `${API_URL}/predictions/user-stats`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       setCurrentUserStats(userStatsResponse.data.userStats);
-      
+
       // Fetch recent performance (last 7 matches)
-      const recentMatchesResponse = await axios.get(`${API_URL}/predictions/recent-performance`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const recentMatchesResponse = await axios.get(
+        `${API_URL}/predictions/recent-performance`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       setRecentPerformance(recentMatchesResponse.data.recentMatches);
       setUserStatsLoading(false);
     } catch (error) {
@@ -92,12 +108,12 @@ const PredictionStats = () => {
 
   const fetchExtraStats = async () => {
     try {
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       const response = await axios.get(`${API_URL}/extrastats`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       setExtraStats(response.data);
       setEditableStats(response.data);
     } catch (error) {
@@ -110,26 +126,24 @@ const PredictionStats = () => {
     return [...data].sort((a, b) => {
       // For string fields (like name)
       if (field === "name") {
-        return direction === "asc" 
+        return direction === "asc"
           ? a[field].localeCompare(b[field])
           : b[field].localeCompare(a[field]);
       }
-      
+
       // For numeric fields
-      return direction === "asc" 
-        ? a[field] - b[field]
-        : b[field] - a[field];
+      return direction === "asc" ? a[field] - b[field] : b[field] - a[field];
     });
   };
 
   // Handle column header click for sorting
   const handleSort = (field) => {
-    const newDirection = 
+    const newDirection =
       field === sortField && sortDirection === "desc" ? "asc" : "desc";
-    
+
     setSortField(field);
     setSortDirection(newDirection);
-    
+
     const sortedData = sortData(statsData, field, newDirection);
     setStatsData(sortedData);
   };
@@ -137,27 +151,21 @@ const PredictionStats = () => {
   // Get sort indicator for column headers
   const getSortIndicator = (field) => {
     if (field !== sortField) return null;
-    
-    return (
-      <span className="ml-1">
-        {sortDirection === "desc" ? "▼" : "▲"}
-      </span>
-    );
+
+    return <span className="ml-1">{sortDirection === "desc" ? "▼" : "▲"}</span>;
   };
 
   const handleEditToggle = async () => {
     if (isEditing) {
       try {
         // Save changes to the backend
-        const token = localStorage.getItem('token');
-        await axios.put(
-          `${API_URL}/extrastats`, 
-          editableStats, 
-          { headers: { Authorization: `Bearer ${token}` }}
-        );
-        
+        const token = localStorage.getItem("token");
+        await axios.put(`${API_URL}/extrastats`, editableStats, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         // Update local state
-        setExtraStats({...editableStats});
+        setExtraStats({ ...editableStats });
         setIsEditing(false);
       } catch (error) {
         console.error("Error updating extra stats:", error);
@@ -165,7 +173,7 @@ const PredictionStats = () => {
       }
     } else {
       // Enter edit mode
-      setEditableStats({...extraStats});
+      setEditableStats({ ...extraStats });
       setIsEditing(true);
     }
   };
@@ -173,7 +181,7 @@ const PredictionStats = () => {
   const handleStatChange = (key, value) => {
     setEditableStats({
       ...editableStats,
-      [key]: value
+      [key]: value,
     });
   };
 
@@ -191,24 +199,21 @@ const PredictionStats = () => {
 
       <main className="flex-grow bg-gray-100 py-8">
         <div className="max-w-6xl mx-auto px-4">
-          
           {/* New User Stats Section with charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <UserStatsCard 
-              userData={currentUserStats} 
-              loading={userStatsLoading} 
+            <UserStatsCard
+              userData={currentUserStats}
+              loading={userStatsLoading}
             />
-            <RecentPerformanceCard 
-              recentMatches={recentPerformance} 
-              loading={userStatsLoading} 
+            <RecentPerformanceCard
+              recentMatches={recentPerformance}
+              loading={userStatsLoading}
             />
           </div>
 
           <div className="bg-white shadow-md rounded-lg overflow-hidden h-[65vh] flex flex-col mb-6">
             <div className="p-4 sm:p-6 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex flex-wrap sm:flex-row justify-between items-center gap-3">
-              <h1 className="text-base sm:text-lg font-semibold">
-                Statistics
-              </h1>
+              <h1 className="text-base sm:text-lg font-semibold">Statistics</h1>
               <div className="text-sm text-white">
                 Total Matches: {completedMatches}
               </div>
@@ -225,7 +230,7 @@ const PredictionStats = () => {
                     <table className="w-full min-w-max">
                       <thead>
                         <tr className="sticky top-0 bg-gray-50 shadow-sm">
-                          <th 
+                          <th
                             className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                             onClick={() => handleSort("name")}
                           >
@@ -233,7 +238,7 @@ const PredictionStats = () => {
                               Name{getSortIndicator("name")}
                             </div>
                           </th>
-                          <th 
+                          <th
                             className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                             onClick={() => handleSort("totalPoints")}
                           >
@@ -241,15 +246,16 @@ const PredictionStats = () => {
                               Points{getSortIndicator("totalPoints")}
                             </div>
                           </th>
-                          <th 
+                          <th
                             className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                             onClick={() => handleSort("correctPredictions")}
                           >
                             <div className="flex items-center justify-end">
-                              Team Win(Accuracy){getSortIndicator("correctPredictions")}
+                              Team Win(Accuracy)
+                              {getSortIndicator("correctPredictions")}
                             </div>
                           </th>
-                          <th 
+                          <th
                             className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                             onClick={() => handleSort("correctPotmPredictions")}
                           >
@@ -257,7 +263,7 @@ const PredictionStats = () => {
                               POTM{getSortIndicator("correctPotmPredictions")}
                             </div>
                           </th>
-                          <th 
+                          <th
                             className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                             onClick={() => handleSort("bothCorrectPredictions")}
                           >
@@ -265,12 +271,13 @@ const PredictionStats = () => {
                               Both{getSortIndicator("bothCorrectPredictions")}
                             </div>
                           </th>
-                          <th 
+                          <th
                             className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                             onClick={() => handleSort("noPredictionCount")}
                           >
                             <div className="flex items-center justify-end">
-                              No Prediction{getSortIndicator("noPredictionCount")}
+                              No Prediction
+                              {getSortIndicator("noPredictionCount")}
                             </div>
                           </th>
                         </tr>
@@ -278,7 +285,10 @@ const PredictionStats = () => {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {statsData.length > 0 ? (
                           statsData.map((user, index) => {
-                            const isInTop3 = index < 3 && sortField === "totalPoints" && sortDirection === "desc";
+                            const isInTop3 =
+                              index < 3 &&
+                              sortField === "totalPoints" &&
+                              sortDirection === "desc";
                             const isCurrentUser = user.id === currentUser?._id;
                             return (
                               <tr
@@ -288,7 +298,10 @@ const PredictionStats = () => {
                                 }`}
                               >
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm font-medium text-gray-900">
+                                  <div
+                                    className="text-sm font-medium text-gray-900 cursor-pointer hover:text-indigo-600 transition-colors"
+                                    onClick={() => handleUserClick(user)}
+                                  >
                                     {capitalizeFirstLetter(
                                       getFirstName(user.name)
                                     )}
@@ -348,7 +361,7 @@ const PredictionStats = () => {
 
           {/* Extra Stats Card with Toggle */}
           <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
-            <div 
+            <div
               className="p-4 sm:p-6 bg-gradient-to-r from-indigo-600 to-purple-700 text-white flex justify-between items-center cursor-pointer"
               onClick={toggleExtraStats}
             >
@@ -356,7 +369,9 @@ const PredictionStats = () => {
                 Extra Statistics
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 ml-2 transition-transform duration-300 ${showExtraStats ? 'rotate-180' : ''}`}
+                  className={`h-5 w-5 ml-2 transition-transform duration-300 ${
+                    showExtraStats ? "rotate-180" : ""
+                  }`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -382,94 +397,136 @@ const PredictionStats = () => {
                 </button>
               )}
             </div>
-            
+
             {/* Collapsible content */}
             {showExtraStats && (
               <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 transition-all duration-300">
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-semibold text-gray-600">Highest score in a week:</p>
+                    <p className="text-sm font-semibold text-gray-600">
+                      Highest score in a week:
+                    </p>
                     {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.highestWeeklyScore}
-                        onChange={(e) => handleStatChange('highestWeeklyScore', e.target.value)}
+                        onChange={(e) =>
+                          handleStatChange("highestWeeklyScore", e.target.value)
+                        }
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     ) : (
-                      <p className="text-sm text-gray-800">{extraStats.highestWeeklyScore}</p>
+                      <p className="text-sm text-gray-800">
+                        {extraStats.highestWeeklyScore}
+                      </p>
                     )}
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm font-semibold text-gray-600">Lowest score in a week:</p>
+                    <p className="text-sm font-semibold text-gray-600">
+                      Lowest score in a week:
+                    </p>
                     {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.lowestWeeklyScore}
-                        onChange={(e) => handleStatChange('lowestWeeklyScore', e.target.value)}
+                        onChange={(e) =>
+                          handleStatChange("lowestWeeklyScore", e.target.value)
+                        }
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     ) : (
-                      <p className="text-sm text-gray-800">{extraStats.lowestWeeklyScore}</p>
+                      <p className="text-sm text-gray-800">
+                        {extraStats.lowestWeeklyScore}
+                      </p>
                     )}
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm font-semibold text-gray-600">Consecutive Wrong prediction:</p>
+                    <p className="text-sm font-semibold text-gray-600">
+                      Consecutive Wrong prediction:
+                    </p>
                     {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.consecutiveWrongPrediction}
-                        onChange={(e) => handleStatChange('consecutiveWrongPrediction', e.target.value)}
+                        onChange={(e) =>
+                          handleStatChange(
+                            "consecutiveWrongPrediction",
+                            e.target.value
+                          )
+                        }
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     ) : (
-                      <p className="text-sm text-gray-800">{extraStats.consecutiveWrongPrediction}</p>
+                      <p className="text-sm text-gray-800">
+                        {extraStats.consecutiveWrongPrediction}
+                      </p>
                     )}
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm font-semibold text-gray-600">Consecutive Right prediction:</p>
+                    <p className="text-sm font-semibold text-gray-600">
+                      Consecutive Right prediction:
+                    </p>
                     {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.consecutiveRightPrediction}
-                        onChange={(e) => handleStatChange('consecutiveRightPrediction', e.target.value)}
+                        onChange={(e) =>
+                          handleStatChange(
+                            "consecutiveRightPrediction",
+                            e.target.value
+                          )
+                        }
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     ) : (
-                      <p className="text-sm text-gray-800">{extraStats.consecutiveRightPrediction}</p>
+                      <p className="text-sm text-gray-800">
+                        {extraStats.consecutiveRightPrediction}
+                      </p>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm font-semibold text-gray-600">Highest +2 points Received by (week topper):</p>
+                    <p className="text-sm font-semibold text-gray-600">
+                      Highest +2 points Received by (week topper):
+                    </p>
                     {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.highestPlusPoints}
-                        onChange={(e) => handleStatChange('highestPlusPoints', e.target.value)}
+                        onChange={(e) =>
+                          handleStatChange("highestPlusPoints", e.target.value)
+                        }
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     ) : (
-                      <p className="text-sm text-gray-800">{extraStats.highestPlusPoints}</p>
+                      <p className="text-sm text-gray-800">
+                        {extraStats.highestPlusPoints}
+                      </p>
                     )}
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm font-semibold text-gray-600">Highest -2 points received by (week lower):</p>
+                    <p className="text-sm font-semibold text-gray-600">
+                      Highest -2 points received by (week lower):
+                    </p>
                     {isEditing && isAdmin ? (
                       <input
                         type="text"
                         value={editableStats.highestMinusPoints}
-                        onChange={(e) => handleStatChange('highestMinusPoints', e.target.value)}
+                        onChange={(e) =>
+                          handleStatChange("highestMinusPoints", e.target.value)
+                        }
                         className="mt-1 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                       />
                     ) : (
-                      <p className="text-sm text-gray-800">{extraStats.highestMinusPoints}</p>
+                      <p className="text-sm text-gray-800">
+                        {extraStats.highestMinusPoints}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -477,6 +534,13 @@ const PredictionStats = () => {
             )}
           </div>
         </div>
+        <UserInfoModal
+          isOpen={isUserInfoModalOpen}
+          onClose={() => setIsUserInfoModalOpen(false)}
+          userId={selectedUser?.id}
+          userName={selectedUser?.name}
+          userMobile={selectedUser?.mobile}
+        />
       </main>
     </>
   );

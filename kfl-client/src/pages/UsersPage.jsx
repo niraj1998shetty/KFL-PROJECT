@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { capitalizeFirstLetter } from "../helpers/functions";
 import { useAuth } from "../contexts/AuthContext";
+import UserInfoModal from "../components/UserInfoModal";
 
 
 
@@ -9,6 +10,8 @@ const UsersPage = () => {
   const { currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const[isUserInfoModalOpen, setIsUserInfoModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -28,11 +31,19 @@ const UsersPage = () => {
     }
   };
 
+  const handleUserClick = (user) => {
+  setSelectedUser({
+    id: user._id,
+    name: user.name,
+    mobile: user.mobile,
+  });
+  setIsUserInfoModalOpen(true);
+};
+
   return (
     <main className="flex-grow bg-gray-100 py-4">
       <div className="max-w-6xl mx-auto px-4">
         <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
-
           {/* Header */}
           <div className="p-4 sm:p-6 bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
             <h1 className="text-base sm:text-lg font-semibold">Users</h1>
@@ -44,7 +55,6 @@ const UsersPage = () => {
             </div>
           ) : (
             <div className="flex flex-col flex-grow overflow-hidden">
-
               {/* TABLE HEADER */}
               <div className="bg-gray-50 border-b border-gray-200">
                 <table className="w-full table-fixed">
@@ -71,25 +81,31 @@ const UsersPage = () => {
                     {users.length > 0 ? (
                       users.map((user, index) => {
                         const isCurrentUser = user._id === currentUser?._id;
-                        return(
-                        <tr key={user._id}>
-                          <td className="w-16 px-6 py-4 text-sm text-gray-900">
-                            {index + 1}
-                          </td>
-                          <td className="w-1/2 px-6 py-4 text-sm font-medium text-gray-900 text-center truncate">
-                            {capitalizeFirstLetter(user.name)}
-                             {isCurrentUser && (
-                                <span className="ml-1 text-purple-600 font-semibold">
-                                  (You)
-                                </span>
-                             )}
-                          </td>
-                          <td className="w-1/3 px-6 py-4 text-sm text-gray-900">
-                            {user.mobile}
-                          </td>
-                        </tr>
+                        return (
+                          <tr key={user._id}>
+                            <td className="w-16 px-6 py-4 text-sm text-gray-900">
+                              {index + 1}
+                            </td>
+                            <td className="w-1/2 px-6 py-4 text-sm font-medium text-gray-900 text-center truncate">
+                              <span
+                                className="cursor-pointer
+                              hover:text-indigo-600 transition-colors"
+                                onClick={() => handleUserClick(user)}
+                              >
+                                {capitalizeFirstLetter(user.name)}
+                                {isCurrentUser && (
+                                  <span className="ml-1 text-purple-600 font-semibold">
+                                    (You)
+                                  </span>
+                                )}
+                              </span>
+                            </td>
+                            <td className="w-1/3 px-6 py-4 text-sm text-gray-900">
+                              {user.mobile}
+                            </td>
+                          </tr>
                         );
-  })
+                      })
                     ) : (
                       <tr>
                         <td
@@ -103,11 +119,16 @@ const UsersPage = () => {
                   </tbody>
                 </table>
               </div>
-
             </div>
           )}
         </div>
       </div>
+      <UserInfoModal isOpen={isUserInfoModalOpen}
+      onClose={() => setIsUserInfoModalOpen(false)}
+      userId={selectedUser?.id}
+      userName={selectedUser?.name}
+      userMobile={selectedUser?.mobile}
+      />
     </main>
   );
 };
