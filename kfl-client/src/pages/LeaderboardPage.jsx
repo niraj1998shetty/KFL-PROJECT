@@ -4,7 +4,7 @@ import TopBar from "../components/TopBar";
 import WeekPointsModal from "../components/WeekPointsModal";
 import UserInfoModal from "../components/UserInfoModal";
 import axios from "axios";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter,capitalizeEachWord } from "../helpers/functions";
 import { fetchUserStats } from "../services/userStatsService";
 
 
@@ -528,7 +528,7 @@ const LeaderboardPage = () => {
                               </td>
                               <td className="px-4 sm:px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
-                                  {capitalizeFirstLetter(entry.username)}
+                                  {capitalizeEachWord(entry.username)}
                                   {isCurrentUser && (
                                     <span className="ml-1 text-purple-600 font-semibold">
                                       (You)

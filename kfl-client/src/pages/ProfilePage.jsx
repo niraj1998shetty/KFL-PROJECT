@@ -13,7 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import "../styles/ProfilePage.css";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter, capitalizeEachWord} from "../helpers/functions";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
 
 const ProfilePage = () => {
@@ -209,7 +209,7 @@ const ProfilePage = () => {
                 // </div>
                 <div className="profile-name-display">
                   <h1 className="profile-name">
-                    {capitalizeFirstLetter(profileData.name)}
+                    {capitalizeEachWord(profileData.name)}
                   </h1>
                   <button
                     onClick={() => handleStartEdit("name")}

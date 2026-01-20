@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter,capitalizeEachWord } from "../helpers/functions";
 import { useAuth } from "../contexts/AuthContext";
 import UserInfoModal from "../components/UserInfoModal";
 import { fetchUserStats } from "../services/userStatsService";
@@ -114,7 +114,7 @@ const UsersPage = () => {
                             {index + 1}
                           </td>
                           <td className="w-1/2 px-6 py-4 text-sm font-medium text-gray-900 text-center truncate">
-                            {capitalizeFirstLetter(user.name)}
+                            {capitalizeEachWord(user.name)}
                              {isCurrentUser && (
                                 <span className="ml-1 text-purple-600 font-semibold">
                                   (You)

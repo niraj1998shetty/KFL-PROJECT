@@ -5,7 +5,7 @@ import TopBar from "../components/TopBar";
 import UserStatsCard from "../components/UserStatsCard";
 import RecentPerformanceCard from "../components/RecentPerformanceCard";
 import UserInfoModal from "../components/UserInfoModal";
-import { capitalizeFirstLetter ,getFirstName} from "../helpers/functions";
+import { capitalizeFirstLetter ,getFirstName,formatNameMaxTwoWords} from "../helpers/functions";
 import { fetchUserStats } from "../services/userStatsService";
 
 
@@ -321,10 +321,8 @@ const PredictionStats = () => {
                                 } cursor-pointer hover:bg-gray-100 transition-colors`}
                               >
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {capitalizeFirstLetter(
-                                      getFirstName(user.name)
-                                    )}
+                                  <div className="text-sm font-medium w-[85px] text-gray-900">
+                                    {formatNameMaxTwoWords(user.name)}
                                     {isCurrentUser && (
                                       <span className="ml-1 text-purple-600 font-semibold">
                                         (You)

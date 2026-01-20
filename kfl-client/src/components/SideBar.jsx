@@ -2,10 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
-import {
-  capitalizeFirstLetter,
-  getCapitalizedInitial,
-} from "../helpers/functions";
 import { 
   Home, 
   Trophy, 
