@@ -52,9 +52,33 @@ const bulkCreatePlayers = asyncHandler(async (req, res) => {
   res.status(201).json(createdPlayers);
 });
 
+// @desc    Increment player's MOM count
+// @route   PUT /api/players/:playerId/incrementMOM
+// @access  Private (Admin only)
+const incrementPlayerMOM = asyncHandler(async (req, res) => {
+  const { playerId } = req.params;
+  
+  const player = await Player.findByIdAndUpdate(
+    playerId,
+    { $inc: { momfrom25: 1 } },
+    { new: true }
+  );
+  
+  if (!player) {
+    res.status(404);
+    throw new Error('Player not found');
+  }
+  
+  res.status(200).json({
+    message: 'Player MOM count incremented successfully',
+    player
+  });
+});
+
 module.exports = {
   getPlayers,
   getPlayersByTeam,
   createPlayer,
-  bulkCreatePlayers
+  bulkCreatePlayers,
+  incrementPlayerMOM
 };

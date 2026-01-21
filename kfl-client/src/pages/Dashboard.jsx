@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import TopBar from "../components/TopBar";
 import MatchPredictionModal from "../components/MatchPredictionModal";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter, capitalizeEachWord } from "../helpers/functions";
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -484,7 +484,7 @@ const Dashboard = () => {
                         className={userPred.isCurrentUser ? "bg-gray-50" : ""}
                       >
                         <td className="px-2 truncate max-w-[120px] md:px-6 py-2 md:py-4 text-sm">
-                          {capitalizeFirstLetter(userPred.name || "Unknown")}
+                          {capitalizeEachWord(userPred.name || "Unknown")}
                           {userPred.isCurrentUser && (
                             <span className="ml-1 text-purple-700">(You)</span>
                           )}

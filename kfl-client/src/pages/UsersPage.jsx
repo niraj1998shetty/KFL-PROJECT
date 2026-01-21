@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter,capitalizeEachWord } from "../helpers/functions";
 import { useAuth } from "../contexts/AuthContext";
+import UserInfoModal from "../components/UserInfoModal";
+import { fetchUserStats } from "../services/userStatsService";
 
 
 
@@ -9,12 +11,11 @@ const UsersPage = () => {
   const { currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -26,6 +27,38 @@ const UsersPage = () => {
       console.error("Error fetching users:", error);
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleUserClick = async (user) => {
+    setIsModalOpen(true);
+    setModalLoading(true);
+    try {
+      const userStats = await fetchUserStats(user._id);
+      setSelectedUser(userStats);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      // Fallback to basic user info
+      setSelectedUser({
+        name: user.name,
+        mobile: user.mobile,
+        totalPoints: user.points || 0,
+        weekPoints: user.weekPoints || 0,
+        correctPredictions: 0,
+        accuracy: 0
+      });
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
   };
 
   return (
@@ -72,12 +105,16 @@ const UsersPage = () => {
                       users.map((user, index) => {
                         const isCurrentUser = user._id === currentUser?._id;
                         return(
-                        <tr key={user._id}>
+                        <tr 
+                          key={user._id}
+                          onClick={() => handleUserClick(user)}
+                          className="cursor-pointer hover:bg-gray-50 transition-colors"
+                        >
                           <td className="w-16 px-6 py-4 text-sm text-gray-900">
                             {index + 1}
                           </td>
                           <td className="w-1/2 px-6 py-4 text-sm font-medium text-gray-900 text-center truncate">
-                            {capitalizeFirstLetter(user.name)}
+                            {capitalizeEachWord(user.name)}
                              {isCurrentUser && (
                                 <span className="ml-1 text-purple-600 font-semibold">
                                   (You)
@@ -108,6 +145,14 @@ const UsersPage = () => {
           )}
         </div>
       </div>
+
+      {/* User Info Modal */}
+      <UserInfoModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        user={selectedUser}
+        loading={modalLoading}
+      />
     </main>
   );
 };

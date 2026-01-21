@@ -13,7 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import "../styles/ProfilePage.css";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter, capitalizeEachWord} from "../helpers/functions";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
 
 const ProfilePage = () => {
@@ -209,7 +209,7 @@ const ProfilePage = () => {
                 // </div>
                 <div className="profile-name-display">
                   <h1 className="profile-name">
-                    {capitalizeFirstLetter(profileData.name)}
+                    {capitalizeEachWord(profileData.name)}
                   </h1>
                   <button
                     onClick={() => handleStartEdit("name")}
@@ -271,12 +271,12 @@ const ProfilePage = () => {
                   onChange={handleInputChange}
                   className="profile-textarea"
                   placeholder="Tell something about yourself (optional)"
-                  maxLength="200"
+                  maxLength="85"
                   autoFocus
                 />
 
                 <p className="char-count">
-                  {formData.about.length}/200 characters
+                  {formData.about.length}/85 characters
                 </p>
               </>
             ) : (
@@ -306,7 +306,7 @@ const ProfilePage = () => {
               <span>Password Recovery Code</span>
             </div>
             <p className="recovery-code-description">
-              Use this code to reset your password if you forget it. Keep it
+              Use this code to reset or change your password if you forget it or want to change it. Keep it
               safe and don't share it with anyone.
             </p>
             <div className="recovery-code-display">
