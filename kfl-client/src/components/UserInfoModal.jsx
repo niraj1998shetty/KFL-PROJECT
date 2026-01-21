@@ -48,7 +48,7 @@ const UserInfoModal = ({ isOpen, onClose, user, loading }) => {
                 <h3 className="text-lg font-semibold text-gray-900">
                   {capitalizeFirstLetter(user.name)}
                 </h3>
-                <p className="text-sm text-gray-500">{user.mobile || "N/A"}</p>
+                <p className="text-sm text-gray-500">{user.about || "N/A"}</p>
               </div>
             </div>
 
@@ -65,7 +65,7 @@ const UserInfoModal = ({ isOpen, onClose, user, loading }) => {
 
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">Correct Predictions:</span>
-                <span className="text-sm text-gray-900">{user.correctPredictions || 0}</span>
+                <span className="text-sm text-gray-900">{user.correctPredictions || 0}/{user.totalMatches || 0}</span>
               </div>
 
               <div className="flex justify-between items-center">

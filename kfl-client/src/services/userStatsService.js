@@ -55,7 +55,8 @@ export const fetchUserStats = async (userId) => {
       noPredictionCount: userStats?.noPredictionCount || 0,
       predictionsCount: userStats?.predictionsCount || 0,
       accuracy: userStats?.accuracy || 0,
-      totalMatches: completedMatches.length
+      totalMatches: completedMatches.length,
+      about: user.about || ""
     };
   } catch (error) {
     console.error("Error fetching user stats:", error);
@@ -106,7 +107,8 @@ export const fetchAllUsersStats = async () => {
         noPredictionCount: userStats?.noPredictionCount || 0,
         predictionsCount: userStats?.predictionsCount || 0,
         accuracy: userStats?.accuracy || 0,
-        totalMatches: completedMatches.length
+        totalMatches: completedMatches.length,
+        about: user.about || ""
       };
     });
 

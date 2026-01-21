@@ -271,12 +271,12 @@ const ProfilePage = () => {
                   onChange={handleInputChange}
                   className="profile-textarea"
                   placeholder="Tell something about yourself (optional)"
-                  maxLength="200"
+                  maxLength="85"
                   autoFocus
                 />
 
                 <p className="char-count">
-                  {formData.about.length}/200 characters
+                  {formData.about.length}/85 characters
                 </p>
               </>
             ) : (
