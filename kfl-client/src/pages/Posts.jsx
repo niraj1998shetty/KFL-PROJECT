@@ -46,6 +46,7 @@ const Posts = () => {
   const [showReactionPopup, setShowReactionPopup] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null, postId: null, isMobileView: false });
   const [longPressTimer, setLongPressTimer] = useState(null);
+  const [expandedPosts, setExpandedPosts] = useState({}); // Track which posts are expanded
 
   // Mention feature states
   const [allUsers, setAllUsers] = useState([]);
@@ -435,6 +436,26 @@ const Posts = () => {
     } catch (error) {
       console.error("Error voting on poll:", error);
     }
+  };
+
+  const CHARACTER_LIMIT = 300;
+
+  const isPostLong = (content) => {
+    return content && content.length > CHARACTER_LIMIT;
+  };
+
+  const getTruncatedContent = (content) => {
+    if (isPostLong(content)) {
+      return content.substring(0, CHARACTER_LIMIT) + '...';
+    }
+    return content;
+  };
+
+  const togglePostExpansion = (postId) => {
+    setExpandedPosts(prev => ({
+      ...prev,
+      [postId]: !prev[postId]
+    }));
   };
 
   const handleEmojiClick = (e, type, emoji, post) => {
@@ -926,8 +947,19 @@ const Posts = () => {
                           {/* Post Content */}
                           <div className="mt-2">
                             <div className="text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
-                              {renderContentWithMentions(post.content)}
+                              {expandedPosts[post._id] 
+                                ? renderContentWithMentions(post.content)
+                                : renderContentWithMentions(getTruncatedContent(post.content))
+                              }
                             </div>
+                            {isPostLong(post.content) && (
+                              <button
+                                onClick={() => togglePostExpansion(post._id)}
+                                className="text-blue-400 hover:text-blue-500 font-semibold text-sm mt-2 transition-colors"
+                              >
+                                {expandedPosts[post._id] ? 'Read Less' : 'Read More'}
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
