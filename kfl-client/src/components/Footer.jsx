@@ -332,7 +332,7 @@ const Footer = () => {
                     All players), that person earns +4 extra points.
                   </li>
                   <li>
-                    If a team wins by more than 100 runs, predictors of that
+                    If a team wins by more than or equal to 100 runs, predictors of that
                     team earn +2 extra points.
                   </li>
                   <li>
