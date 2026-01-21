@@ -337,6 +337,22 @@ const LeaderboardPage = () => {
         }
       );
 
+      if (formData.matchType !== "noResult" && formData.manOfTheMatch) {
+        try {
+          await axios.put(
+            `${API_URL}/players/${formData.manOfTheMatch}/incrementMOM`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+        } catch (error) {
+          console.error("Error updating player MOM count:", error);
+        }
+      }
+
       // For no result matches, skip awarding points
       if (formData.matchType !== "noResult" && userPredictions.length > 0) {
         const selectedPlayerName = players.find(
