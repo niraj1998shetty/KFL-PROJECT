@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getFirstName } from '../helpers/functions';
 
-const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUserId, allUsers, reactionType, postId, onRemoveReaction }) => {
+const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUserId, allUsers, reactionType, postId, onRemoveReaction, isMobileView }) => {
   const popupRef = useRef(null);
   const [adjustedPosition, setAdjustedPosition] = useState(position);
 
@@ -123,7 +123,7 @@ const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUs
                     <p className="text-xs text-gray-800 font-medium truncate">
                       {user.userId === currentUserId ? 'You' : user.username}
                     </p>
-                    {user.userId === currentUserId && (
+                    {user.userId === currentUserId && isMobileView && (
                       <button
                         onClick={handleRemoveReaction}
                         className="text-[10px] text-gray-500 hover:text-red-600 hover:underline cursor-pointer transition-colors"

@@ -44,7 +44,7 @@ const Posts = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [unreadPostsCount, setUnreadPostsCount] = useState(0);
   const [showReactionPopup, setShowReactionPopup] = useState(false);
-  const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null, postId: null });
+  const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null, postId: null, isMobileView: false });
   const [longPressTimer, setLongPressTimer] = useState(null);
 
   // Mention feature states
@@ -440,35 +440,45 @@ const Posts = () => {
   const handleEmojiClick = (e, type, emoji, post) => {
     e.stopPropagation();
     e.preventDefault();
-    // Click should show the modal with who reacted, not add reaction
-    const rect = e.currentTarget.getBoundingClientRect();
-    const users = post.reactionsByType && post.reactionsByType[type] 
-      ? post.reactionsByType[type] 
-      : [];
     
-    // Get all users who reacted (for "All" tab)
-    const allUsers = [];
-    if (post.reactionsByType) {
-      Object.values(post.reactionsByType).forEach(userList => {
-        allUsers.push(...userList);
+    // Check if this is a desktop click (not a touch event) by checking if it's a mouse event
+    const isDesktopClick = e.pointerType === 'mouse' || (!e.pointerType && e.type === 'click');
+    
+    if (isDesktopClick) {
+      // Desktop: toggle the reaction (add if not reacted, remove if already reacted)
+      handleReact(post._id, type);
+    } else {
+      // Touch/mobile: show the modal with who reacted
+      const rect = e.currentTarget.getBoundingClientRect();
+      const users = post.reactionsByType && post.reactionsByType[type] 
+        ? post.reactionsByType[type] 
+        : [];
+      
+      // Get all users who reacted (for "All" tab)
+      const allUsers = [];
+      if (post.reactionsByType) {
+        Object.values(post.reactionsByType).forEach(userList => {
+          allUsers.push(...userList);
+        });
+      }
+      
+      // Calculate position - place below the emoji button
+      const position = {
+        x: Math.max(10, rect.left),
+        y: rect.bottom + 10
+      };
+      
+      setSelectedReaction({
+        emoji,
+        type,
+        users,
+        allUsers,
+        position,
+        postId: post._id,
+        isMobileView: true
       });
+      setShowReactionPopup(true);
     }
-    
-    // Calculate position - place below the emoji button
-    const position = {
-      x: Math.max(10, rect.left),
-      y: rect.bottom + 10
-    };
-    
-    setSelectedReaction({
-      emoji,
-      type,
-      users,
-      allUsers,
-      position,
-      postId: post._id
-    });
-    setShowReactionPopup(true);
   };
 
   const handleEmojiHover = (e, type, emoji, post) => {
@@ -1252,6 +1262,7 @@ const Posts = () => {
         reactionType={selectedReaction.type}
         postId={selectedReaction.postId}
         onRemoveReaction={handleReact}
+        isMobileView={selectedReaction.isMobileView}
       />
     </>
   );
