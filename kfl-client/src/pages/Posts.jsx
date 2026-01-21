@@ -5,6 +5,7 @@ import TopBar from "../components/TopBar";
 import {
   getFirstName,
   capitalizeFirstLetter,
+  formatNameMaxTwoWords,
   getCapitalizedInitial,
 } from "../helpers/functions";
 
@@ -605,7 +606,7 @@ const Posts = () => {
                         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-medium flex-shrink-0">
                           {post.author?.name
                             ? getCapitalizedInitial(
-                                getFirstName(post.author.name)
+                                getFirstName(post.author.name),
                               )
                             : "?"}
                         </div>
@@ -613,9 +614,7 @@ const Posts = () => {
                           <div className="flex items-center">
                             <h3 className="font-bold text-gray-900">
                               {post.author?.name
-                                ? capitalizeFirstLetter(
-                                    getFirstName(post.author.name)
-                                  )
+                                ? formatNameMaxTwoWords(post.author.name)
                                 : "Unknown User"}
                             </h3>
                             <span className="mx-1 text-gray-400">·</span>
@@ -741,13 +740,13 @@ const Posts = () => {
                               // Calculate percentage for this option
                               const totalVotes = post.pollOptions.reduce(
                                 (sum, opt) => sum + (opt.voteCount || 0),
-                                0
+                                0,
                               );
                               const votePercentage =
                                 totalVotes > 0
                                   ? Math.round(
                                       ((option.voteCount || 0) / totalVotes) *
-                                        100
+                                        100,
                                     )
                                   : 0;
 
@@ -794,7 +793,7 @@ const Posts = () => {
                           <p className="text-xs text-gray-500 mt-2">
                             {post.pollOptions.reduce(
                               (sum, opt) => sum + (opt.voteCount || 0),
-                              0
+                              0,
                             )}{" "}
                             votes
                           </p>
@@ -816,13 +815,13 @@ const Posts = () => {
                                 <span className="mr-1">{emoji}</span>
                                 <span>{post.reactionCounts[type]}</span>
                               </div>
-                            )
+                            ),
                         )}
                       </div>
                       <button
                         onClick={() =>
                           setActiveReactionPost(
-                            activeReactionPost === post._id ? null : post._id
+                            activeReactionPost === post._id ? null : post._id,
                           )
                         }
                         data-reaction-trigger={true}

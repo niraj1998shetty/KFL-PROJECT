@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import TopBar from "../components/TopBar";
 import WeekPointsModal from "../components/WeekPointsModal";
+import UserInfoModal from "../components/UserInfoModal";
 import axios from "axios";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter,capitalizeEachWord } from "../helpers/functions";
+import { fetchUserStats } from "../services/userStatsService";
 
 
 
@@ -14,6 +16,9 @@ const LeaderboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isWeekPointsModalOpen, setIsWeekPointsModalOpen] = useState(false);
+  const [isUserInfoModalOpen, setIsUserInfoModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
   const [matchLoading, setMatchLoading] = useState(false);
   const [updateError, setUpdateError] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState("");
@@ -253,6 +258,33 @@ const LeaderboardPage = () => {
     }
   };
 
+  const handleUserClick = async (entry) => {
+    setIsUserInfoModalOpen(true);
+    setModalLoading(true);
+    try {
+      const userStats = await fetchUserStats(entry.id);
+      setSelectedUser(userStats);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      // Fallback to basic user info
+      setSelectedUser({
+        name: entry.username,
+        mobile: entry.mobile,
+        totalPoints: entry.totalPoints,
+        weekPoints: entry.weekPoints || 0,
+        correctPredictions: 0,
+        accuracy: 0
+      });
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleCloseUserModal = () => {
+    setIsUserInfoModalOpen(false);
+    setSelectedUser(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -483,7 +515,8 @@ const LeaderboardPage = () => {
                           return (
                             <tr
                               key={entry.id}
-                              className={isInTop3 ? "bg-blue-50" : ""}
+                              onClick={() => handleUserClick(entry)}
+                              className={`${isInTop3 ? "bg-blue-50" : ""} cursor-pointer hover:bg-gray-100 transition-colors`}
                             >
                               <td className="px-4 sm:px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900 flex items-center">
@@ -495,7 +528,7 @@ const LeaderboardPage = () => {
                               </td>
                               <td className="px-4 sm:px-6 py-4">
                                 <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">
-                                  {capitalizeFirstLetter(entry.username)}
+                                  {capitalizeEachWord(entry.username)}
                                   {isCurrentUser && (
                                     <span className="ml-1 text-purple-600 font-semibold">
                                       (You)
@@ -806,6 +839,14 @@ const LeaderboardPage = () => {
           </div>
         </div>
       )}
+
+      {/* User Info Modal */}
+      <UserInfoModal 
+        isOpen={isUserInfoModalOpen}
+        onClose={handleCloseUserModal}
+        user={selectedUser}
+        loading={modalLoading}
+      />
     </>
   );
 };
