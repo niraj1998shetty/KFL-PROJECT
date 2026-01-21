@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { getFirstName } from '../helpers/functions';
+import { capitalizeEachWord, getFirstName } from '../helpers/functions';
 
 const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUserId, allUsers, reactionType, postId, onRemoveReaction, isMobileView }) => {
   const popupRef = useRef(null);
@@ -121,7 +121,7 @@ const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUs
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-gray-800 font-medium truncate">
-                      {user.userId === currentUserId ? 'You' : user.username}
+                      {user.userId === currentUserId ? 'You' : capitalizeEachWord(user.username)}
                     </p>
                     {user.userId === currentUserId && isMobileView && (
                       <button
