@@ -629,6 +629,30 @@ const Posts = () => {
     setActiveDropdownId(activeDropdownId === postId ? null : postId);
   };
 
+  // Function to parse and render mentions with blue styling
+  const renderContentWithMentions = (content) => {
+    if (!content) return null;
+    
+    // Split content by mentions (words starting with @)
+    const parts = content.split(/(@\S+)/g);
+    
+    return (
+      <>
+        {parts.map((part, index) => {
+          if (part.startsWith('@')) {
+            // This is a mention, render it in blue
+            return (
+              <span key={index} className="text-blue-600 font-semibold">
+                {part}
+              </span>
+            );
+          }
+          return <span key={index}>{part}</span>;
+        })}
+      </>
+    );
+  };
+
   return (
     <>
       <TopBar />
@@ -891,23 +915,9 @@ const Posts = () => {
 
                           {/* Post Content */}
                           <div className="mt-2">
-                            <div className="text-gray-800 leading-relaxed">
-                              {post.content}
+                            <div className="text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
+                              {renderContentWithMentions(post.content)}
                             </div>
-
-                            {/* Tagged Users */}
-                            {post.tags && post.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {post.tags.map((tag) => (
-                                  <span
-                                    key={tag._id}
-                                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600"
-                                  >
-                                    @{tag.name}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
