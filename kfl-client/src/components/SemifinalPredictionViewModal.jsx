@@ -35,7 +35,7 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full flex flex-col max-h-[90vh]">
         <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-4 rounded-t-lg flex-shrink-0">
           <h3 className="text-lg font-semibold">Semifinal Predictions</h3>
-          <p className="text-sm">View all users' semifinal team predictions</p>
+          <p className="text-sm">View all user's semifinal team predictions</p>
         </div>
 
         <div className="p-6 overflow-auto flex-grow">
