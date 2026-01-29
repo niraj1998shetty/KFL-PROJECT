@@ -99,14 +99,14 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #7e22ce 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 40px;
   font-weight: 700;
   color: white;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
   margin-top: -50px;
   animation: scaleIn 0.5s ease-out;
 }
@@ -152,7 +152,7 @@
   font-size: 26px;
   font-weight: 700;
   color: #1a202c;
-  border: 2px solid #667eea;
+  border: 2px solid #2563eb;
   border-radius: 12px;
   padding: 8px 12px;
   width: 100%;
@@ -164,7 +164,7 @@
 .inline-edit-icon {
   background: transparent;
   border: none;
-  color: #667eea;
+  color: #2563eb;
   cursor: pointer;
   padding: 6px;
   border-radius: 6px;
@@ -175,7 +175,7 @@
 }
 
 .inline-edit-icon:hover {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(37, 99, 235, 0.1);
   transform: scale(1.1);
 }
 
@@ -250,7 +250,7 @@ background: #fff5f5;
   font-size: 24px;
   font-weight: 700;
   color: #1a202c;
-  border: 2px solid #667eea;
+  border: 2px solid #2563eb;
   border-radius: 12px;
   padding: 8px 12px;
   flex: 1;
@@ -262,8 +262,8 @@ background: #fff5f5;
 
 .profile-input-name-inline:focus {
   outline: none;
-  border-color: #764ba2;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #7e22ce;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 /* Mobile responsive for horizontal layout */
@@ -324,17 +324,17 @@ background: #fff5f5;
 }
 
 .profile-info-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.1);
 }
 
 .recovery-code-card {
   background: linear-gradient(
     135deg,
     #f7fafc 0%,
-    rgba(102, 126, 234, 0.05) 100%
+    rgba(37, 99, 235, 0.05) 100%
   );
-  border-color: #667eea;
+  border-color: #2563eb;
 }
 
 .info-label {
@@ -391,9 +391,9 @@ background: #fff5f5;
 
 .profile-textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #2563eb;
   background: #f7fafc;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .char-count {
@@ -431,8 +431,8 @@ background: #fff5f5;
 }
 
 .stat-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.1);
   transform: translateY(-4px);
 }
 
@@ -449,7 +449,7 @@ background: #fff5f5;
 }
 
 .stat-icon.points {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #7e22ce 100%);
 }
 
 .stat-icon.week-points {
@@ -512,7 +512,7 @@ background: #fff5f5;
   font-weight: 700;
   font-family: "Courier New", monospace;
   letter-spacing: 1px;
-  color: #667eea;
+  color: #2563eb;
   word-break: break-all;
 }
 
@@ -520,7 +520,7 @@ background: #fff5f5;
   display: flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #7e22ce 100%);
   color: white;
   border: none;
   padding: 8px 14px;
@@ -530,12 +530,12 @@ background: #fff5f5;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .copy-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
 
 .copy-btn.copied {
@@ -611,25 +611,25 @@ background: #fff5f5;
 
 .btn-cancel {
   background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: #2563eb;
+  border: 2px solid #2563eb;
 }
 
 .btn-cancel:hover {
   background: #f7fafc;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
 }
 
 .btn-save {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #7e22ce 100%);
   color: white;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
 }
 
 .btn-save:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 15px 40px rgba(37, 99, 235, 0.4);
 }
 
 .btn-save:disabled {
