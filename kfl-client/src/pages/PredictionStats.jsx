@@ -4,7 +4,9 @@ import axios from "axios";
 import TopBar from "../components/TopBar";
 import UserStatsCard from "../components/UserStatsCard";
 import RecentPerformanceCard from "../components/RecentPerformanceCard";
-import { capitalizeFirstLetter ,getFirstName} from "../helpers/functions";
+import UserInfoModal from "../components/UserInfoModal";
+import { capitalizeFirstLetter ,getFirstName,formatNameMaxTwoWords} from "../helpers/functions";
+import { fetchUserStats } from "../services/userStatsService";
 
 
 const PredictionStats = () => {
@@ -14,6 +16,9 @@ const PredictionStats = () => {
   const [completedMatches, setCompletedMatches] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [showExtraStats, setShowExtraStats] = useState(false);
+  const [isUserInfoModalOpen, setIsUserInfoModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
   // Sorting states
   const [sortField, setSortField] = useState("totalPoints");
   const [sortDirection, setSortDirection] = useState("desc");
@@ -182,6 +187,33 @@ const PredictionStats = () => {
     setShowExtraStats(!showExtraStats);
   };
 
+  const handleUserClick = async (user) => {
+    setIsUserInfoModalOpen(true);
+    setModalLoading(true);
+    try {
+      const userStats = await fetchUserStats(user.id);
+      setSelectedUser(userStats);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      // Fallback to basic user info
+      setSelectedUser({
+        name: user.name,
+        mobile: user.mobile || "N/A",
+        totalPoints: user.totalPoints,
+        weekPoints: 0,
+        correctPredictions: user.correctPredictions,
+        accuracy: user.accuracy
+      });
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleCloseUserModal = () => {
+    setIsUserInfoModalOpen(false);
+    setSelectedUser(null);
+  };
+
   // Check if the current user is an admin
   const isAdmin = currentUser && currentUser.isAdmin;
 
@@ -279,18 +311,23 @@ const PredictionStats = () => {
                         {statsData.length > 0 ? (
                           statsData.map((user, index) => {
                             const isInTop3 = index < 3 && sortField === "totalPoints" && sortDirection === "desc";
-                            const isCurrentUser = user.id === currentUser?.id;
+                            const isCurrentUser = user.id === currentUser?._id;
                             return (
                               <tr
                                 key={user.id}
+                                onClick={() => handleUserClick(user)}
                                 className={`${isInTop3 ? "bg-blue-50" : ""} ${
-                                  isCurrentUser ? "bg-yellow-50" : ""
-                                }`}
+                                  isCurrentUser ? "text-purple-500" : ""
+                                } cursor-pointer hover:bg-gray-100 transition-colors`}
                               >
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {capitalizeFirstLetter(getFirstName(user.name))}
-                                    {isCurrentUser && "(You)"}
+                                  <div className="text-sm font-medium w-[85px] text-gray-900">
+                                    {formatNameMaxTwoWords(user.name)}
+                                    {isCurrentUser && (
+                                      <span className="ml-1 text-purple-600 font-semibold">
+                                        (You)
+                                      </span>
+                                    )}
                                   </div>
                                 </td>
                                 <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right">
@@ -472,6 +509,14 @@ const PredictionStats = () => {
           </div>
         </div>
       </main>
+
+      {/* User Info Modal */}
+      <UserInfoModal 
+        isOpen={isUserInfoModalOpen}
+        onClose={handleCloseUserModal}
+        user={selectedUser}
+        loading={modalLoading}
+      />
     </>
   );
 };

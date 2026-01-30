@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { ipl2025Matches } from '../data/ipl2025Matches';
+import { ipl2025PlayerMapping } from '../data/ipl2025PlayerMapping';
 
 const KFL_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -38,51 +40,65 @@ const fetchPlayersCache = async () => {
 };
 
 /**
- * Fetch 2025 IPL match results from backend
- * Only fetches completed matches from your KFL database
+ * Fetch IPL match results (2025 from static data + 2026 from backend)
+ * Includes both completed matches and matches with no result
  * @returns {Promise<Array>} - Array of match results
  */
 export const fetchIPL2025Results = async () => {
   try {
     const token = localStorage.getItem('token');
     
-    const response = await axios.get(`${KFL_API_URL}/matches`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      timeout: 10000,
-    });
-
-    if (!response.data || !Array.isArray(response.data)) {
-      throw new Error('Invalid response format from backend');
-    }
-
     // Fetch player cache for resolving Man of the Match
     const players = await fetchPlayersCache();
-
-    // Filter for completed matches from 2025
-    const completedMatches = response.data
+    
+    // Format 2025 historical data - INCLUDE ALL MATCHES (completed AND noResult)
+    const formatted2025Matches = ipl2025Matches
       .filter(match => {
-        const matchDate = parseMatchDate(match.date);
-        return (
-          matchDate.getFullYear() === 2025 &&
-          match.result &&
-          match.result.completed === true
-        );
+        // Include matches that are either completed or have no result
+        return match.result && (match.result.completed === true || match.result.noResult === true);
       })
       .map(match => formatBackendMatchData(match, players))
-      .sort((a, b) => {
-        return parseInt(a.matchNo) - parseInt(b.matchNo);
+      .sort((a, b) => parseInt(a.matchNo) - parseInt(b.matchNo));
+    
+    // Fetch 2026 matches from backend
+    let matches2026 = [];
+    try {
+      const response = await axios.get(`${KFL_API_URL}/matches`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 10000,
       });
 
-    return completedMatches;
+      if (response.data && Array.isArray(response.data)) {
+        matches2026 = response.data
+          .filter(match => {
+            const matchDate = parseMatchDate(match.date);
+            const year = matchDate.getFullYear();
+            // Include 2026 matches that are either completed or have no result
+            return (
+              year === 2026 &&
+              match.result &&
+              (match.result.completed === true || match.result.noResult === true)
+            );
+          })
+          .map(match => formatBackendMatchData(match, players))
+          .sort((a, b) => parseInt(a.matchNo) - parseInt(b.matchNo));
+      }
+    } catch (backendError) {
+      console.warn('Could not fetch 2026 matches from backend:', backendError.message);
+      // Continue with 2025 data only
+    }
+
+    // Combine both datasets
+    const allMatches = [...formatted2025Matches, ...matches2026];
+    
+    return allMatches;
   } catch (error) {
-    console.error('Error fetching 2025 data from backend:', error.message);
+    console.error('Error fetching match results:', error.message);
     throw error;
   }
 };
-
-
 
 /**
  * Format backend match data
@@ -102,6 +118,7 @@ const formatBackendMatchData = (match, players = {}) => {
     venue: formatVenue(match.venue),
     result: formatResult(match),
     manOfTheMatch: extractPlayerName(match.result?.playerOfTheMatch, players),
+    noResult: match.result?.noResult || false,
   };
 };
 
@@ -121,9 +138,21 @@ const extractPlayerName = (playerData, players = {}) => {
   if (typeof playerData === 'string') {
     // Check if it's a MongoDB ObjectId (24 hex characters)
     if (/^[0-9a-f]{24}$/i.test(playerData)) {
-      // Try to find player name using the ObjectId
+      // First try to find player name using the ObjectId from API
       const playerName = players[playerData];
-      return playerName || 'No-one';
+      if (playerName) {
+        return playerName;
+      }
+      
+      // Fallback to static mapping for 2025 season data
+      const staticPlayerName = ipl2025PlayerMapping[playerData];
+      if (staticPlayerName) {
+        return staticPlayerName;
+      }
+      
+      // If not found in either mapping, log and return 'No-one'
+      console.warn(`Player ID ${playerData} not found in cache or static mapping`);
+      return 'No-one';
     }
     // It's already a player name string
     return playerData;
@@ -156,10 +185,17 @@ const parseMatchDate = (dateStr) => {
 
 /**
  * Format match result from backend data
+ * Handles both completed matches and matches with no result
  * @param {Object} match - Match object with result field
  * @returns {string} - Formatted result string
  */
 const formatResult = (match) => {
+  // Check for no result first
+  if (match.result && match.result.noResult === true) {
+    return 'No result';
+  }
+  
+  // Check if match was not completed or has no winner
   if (!match.result || !match.result.completed || !match.result.winner) {
     return 'No result';
   }
@@ -171,68 +207,19 @@ const formatResult = (match) => {
 };
 
 /**
- * Format venue name to short form
- * Extracts text after comma if present
- * @param {string} venue - Full venue name
- * @returns {string} - Short venue name
+ * Format venue name - returns city/location name
+ * @param {string} venue - Full venue name (e.g., "Stadium Name, City")
+ * @returns {string} - City name or full venue name
  */
 const formatVenue = (venue) => {
   if (!venue) return 'N/A';
-
-  let venueText = venue;
-  if (venue.includes(',')) {
-    const parts = venue.split(',');
-    venueText = parts[parts.length - 1].trim();
-  }
-
-  const venueMap = {
-    'wankhede': 'Wankhede',
-    'chinnaswamy': 'Chinnaswamy',
-    'chepauk': 'Chepauk',
-    'chidambaram': 'Chepauk',
-    'arun jaitley': 'Arun Jaitley',
-    'feroz shah kotla': 'Feroz Shah Kotla',
-    'narendra modi': 'Narendra Modi',
-    'rajiv gandhi': 'Rajiv Gandhi',
-    'bharat ratna': 'Bharat Ratna',
-    'holkar': 'Holkar',
-    'barsapara': 'Barsapara',
-    'greenfield': 'Greenfield',
-    'adarsh': 'Adarsh',
-    'eden gardens': 'Eden Gardens',
-    'sheikh zayed': 'Sheikh Zayed',
-    'ekana': 'Ekana',
-    'lucknow': 'Ekana',
-    'mumbai': 'Wankhede',
-    'bangalore': 'Chinnaswamy',
-    'bengaluru': 'Chinnaswamy',
-    'hyderabad': 'Rajiv Gandhi',
-    'kolkata': 'Eden Gardens',
-    'delhi': 'Arun Jaitley',
-    'new delhi': 'Arun Jaitley',
-    'chennai': 'Chepauk',
-    'pune': 'MCA Stadium',
-    'jaipur': 'Sawai Man Singh',
-    'indore': 'Holkar',
-    'guwahati': 'Barsapara',
-    'kochi': 'Greenfield',
-    'visakhapatnam': 'Adarsh',
-    'ahmedabad': 'Narendra Modi',
-  };
-
-  const lowerVenue = venueText.toLowerCase().trim();
   
-  if (venueMap[lowerVenue]) {
-    return venueMap[lowerVenue];
+  // If there's a comma, return everything after it (trimmed)
+  const parts = venue.split(',');
+  if (parts.length > 1) {
+    return parts[1].trim();
   }
-
-  for (const [key, value] of Object.entries(venueMap)) {
-    if (lowerVenue.includes(key)) {
-      return value;
-    }
-  }
-
-  return venueText.length > 0 ? venueText : venue;
+  
+  // If no comma, return the full venue name
+  return venue.trim();
 };
-
-

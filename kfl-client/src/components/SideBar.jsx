@@ -2,10 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
-import {
-  capitalizeFirstLetter,
-  getCapitalizedInitial,
-} from "../helpers/functions";
 import { 
   Home, 
   Trophy, 
@@ -74,36 +70,53 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { path: "/dashboard", label: "Dashboard", icon: <Home className="w-5 h-5" /> },
-    { path: "/leaderboard", label: "Leaderboard", icon: <Trophy className="w-5 h-5" /> },
-    { path: "/stats", label: "Statistics", icon: <BarChart2 className="w-5 h-5" /> },
-    { 
-      path: "/posts", 
-      label: "Posts", 
+    {
+      path: "/dashboard",
+      label: "Dashboard",
+      icon: <Home className="w-5 h-5" />,
+    },
+    {
+      path: "/leaderboard",
+      label: "Leaderboard",
+      icon: <Trophy className="w-5 h-5" />,
+    },
+    {
+      path: "/stats",
+      label: "Statistics",
+      icon: <BarChart2 className="w-5 h-5" />,
+    },
+    {
+      path: "/posts",
+      label: "Posts",
       icon: <MessageSquare className="w-5 h-5" />,
-      badge: unreadPostsCount > 0 ? unreadPostsCount : null
+      badge: unreadPostsCount > 0 ? unreadPostsCount : null,
     },
-    { 
-      path: "/teams-players", 
-      label: "Teams & Players", 
-      icon: <Users className="w-5 h-5" /> 
+    {
+      path: "/teams-players",
+      label: "Teams & Players",
+      icon: <Users className="w-5 h-5" />,
     },
-    { 
-      path: "/match-results", 
-      label: "IPL Results", 
-      icon: <FileText className="w-5 h-5" /> 
+    {
+      path: "/match-results",
+      label: "IPL Results",
+      icon: <FileText className="w-5 h-5" />,
     },
-    { 
-      label: "Prize Pool", 
-      icon: <Gift className="w-5 h-5" />, 
-      modal: true, 
-      modalName: "prize" 
+    {
+      path: "/users",
+      label: "Users",
+      icon: <Users className="w-5 h-5" />,
     },
-    { 
-      label: "Rules", 
-      icon: <FileText className="w-5 h-5" />, 
-      modal: true, 
-      modalName: "rules" 
+    {
+      label: "Prize Pool",
+      icon: <Gift className="w-5 h-5" />,
+      modal: true,
+      modalName: "prize",
+    },
+    {
+      label: "Rules",
+      icon: <FileText className="w-5 h-5" />,
+      modal: true,
+      modalName: "rules",
     },
   ];
 
@@ -135,9 +148,7 @@ const Sidebar = () => {
 
   return (
     <div className="w-64 bg-gray-800 text-white p-4 h-full overflow-y-auto hidden md:block">
-      <h2 className="text-xl font-bold mb-6 pb-2 border-b border-gray-700">
-        
-      </h2>
+     
 
       <div className="space-y-2">
         {menuItems.map((item, index) => (
@@ -202,63 +213,7 @@ const Sidebar = () => {
             </div>
           )}
         </div>
-
-        {/* Users Dropdown */}
-        <div className="pt-2">
-          <button
-            onClick={() => setShowUsers(!showUsers)}
-            className="flex items-center justify-between space-x-3 p-2 rounded transition duration-300 hover:bg-gray-700 w-full"
-          >
-            <div className="flex items-center space-x-3">
-              <User className="w-5 h-5" />
-              <span>Users</span>
-            </div>
-            {showUsers ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          
-          {showUsers && (
-            <div className="pl-2 mt-2 space-y-2 max-h-64 overflow-y-auto">
-              {loading ? (
-                <div className="flex justify-center items-center p-4">
-                  <span className="animate-spin h-5 w-5 mr-3 border-t-2 border-b-2 border-primary rounded-full"></span>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {users.map((user) => {
-                    const isCurrentUser = currentUser && currentUser._id === user._id;
-
-                    return (
-                      <div
-                        key={user._id}
-                        className={`flex items-center space-x-3 p-2 rounded transition duration-300 ${
-                          isCurrentUser ? "bg-gradient-to-r from-indigo-600 to-purple-700" : "hover:bg-gray-700"
-                        }`}
-                      >
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                            isCurrentUser ? "bg-gradient-to-r from-indigo-600 to-purple-700" : "bg-gradient-to-r from-indigo-600 to-purple-700"
-                          }`}
-                        >
-                          {getCapitalizedInitial(user.name)}
-                        </div>
-                        <div>
-                          <div className="font-medium">
-                            {capitalizeFirstLetter(user.name)}
-                            {isCurrentUser && (
-                              <span className="ml-2 text-xs">(You)</span>
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-400">{user.mobile}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+     </div>
     </div>
   );
 };

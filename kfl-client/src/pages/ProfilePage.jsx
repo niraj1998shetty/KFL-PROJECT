@@ -2,26 +2,38 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Edit2, Copy, Check, Calendar, TrendingUp, Shield, LogOut } from "lucide-react";
+import {
+  Edit2,
+  X,
+  Copy,
+  Check,
+  Calendar,
+  TrendingUp,
+  Shield,
+  LogOut,
+} from "lucide-react";
 import "../styles/ProfilePage.css";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter, capitalizeEachWord} from "../helpers/functions";
+import LogoutConfirmModal from "../components/LogoutConfirmModal";
 
 const ProfilePage = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
+  const [editingField, setEditingField] = useState(null);
+  // const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    about: ""
+    about: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";//Do not remove anywhere
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"; //Do not remove anywhere
 
   useEffect(() => {
     fetchProfile();
@@ -34,7 +46,7 @@ const ProfilePage = () => {
       setProfileData(response.data);
       setFormData({
         name: response.data.name,
-        about: response.data.about
+        about: response.data.about,
       });
     } catch (err) {
       setError("Failed to load profile");
@@ -46,14 +58,29 @@ const ProfilePage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSaveProfile = async () => {
-    if (!formData.name.trim()) {
+  const handleStartEdit = (field) => {
+    setEditingField(field);
+    setError("");
+    setSuccess("");
+  };
+
+  const handleCancelEdit = () => {
+    setFormData({
+      name: profileData.name,
+      about: profileData.about,
+    });
+    setEditingField(null);
+    setError("");
+  };
+
+  const handleSaveField = async () => {
+    if (editingField === "name" && !formData.name.trim()) {
       setError("Name cannot be empty");
       return;
     }
@@ -64,10 +91,10 @@ const ProfilePage = () => {
       setIsSaving(true);
 
       const response = await axios.put(`${API_URL}/users/profile`, formData);
-      
+
       setProfileData(response.data.user);
       setSuccess("Profile updated successfully!");
-      setIsEditing(false);
+      setEditingField(null);
 
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -86,12 +113,14 @@ const ProfilePage = () => {
   };
 
   const getInitials = (name) => {
-    return name
-      ?.split(" ")
-      .map(word => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "U";
+    return (
+      name
+        ?.split(" ")
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "U"
+    );
   };
 
   const calculateWinPercentage = () => {
@@ -105,7 +134,7 @@ const ProfilePage = () => {
     return new Date(date).toLocaleDateString("en-IN", {
       year: "numeric",
       month: "long",
-      day: "numeric"
+      day: "numeric",
     });
   };
 
@@ -130,8 +159,8 @@ const ProfilePage = () => {
     );
   }
 
-    return (
-  <>
+  return (
+    <>
       <div className="profile-wrapper">
         {/* Profile Card */}
         <div className="profile-card">
@@ -140,29 +169,58 @@ const ProfilePage = () => {
             <div className="profile-avatar">
               {getInitials(profileData.name)}
             </div>
-            <h1 className="profile-name">
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="profile-input-name"
-                  placeholder="Your name"
-                />
+            <div className="editable-field-container">
+              {editingField === "name" ? (
+                <div className="inline-edit-wrapper-horizontal">
+                  <div className="name-input-with-count">
+                    <input
+                      type="text"
+                      name="name"
+                      maxLength="25"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="profile-input-name-inline"
+                      placeholder="Your name"
+                      autoFocus
+                    />
+                    <p className="char-count">
+                      {formData.name.length}/25 characters
+                    </p>
+                  </div>
+                  <div className="inline-edit-actions">
+                    <button
+                      onClick={handleSaveField}
+                      disabled={isSaving}
+                      className="inline-action-btn save-btn"
+                      title="Save"
+                    >
+                      <Check size={16} />
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="inline-action-btn cancel-btn"
+                      title="Cancel"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
               ) : (
-               capitalizeFirstLetter(profileData.name)
+                // </div>
+                <div className="profile-name-display">
+                  <h1 className="profile-name">
+                    {capitalizeEachWord(profileData.name)}
+                  </h1>
+                  <button
+                    onClick={() => handleStartEdit("name")}
+                    className="inline-edit-icon"
+                    title="Edit name"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                </div>
               )}
-            </h1>
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="edit-profile-btn"
-              >
-                <Edit2 size={16} />
-                Edit Profile
-              </button>
-            )}
+            </div>
           </div>
 
           {/* Messages */}
@@ -179,16 +237,48 @@ const ProfilePage = () => {
           <div className="profile-info-card">
             <div className="info-label-with-icon">
               <span>About</span>
+              {editingField !== "about" ? (
+                <button
+                  onClick={() => handleStartEdit("about")}
+                  className="inline-edit-icon"
+                  title="Edit about"
+                >
+                  <Edit2 size={16} />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={handleSaveField}
+                    disabled={isSaving}
+                    className="inline-action-btn save-btn"
+                  >
+                    <Check size={16} />
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="inline-action-btn cancel-btn"
+                  >
+                    <X size={16} />
+                  </button>
+                </>
+              )}
             </div>
-            {isEditing ? (
-              <textarea
-                name="about"
-                value={formData.about}
-                onChange={handleInputChange}
-                className="profile-textarea"
-                placeholder="Tell something about yourself (optional)"
-                maxLength="200"
-              />
+            {editingField === "about" ? (
+              <>
+                <textarea
+                  name="about"
+                  value={formData.about}
+                  onChange={handleInputChange}
+                  className="profile-textarea"
+                  placeholder="Tell something about yourself (optional)"
+                  maxLength="85"
+                  autoFocus
+                />
+
+                <p className="char-count">
+                  {formData.about.length}/85 characters
+                </p>
+              </>
             ) : (
               <div className="info-value">
                 {profileData.about || (
@@ -196,45 +286,7 @@ const ProfilePage = () => {
                 )}
               </div>
             )}
-            {isEditing && (
-              <p className="char-count">
-                {formData.about.length}/200 characters
-              </p>
-            )}
           </div>
-
-          {/* Stats Grid */}
-          {/* <div className="profile-stats-grid">
-            <div className="stat-card">
-              <div className="stat-icon points">
-                <TrendingUp size={24} />
-              </div>
-              <div className="stat-content">
-                <div className="stat-label">Total Points</div>
-                <div className="stat-value">{profileData.points}</div>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon week-points">
-                <Shield size={24} />
-              </div>
-              <div className="stat-content">
-                <div className="stat-label">Weekly Points</div>
-                <div className="stat-value">{profileData.weekPoints}</div>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon win-percentage">
-                <span className="percentage-icon">%</span>
-              </div>
-              <div className="stat-content">
-                <div className="stat-label">Win Percentage</div>
-                <div className="stat-value">{calculateWinPercentage()}%</div>
-              </div>
-            </div>
-          </div> */}
 
           {/* Member Since */}
           <div className="profile-info-card">
@@ -242,17 +294,20 @@ const ProfilePage = () => {
               <Calendar size={16} />
               <span>Member Since</span>
             </div>
-            <div className="info-value">{formatDate(profileData.createdAt)}</div>
+            <div className="info-value">
+              {formatDate(profileData.createdAt)}
+            </div>
           </div>
 
           {/* Recovery Code Section */}
           <div className="profile-info-card recovery-code-card">
             <div className="info-label-with-icon">
               <Shield size={16} />
-              <span>Recovery Code</span>
+              <span>Password Recovery Code</span>
             </div>
             <p className="recovery-code-description">
-              Use this code to reset your password if you forget it. Keep it safe and don't share it with anyone.
+              Use this code to reset or change your password if you forget it or want to change it. Keep it
+              safe and don't share it with anyone.
             </p>
             <div className="recovery-code-display">
               <div className="recovery-code-value">
@@ -277,43 +332,25 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          {isEditing && (
-            <div className="profile-actions">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setFormData({
-                    name: profileData.name,
-                    about: profileData.about
-                  });
-                  setError("");
-                }}
-                className="btn-cancel"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveProfile}
-                disabled={isSaving}
-                className="btn-save"
-              >
-                {isSaving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          )}
-
           {/* Logout Button */}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className="logout-btn"
           >
             <LogOut size={18} />
             <span>Logout</span>
           </button>
         </div>
-            </div>
-            </>
+      </div>
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          handleLogout();
+        }}
+      />
+    </>
   );
 };
 

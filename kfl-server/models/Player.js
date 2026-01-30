@@ -8,6 +8,15 @@ const PlayerSchema = new mongoose.Schema({
   team: {
     type: String,
     required: true
+  },
+  role: {
+    type: String,
+    enum: ['batter', 'wk-batter', 'bowler', 'all rounder', ''],
+    default: ''
+  },
+  momfrom25: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

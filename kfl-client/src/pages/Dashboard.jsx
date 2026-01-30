@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import TopBar from "../components/TopBar";
 import MatchPredictionModal from "../components/MatchPredictionModal";
-import { capitalizeFirstLetter } from "../helpers/functions";
+import { capitalizeFirstLetter, capitalizeEachWord } from "../helpers/functions";
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -28,9 +28,9 @@ const Dashboard = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   const formatDate = (date) => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const dayName = days[date.getDay()];
-    
+
     return `${dayName}, ${String(date.getDate()).padStart(2, "0")}/${String(
       date.getMonth() + 1
     ).padStart(2, "0")}/${date.getFullYear()}`;
@@ -40,7 +40,7 @@ const Dashboard = () => {
     onSwipedLeft: () => goToNextDay(),
     onSwipedRight: () => goToPreviousDay(),
     preventScrollOnSwipe: true,
-    trackMouse: true
+    trackMouse: true,
   });
 
   // today
@@ -169,7 +169,7 @@ const Dashboard = () => {
   const fetchMatchesForDate = async (date) => {
     try {
       setDateLoading(true);
-      const formattedDate = formatDate(date).split(', ')[1]; // Extract DD/MM/YYYY part for API
+      const formattedDate = formatDate(date).split(", ")[1]; // Extract DD/MM/YYYY part for API
       setDisplayDate(formatDate(date)); // Set full display date with day name
 
       const encodedDate = encodeURIComponent(formattedDate);
@@ -483,8 +483,8 @@ const Dashboard = () => {
                         key={userPred.userId}
                         className={userPred.isCurrentUser ? "bg-gray-50" : ""}
                       >
-                        <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
-                          {capitalizeFirstLetter(userPred.name || "Unknown")}
+                        <td className="px-2 truncate max-w-[120px] md:px-6 py-2 md:py-4 text-sm">
+                          {capitalizeEachWord(userPred.name || "Unknown")}
                           {userPred.isCurrentUser && (
                             <span className="ml-1 text-purple-700">(You)</span>
                           )}
@@ -613,8 +613,8 @@ const Dashboard = () => {
     // Check if match is completed and has a result
     const isMatchCompleted = match.result?.completed;
     const matchWinner = isMatchCompleted ? match.result.winner : null;
-    const playerOfTheMatch = isMatchCompleted 
-      ? playerDetails[match.result.playerOfTheMatch] 
+    const playerOfTheMatch = isMatchCompleted
+      ? playerDetails[match.result.playerOfTheMatch]
       : null;
 
     return (
@@ -624,7 +624,6 @@ const Dashboard = () => {
       >
         <div className="font-semibold text-sm md:text-base mb-2 md:mb-0">
           Match {match.matchNumber}: {match.team1} vs {match.team2}
-          
           {isMatchCompleted ? (
             <div className="text-green-600 md:ml-2 block md:inline mt-1 md:mt-0 text-sm">
               <span>Winning team: {matchWinner} </span>
@@ -701,7 +700,10 @@ const Dashboard = () => {
       <div className="flex flex-1">
         {/* <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} /> */}
 
-        <main {...swipeHandlers} className="flex-1 p-4 md:p-6 bg-gray-100 overflow-x-hidden min-h-[80vh] touch-pan-y mb-6">
+        <main
+          {...swipeHandlers}
+          className="flex-1 p-4 md:p-6 bg-gray-100 overflow-x-hidden min-h-[80vh] touch-pan-y mb-6"
+        >
           {renderDateNavigation()}
 
           <div className="text-center mb-6 md:mb-8">

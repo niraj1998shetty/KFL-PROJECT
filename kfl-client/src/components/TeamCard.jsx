@@ -1,7 +1,35 @@
 import React from "react";
 import { motion } from "framer-motion";
+import cskLogo from "../assets/csk-logo.png";
+import miLogo from "../assets/mi-logo.png";
+import rcbLogo from "../assets/rcb-logo.png";
+import srhLogo from "../assets/srh-logo.png";
+import kkrLogo from "../assets/kkr-logo.png";
+import dcLogo from "../assets/dc-logo.png";
+import pbksLogo from "../assets/pbks-logo.png";
+import rrLogo from "../assets/rr-logo.png";
+import gtLogo from "../assets/gt-logo.png";
+import lsgLogo from "../assets/lsg-logo.png";
+
 
 const TeamCard = ({ team, onSelect, colorGradient }) => {
+   const getTeamLogo = (code) => {
+     const teamLogos = {
+       CSK: cskLogo,
+       MI: miLogo,
+       RCB: rcbLogo,
+       SRH: srhLogo,
+       KKR: kkrLogo,
+       DC: dcLogo,
+       PBKS: pbksLogo,
+       RR: rrLogo,
+       GT: gtLogo,
+       LSG: lsgLogo,
+     };
+     return teamLogos[code] || null;
+   };
+
+   const teamLogo = getTeamLogo(team.code);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -36,25 +64,35 @@ const TeamCard = ({ team, onSelect, colorGradient }) => {
                 <circle cx="10" cy="10" r="2" fill="white" />
               </pattern>
             </defs>
-            <rect width="100" height="100" fill={`url(#pattern-${team.code})`} />
+            <rect
+              width="100"
+              height="100"
+              fill={`url(#pattern-${team.code})`}
+            />
           </svg>
         </div>
 
         {/* Content */}
-        <div className="relative h-48 p-6 flex flex-col justify-between text-white z-10">
+        <div className="relative h-55 p-6 flex flex-col justify-between text-white z-10">
           {/* Team Icon/Avatar */}
-          <div className="flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-2">
-            <span className="text-2xl font-bold">
-              {team.code.substring(0, 2).toUpperCase()}
-            </span>
-          </div>
+          <div className="flex items-center justify-center w-16 h-16  mb-2">
+            {teamLogo ? (
+              <img
+                src={teamLogo}
+                alt={`${team.name} logo`}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <span className="text-2xl font-bold text-gray-700">
+                {team.code.substring(0, 2).toUpperCase()}
+              </span>
+            )}
+           </div>
 
           {/* Team Info */}
           <div className="flex-1 flex flex-col justify-end">
             <h3 className="text-xl font-bold mb-1">{team.name}</h3>
-            <p className="text-sm text-white text-opacity-90">
-              {team.code}
-            </p>
+            <p className="text-sm text-white text-opacity-90">{team.code}</p>
           </div>
 
           {/* Player Count */}

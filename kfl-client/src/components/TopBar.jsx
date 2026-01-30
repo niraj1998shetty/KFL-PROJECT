@@ -6,8 +6,10 @@ import SemifinalPredictionModal from "./SemifinalPredictionModal";
 import SemifinalPredictionViewModal from "./SemifinalPredictionViewModal";
 import logo from '../assets/logo.png';
 import axios from "axios";
+import LogoutConfirmModal from "../components/LogoutConfirmModal";
 
-const TopBar = ({ showProfile = false }) => {
+
+const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBackClick=null}) => {
   const { currentUser, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSemifinalOptions, setShowSemifinalOptions] = useState(false);
@@ -24,6 +26,8 @@ const TopBar = ({ showProfile = false }) => {
 
   const profileMenuRef = useRef(null);
   const semifinalOptionsRef = useRef(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -142,31 +146,91 @@ const TopBar = ({ showProfile = false }) => {
       setShowToast(true);
     }
   };
+  const handleBackButtonClick = () => {
+    if(onBackClick){
+      onBackClick();
+    }
+    else{
+      navigate(-1);
+    }
+  };
+
+  const ProfileMenu = () => (
+    <div className="relative" ref={profileMenuRef}>
+      <button
+        className="p-2 rounded-full hover:bg-purple-800 hover:bg-opacity-50 transition duration-300 focus:outline-none"
+        onClick={() => setShowProfileMenu(!showProfileMenu)}
+      >
+        <User className="h-6 w-6" />
+      </button>
+
+      {showProfileMenu && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+          <button
+            onClick={() => {
+              navigate("/profile");
+              setShowProfileMenu(false);
+            }}
+            className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Profile
+          </button>
+          
+          <button
+            onClick={() => {
+              setShowLogoutConfirm(true);
+              setShowProfileMenu(false);
+            }}
+            className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            {showProfile ? (
+            {showProfile || pageTitle || showBackButton ? (
               // Profile Page Header
               <>
-                <div className="flex items-center flex-shrink-0">
+                <div className="hidden md:flex items-center flex-shrink-0 gap-3 ml-20 ">
+                  <div className="h-12 w-12 flex-shrink-0">
+                    <img
+                      src={logo}
+                      alt="KattheGang Logo"
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center flex-shrink-0 ml-0 md:ml-22">
+                  
                   <button
-                    onClick={() => navigate(-1)}
-                    className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
+                    onClick={handleBackButtonClick}
+                    className="p-2 rounded-full hover:bg-indigo-800 hover:bg-opacity-50 transition duration-300 focus:outline-none mr-2"
                   >
                     <ArrowLeft className="h-6 w-6" />
                   </button>
-                  <span className="text-xl font-bold">Profile</span>
+                  <span className="text-xl font-bold">
+                    {pageTitle || (showProfile ? "Profile" : "")}
+                  </span>
                 </div>
                 <div className="flex-grow"></div>
+                <div className="flex items-center">
+                  <ProfileMenu />
+                </div>
               </>
             ) : (
               // Default Header
               <>
-                <div className="flex items-center flex-shrink-0">
-                  <div className="h-12 w-12">
+                <div className="flex items-center flex-shrink-0 gap-2">
+                  <div className="h-12 w-12 flex-shrink-0">
                     <img
                       src={logo}
                       alt="KattheGang Logo"
@@ -174,7 +238,7 @@ const TopBar = ({ showProfile = false }) => {
                     />
                   </div>
 
-                  <div className="font-bold">
+                  <div className="font-bold whitespace-nowrap">
                     <span className="hidden md:inline text-xl">
                       KattheGang Fantasy League
                     </span>
@@ -187,8 +251,10 @@ const TopBar = ({ showProfile = false }) => {
                 <div className="flex items-center space-x-1">
                   <div className="relative" ref={semifinalOptionsRef}>
                     <button
-                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300"
-                      onClick={() => setShowSemifinalOptions(!showSemifinalOptions)}
+                      className="px-4 py-2 rounded-md text-sm font-medium hover:bg-purple-800 hover:bg-opacity-50 transition duration-300 whitespace-nowrap"
+                      onClick={() =>
+                        setShowSemifinalOptions(!showSemifinalOptions)
+                      }
                     >
                       Semifinal Prediction
                     </button>
@@ -231,44 +297,13 @@ const TopBar = ({ showProfile = false }) => {
                     )}
                   </div>
 
-                  <div className="relative" ref={profileMenuRef}>
-                    <button
-                      className="p-2 rounded-full hover:bg-indigo-500 hover:bg-opacity-50 transition duration-300 focus:outline-none"
-                      onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    >
-                      <User className="h-6 w-6" />
-                    </button>
-
-                    {showProfileMenu && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                        <button
-                          onClick={() => {
-                            navigate("/profile");
-                            setShowProfileMenu(false);
-                          }}
-                          className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                        >
-                          <User className="h-4 w-4 mr-2" />
-                          Profile
-                        </button>
-                        
-                        <button
-                          onClick={handleLogout}
-                          className="flex w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
-                        >
-                          <LogOut className="h-4 w-4 mr-2" />
-                          Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <ProfileMenu />
                 </div>
               </>
             )}
           </div>
         </div>
       </div>
-
       {showToast && (
         <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-fade-in-out">
           {toastMessage}
@@ -292,6 +327,14 @@ const TopBar = ({ showProfile = false }) => {
           currentUser={currentUser}
         />
       )}
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          handleLogout();
+        }}
+      />
     </>
   );
 };

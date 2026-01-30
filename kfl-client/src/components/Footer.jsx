@@ -125,39 +125,45 @@ const Footer = () => {
 
   // Other menu items (for mobile)
   const otherMenuItems = [
-    { 
-      label: "Teams & Players", 
+    {
+      label: "Teams & Players",
       path: "/teams-players",
-      action: () => setIsOtherMenuOpen(false)
+      action: () => setIsOtherMenuOpen(false),
     },
-    { 
-      label: "IPL Results", 
+    {
+      label: "IPL Results",
       path: "/match-results",
-      action: () => setIsOtherMenuOpen(false)
+      action: () => setIsOtherMenuOpen(false),
     },
-    { 
-      label: "Prize Pool", 
+    {
+      label: "Users",
+      path: "/users",
+      action: () => setIsOtherMenuOpen(false),
+    },
+
+    {
+      label: "Prize Pool",
       action: () => {
         setIsPrizeModalOpen(true);
         setIsOtherMenuOpen(false);
-      } 
+      },
     },
-    { 
-      label: "Rules", 
+    {
+      label: "Rules",
       action: () => {
         setIsRulesModalOpen(true);
         setIsOtherMenuOpen(false);
-      } 
+      },
     },
-    { 
-      label: "Excel Sheet Leaderboard", 
+    {
+      label: "Excel Sheet Leaderboard",
       external: true,
-      href: "https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing" 
+      href: "https://docs.google.com/spreadsheets/d/1YQRxSKM9WM2PVxmaOdNOQBaZVaScck1c7VzguJZldw4/edit?usp=sharing",
     },
-    { 
-      label: "Instagram", 
+    {
+      label: "Instagram",
       external: true,
-      href: "https://www.instagram.com/katthe_gang/" 
+      href: "https://www.instagram.com/katthe_gang/",
     },
   ];
 
@@ -167,7 +173,7 @@ const Footer = () => {
       <footer className="bg-gray-800 text-white p-6 hidden md:block">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
-            <p className="text-sm">© 2025 Cricket Prediction League. All rights reserved.</p>
+            <p className="text-sm">© 2026 KattheGang Fantasy League. All rights reserved.</p>
           </div>
         </div>
       </footer>
@@ -262,7 +268,7 @@ const Footer = () => {
       {isRulesModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 backdrop-blur-sm   bg-opacity-50"
             onClick={closeRulesModal}
           ></div>
 
@@ -326,7 +332,7 @@ const Footer = () => {
                     All players), that person earns +4 extra points.
                   </li>
                   <li>
-                    If a team wins by more than 100 runs, predictors of that
+                    If a team wins by more than or equal to 100 runs, predictors of that
                     team earn +2 extra points.
                   </li>
                   <li>
@@ -389,7 +395,7 @@ const Footer = () => {
       {isPrizeModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 backdrop-blur-sm  bg-opacity-50"
             onClick={closePrizeModal}
           >
             <div

@@ -2,6 +2,18 @@ const asyncHandler = require('express-async-handler');
 const Post = require('../models/Post');
 const User = require('../models/User');
 
+// Emoji mapping for reactions
+const reactionEmojis = {
+  like: "❤️",
+  fire: "🔥",
+  thumbsUp: "👍",
+  dislike: "👎",
+  sad: "🥲",
+  cry: "😭",
+  hardLaugh: "🤣",
+  highFive: "🙌"
+};
+
 // @desc    Create a new post
 // @route   POST /api/posts
 // @access  Private
@@ -101,6 +113,16 @@ const getPosts = asyncHandler(async (req, res) => {
       hardLaugh: post.hasUserReacted(req.user.id, 'hardLaugh'),
       highFive: post.hasUserReacted(req.user.id, 'highFive')
     };
+    // Group reactions by type with user info for easy display
+    postObj.reactionsByType = {};
+    Object.keys(reactionEmojis).forEach(type => {
+      postObj.reactionsByType[type] = post.reactions
+        .filter(r => r.type === type)
+        .map(r => ({
+          userId: r.user._id,
+          username: r.user.name
+        }));
+    });
     postObj.hasRead = post.readBy && post.readBy.includes(req.user.id);
     return postObj;
   });
@@ -145,6 +167,16 @@ const getPostById = asyncHandler(async (req, res) => {
     hardLaugh: post.hasUserReacted(req.user.id, 'hardLaugh'), // Add this line
     highFive: post.hasUserReacted(req.user.id, 'highFive')
   };
+  // Group reactions by type with user info for easy display
+  postObj.reactionsByType = {};
+  Object.keys(reactionEmojis).forEach(type => {
+    postObj.reactionsByType[type] = post.reactions
+      .filter(r => r.type === type)
+      .map(r => ({
+        userId: r.user._id,
+        username: r.user.name
+      }));
+  });
 
   res.status(200).json(postObj);
 });
@@ -274,12 +306,27 @@ const reactToPost = asyncHandler(async (req, res) => {
 
   await post.save();
   
+  // Populate user data for reactions
+  await post.populate('reactions.user', 'name');
+  
   // Get updated reaction counts
   const reactionCounts = post.getReactionCounts();
+  
+  // Group reactions by type with user info
+  const reactionsByType = {};
+  Object.keys(reactionEmojis).forEach(type => {
+    reactionsByType[type] = post.reactions
+      .filter(r => r.type === type)
+      .map(r => ({
+        userId: r.user._id,
+        username: r.user.name
+      }));
+  });
   
   res.status(200).json({ 
     message: existingReaction ? 'Reaction removed' : 'Reaction added',
     reactionCounts,
+    reactionsByType,
     userReactions: {
         like: post.hasUserReacted(req.user.id, 'like'),
         fire: post.hasUserReacted(req.user.id, 'fire'),

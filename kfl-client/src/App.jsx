@@ -17,6 +17,8 @@ import Posts from './pages/Posts';
 import TopBar from './components/TopBar';
 import Sidebar from './components/SideBar';
 import Footer from './components/Footer';
+import UsersPage from './pages/UsersPage';
+
 
 // Layout component for authenticated pages
 const AppLayout = ({ children }) => {
@@ -33,11 +35,15 @@ const AppLayout = ({ children }) => {
     </div>
   );
 };
-
-const ProfileLayout = ({ children }) => {
+const PageLayout = ({ children, pageTitle, showProfile = false, showBackButton = false, onBackClick = null }) => {
   return (
     <div className="flex flex-col h-screen">
-      <TopBar showProfile={true} />
+      <TopBar 
+        pageTitle={pageTitle}
+        showProfile={showProfile}
+        showBackButton={showBackButton}
+        onBackClick={onBackClick}
+      />
       <div className="flex flex-1 pt-16 overflow-hidden">
         <Sidebar />
         <main className="flex-1 bg-gray-100 overflow-auto pb-16 md:pb-0">
@@ -59,75 +65,86 @@ const App = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <AuthGuard>
                 <AppLayout>
                   <Dashboard />
                 </AppLayout>
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/leaderboard" 
+          <Route
+            path="/leaderboard"
             element={
               <AuthGuard>
                 <AppLayout>
                   <LeaderboardPage />
                 </AppLayout>
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/stats" 
+          <Route
+            path="/stats"
             element={
               <AuthGuard>
                 <AppLayout>
                   <PredictionStats />
                 </AppLayout>
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/posts" 
+          <Route
+            path="/posts"
             element={
               <AuthGuard>
                 <AppLayout>
                   <Posts />
                 </AppLayout>
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/teams-players" 
+          <Route
+            path="/teams-players"
             element={
               <AuthGuard>
-                <AppLayout>
+                 <PageLayout pageTitle="Teams & Players" showBackButton={true}>
                   <TeamsPlayersPage />
-                </AppLayout>
+                 </PageLayout>
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/match-results" 
+          <Route
+            path="/match-results"
             element={
               <AuthGuard>
-                <AppLayout>
+                <PageLayout pageTitle="IPL Results" showBackButton={true}>
                   <MatchResultsPage />
-                </AppLayout>
+                 </PageLayout>
               </AuthGuard>
-            } 
+            }
           />
-          <Route 
-            path="/profile" 
+          <Route
+            path="/users"
             element={
               <AuthGuard>
-                <ProfileLayout>
-                  <ProfilePage />
-                </ProfileLayout>
+               <PageLayout showProfile={true}>
+                  <UsersPage />
+                 </PageLayout>
               </AuthGuard>
-            } 
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <AuthGuard>
+               <PageLayout showProfile={true}>
+                  <ProfilePage />
+               </PageLayout>
+              </AuthGuard>
+            }
           />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
