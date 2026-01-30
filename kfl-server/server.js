@@ -27,8 +27,10 @@ app.use((req, res, next) => {
 });
 const allowedOrigins = [
   'https://katthegangfantasyleague.com',
-  'http://localhost:5000/api',
-  'http://localhost:5173'
+  'https://kfl-project-7w2i.vercel.app',
+  'https://kfl-project.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5000'
 ];
 // Middleware
 //app.use(cors({ origin: 'https://katthegangfantasyleague.com', credentials: true }));
@@ -76,3 +78,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
 });
+
