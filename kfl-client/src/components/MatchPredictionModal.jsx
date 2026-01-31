@@ -126,7 +126,7 @@ const MatchPredictionModal = ({ match, onClose, onSubmit, players, isEditing, in
               value={potm}
               options={teamPlayers}
               placeholder="-- Select Player --"
-              onSelect={(player) => setPotm(typeof player === 'string' ? player : player.name)}
+              onSelect={(player) => setPotm(typeof player === 'string' ? player : `${player.name} (${player.team})`)}
               isOpen={showPlayerDropdown}
               setIsOpen={setShowPlayerDropdown}
               dropdownRef={playerDropdownRef}
@@ -158,3 +158,4 @@ const MatchPredictionModal = ({ match, onClose, onSubmit, players, isEditing, in
 };
 
 export default MatchPredictionModal;
+
