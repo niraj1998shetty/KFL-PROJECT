@@ -76,11 +76,11 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
                       key={index}
                       className={prediction.isCurrentUser ? "bg-blue-50" : ""}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs font-medium">
                         {prediction.user} {prediction.isCurrentUser && "(You)"}
                       </td>
                       {prediction.teams.map((team, idx) => (
-                        <td key={idx} className="px-6 py-4 whitespace-nowrap">
+                        <td key={idx} className="px-6 py-4 whitespace-nowrap text-xs">
                           <div className="flex items-center">
                             <span className="text-xs font-medium bg-gray-200 text-gray-800 px-2 py-1 rounded mr-2">
                               {team}
