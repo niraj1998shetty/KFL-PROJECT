@@ -87,7 +87,10 @@ postSchema.methods.getReactionCounts = function() {
   };
   
   this.reactions.forEach(reaction => {
-    counts[reaction.type]++;
+    // Only count reactions from users that still exist (not deleted)
+    if (reaction.user) {
+      counts[reaction.type]++;
+    }
   });
   
   return counts;
