@@ -76,9 +76,6 @@ const getPosts = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   const markAsRead = req.query.markAsRead === 'true';
   
-  // Get total count for pagination info
-  const total = await Post.countDocuments();
-  
   // If markAsRead is true, update posts to mark them as read by this user
   if (markAsRead) {
     await Post.updateMany(
@@ -90,59 +87,83 @@ const getPosts = asyncHandler(async (req, res) => {
     );
   }
   
+  // Fetch more posts than needed to account for deleted authors
+  const fetchLimit = limit * 2;
+  
   // Fetch posts with pagination
-  const posts = await Post.find()
+  const allPosts = await Post.find()
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limit)
+    .limit(fetchLimit)
     .populate('author', 'name isAdmin')
     .populate('tags', 'name')
     .populate('reactions.user', 'name');
 
+  // Filter out posts with deleted authors
+  const validPosts = allPosts.filter(post => post.author);
+  
+  // Take only the requested limit
+  const posts = validPosts.slice(0, limit);
+  
+  // Get total count of posts with valid authors by checking all posts
+  const totalPosts = await Post.find().populate('author', '_id');
+  const total = totalPosts.filter(p => p.author).length;
+
   // Format posts to include reaction counts and editability
   const formattedPosts = posts.map(post => {
-    const postObj = post.toObject({ virtuals: true });
-    postObj.reactionCounts = post.getReactionCounts();
-    postObj.userReactions = {
-      like: post.hasUserReacted(req.user.id, 'like'),
-      fire: post.hasUserReacted(req.user.id, 'fire'),
-      thumbsUp: post.hasUserReacted(req.user.id, 'thumbsUp'),
-      dislike: post.hasUserReacted(req.user.id, 'dislike'),
-      sad: post.hasUserReacted(req.user.id, 'sad'),
-      cry: post.hasUserReacted(req.user.id, 'cry'),
-      hardLaugh: post.hasUserReacted(req.user.id, 'hardLaugh'),
-      highFive: post.hasUserReacted(req.user.id, 'highFive')
-    };
-    // Group reactions by type with user info for easy display
-    postObj.reactionsByType = {};
-    Object.keys(reactionEmojis).forEach(type => {
-      postObj.reactionsByType[type] = post.reactions
-        .filter(r => r.type === type)
-        .map(r => ({
-          userId: r.user._id,
-          username: r.user.name
-        }));
-    });
-    postObj.hasRead = post.readBy && post.readBy.includes(req.user.id);
-    
-    // Add poll vote information
-    if (post.isPoll && post.pollOptions) {
-      // Find which option the user voted for
-      const votedOption = post.pollOptions.find(option => 
-        option.votes && option.votes.some(vote => vote.toString() === req.user.id)
-      );
-      postObj.userVote = votedOption ? votedOption._id : null;
+    try {
+      const postObj = post.toObject({ virtuals: true });
+      postObj.reactionCounts = post.getReactionCounts();
+      postObj.userReactions = {
+        like: post.hasUserReacted(req.user.id, 'like'),
+        fire: post.hasUserReacted(req.user.id, 'fire'),
+        thumbsUp: post.hasUserReacted(req.user.id, 'thumbsUp'),
+        dislike: post.hasUserReacted(req.user.id, 'dislike'),
+        sad: post.hasUserReacted(req.user.id, 'sad'),
+        cry: post.hasUserReacted(req.user.id, 'cry'),
+        hardLaugh: post.hasUserReacted(req.user.id, 'hardLaugh'),
+        highFive: post.hasUserReacted(req.user.id, 'highFive')
+      };
+      // Group reactions by type with user info for easy display
+      postObj.reactionsByType = {};
+      Object.keys(reactionEmojis).forEach(type => {
+        postObj.reactionsByType[type] = post.reactions
+          .filter(r => r.type === type && r.user) // Filter out reactions from deleted users
+          .map(r => ({
+            userId: r.user._id,
+            username: r.user.name
+          }));
+      });
       
-      // Add vote counts to each option
-      postObj.pollOptions = post.pollOptions.map(option => ({
-        _id: option._id,
-        text: option.text,
-        voteCount: option.votes ? option.votes.length : 0
-      }));
+      // Filter out tags that are null (deleted users)
+      if (postObj.tags) {
+        postObj.tags = postObj.tags.filter(tag => tag !== null);
+      }
+      
+      postObj.hasRead = post.readBy && post.readBy.includes(req.user.id);
+      
+      // Add poll vote information
+      if (post.isPoll && post.pollOptions) {
+        // Find which option the user voted for
+        const votedOption = post.pollOptions.find(option => 
+          option.votes && option.votes.some(vote => vote && vote.toString() === req.user.id)
+        );
+        postObj.userVote = votedOption ? votedOption._id : null;
+        
+        // Add vote counts to each option - filter out null votes (deleted users)
+        postObj.pollOptions = post.pollOptions.map(option => ({
+          _id: option._id,
+          text: option.text,
+          voteCount: option.votes ? option.votes.filter(vote => vote !== null).length : 0
+        }));
+      }
+      
+      return postObj;
+    } catch (error) {
+      // Skip posts that fail to format (usually due to data inconsistencies)
+      return null;
     }
-    
-    return postObj;
-  });
+  }).filter(post => post !== null);
 
   // Return pagination metadata along with posts
   res.status(200).json({
@@ -172,6 +193,11 @@ const getPostById = asyncHandler(async (req, res) => {
     throw new Error('Post not found');
   }
 
+  if (!post.author) {
+    res.status(404);
+    throw new Error('Post author no longer exists');
+  }
+
   const postObj = post.toObject({ virtuals: true });
   postObj.reactionCounts = post.getReactionCounts();
   postObj.userReactions = {
@@ -188,7 +214,7 @@ const getPostById = asyncHandler(async (req, res) => {
   postObj.reactionsByType = {};
   Object.keys(reactionEmojis).forEach(type => {
     postObj.reactionsByType[type] = post.reactions
-      .filter(r => r.type === type)
+      .filter(r => r.type === type && r.user) // Filter out reactions from deleted users
       .map(r => ({
         userId: r.user._id,
         username: r.user.name
