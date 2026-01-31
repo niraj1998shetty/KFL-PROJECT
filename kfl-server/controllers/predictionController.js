@@ -116,7 +116,7 @@ const getAllMatchPredictions = asyncHandler(async (req, res) => {
       select: 'name mobile'
     });
     
-    return res.status(200).json(userPrediction);
+    return res.status(200).json(userPrediction.filter(p => p.user));
   }
 
   // If match has started, fetch and return all predictions
@@ -126,7 +126,10 @@ const getAllMatchPredictions = asyncHandler(async (req, res) => {
       select: 'name mobile'
     });
   
-  res.status(200).json(predictions);
+  // Filter out predictions from deleted users
+  const validPredictions = predictions.filter(p => p.user);
+  
+  res.status(200).json(validPredictions);
 });
 
 // @desc    Get leaderboard
@@ -197,8 +200,11 @@ const getLeaderboard = asyncHandler(async (req, res) => {
     }
   ]);
   
+  // Filter out entries where user was deleted
+  const validLeaderboard = leaderboard.filter(entry => entry.userDetails);
+  
   // Post-process to count various correct predictions with playerMap
-  const processedLeaderboard = leaderboard.map(entry => {
+  const processedLeaderboard = validLeaderboard.map(entry => {
     // Initialize counters
     let correctPotmCount = 0;
     let bothCorrectCount = 0;
@@ -281,10 +287,13 @@ const getBatchMatchPredictions = asyncHandler(async (req, res) => {
     })
     .populate('match');
   
+  // Filter out predictions from deleted users
+  const validPredictions = predictions.filter(p => p.user);
+  
   // Group predictions by match
   const predictionsByMatch = {};
   
-  for (const prediction of predictions) {
+  for (const prediction of validPredictions) {
     const matchId = prediction.match._id.toString();
     
     if (!predictionsByMatch[matchId]) {
@@ -323,6 +332,9 @@ const getStatsData = asyncHandler(async (req, res) => {
       select: '_id name'
     });
   
+  // Filter out predictions from deleted users
+  const validPredictions = predictions.filter(p => p.user);
+  
   // Step 5: Process stats data manually for more accurate POTM calculation
   const statsMap = {};
   
@@ -342,7 +354,7 @@ const getStatsData = asyncHandler(async (req, res) => {
   });
   
   // Process each prediction
-  predictions.forEach(prediction => {
+  validPredictions.forEach(prediction => {
     const userId = prediction.user._id.toString();
     const userStats = statsMap[userId];
     

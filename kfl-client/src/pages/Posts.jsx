@@ -712,6 +712,9 @@ const Posts = () => {
 
   // Fixed function to check if post is editable
   const isPostEditable = (post) => {
+    // Check if author exists (not deleted)
+    if (!post.author || !post.author._id) return false;
+    
     // Check if current user is the author
     const isAuthor = post.author._id === currentUser?._id;
     
@@ -1075,7 +1078,7 @@ const Posts = () => {
                       {/* Post Actions Dropdown (Edit/Delete) */}
                       <div className="relative post-actions-dropdown">
                         {(currentUser?.isAdmin || 
-                          (post.author._id === currentUser?._id && isPostEditable(post))) && (
+                          (post.author && post.author._id === currentUser?._id && isPostEditable(post))) && (
                           <button
                             onClick={() => toggleDropdown(post._id)}
                             data-dropdown-toggle={true}

@@ -131,7 +131,10 @@ const getAllSemifinalPredictions = asyncHandler(async (req, res) => {
     .populate('user', 'name mobile')
     .sort('createdAt');
   
-  res.status(200).json(predictions);
+  // Filter out predictions with deleted users
+  const validPredictions = predictions.filter(p => p.user);
+  
+  res.status(200).json(validPredictions);
 });
 
 module.exports = {

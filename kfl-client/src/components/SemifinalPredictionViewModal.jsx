@@ -12,12 +12,14 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
         setLoading(true);
         const response = await axios.get(`${API_URL}/semifinals/all`);
 
-        const formattedPredictions = response.data.map((prediction) => ({
-          user: prediction.user.name,
-          mobile: prediction.user.mobile,
-          teams: prediction.teams,
-          isCurrentUser: prediction.user._id === currentUser._id,
-        }));
+        const formattedPredictions = response.data
+          .filter(prediction => prediction.user) // Filter out predictions with deleted users
+          .map((prediction) => ({
+            user: prediction.user.name,
+            mobile: prediction.user.mobile,
+            teams: prediction.teams,
+            isCurrentUser: prediction.user._id === currentUser._id,
+          }));
 
         setPredictions(formattedPredictions);
       } catch (error) {

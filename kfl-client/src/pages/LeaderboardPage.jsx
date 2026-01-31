@@ -359,7 +359,10 @@ const LeaderboardPage = () => {
           (player) => player._id === formData.manOfTheMatch
         )?.name;
 
-        const updatePromises = userPredictions.map(async (prediction) => {
+        // Filter out predictions with deleted users
+        const validPredictions = userPredictions.filter(p => p.user && p.user._id);
+
+        const updatePromises = validPredictions.map(async (prediction) => {
           const correctTeam = prediction.predictedWinner === formData.winner;
 
           const correctMOM =
