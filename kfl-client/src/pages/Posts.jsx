@@ -47,6 +47,7 @@ const Posts = () => {
   const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null, postId: null, isMobileView: false });
   const [longPressTimer, setLongPressTimer] = useState(null);
   const [expandedPosts, setExpandedPosts] = useState({}); // Track which posts are expanded
+  const [showFloatingButton, setShowFloatingButton] = useState(false);
 
   // Mention feature states
   const [allUsers, setAllUsers] = useState([]);
@@ -111,21 +112,39 @@ const Posts = () => {
       }
     };
 
-    const handleScroll = () => {
+    const handleScroll = (e) => {
       // Clear long press timer on scroll
       if (longPressTimer) {
         clearTimeout(longPressTimer);
         setLongPressTimer(null);
       }
+      
+      // Check scroll position - use the target that's actually scrolling
+      let scrollTop = 0;
+      if (e.target === document) {
+        scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      } else if (e.target.scrollTop !== undefined) {
+        scrollTop = e.target.scrollTop;
+      }
+      
+      // Show floating button after scrolling down 300px
+      if (scrollTop > 300) {
+        setShowFloatingButton(true);
+      } else {
+        setShowFloatingButton(false);
+      }
     };
     
     document.addEventListener("mousedown", handleClickOutside);
+    // Listen for scroll on both window and document with capture to catch all scroll events
     window.addEventListener("scroll", handleScroll, true);
+    document.addEventListener("scroll", handleScroll, true);
     
     // Clean up event listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("scroll", handleScroll, true);
+      document.removeEventListener("scroll", handleScroll, true);
     };
   }, [activeReactionPost, activeDropdownId, longPressTimer]);
 
@@ -1293,6 +1312,74 @@ const Posts = () => {
           </div>
         </div>
       </main>
+      
+      {/* Floating Buttons */}
+      {showFloatingButton && (
+        <div className="fixed bottom-20 right-6 md:right-16 md:bottom-24 flex flex-col gap-3 z-50">
+          {/* Scroll to Top Button */}
+          <button
+            onClick={() => {
+              // Scroll both window and the scrolling container to top
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // Find and scroll the main content container
+              const mainContainer = document.querySelector('main.overflow-auto');
+              if (mainContainer) {
+                mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            className="bg-white hover:bg-gray-100 text-indigo-600 p-2 md:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-gray-200"
+            aria-label="Scroll to Top"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 md:h-5 md:w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
+            </svg>
+          </button>
+
+          {/* Create Post Button */}
+          {!showCreatePost && (
+            <button
+              onClick={() => {
+                setShowCreatePost(true);
+                // Scroll both window and the scrolling container to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Find and scroll the main content container
+                const mainContainer = document.querySelector('main.overflow-auto');
+                if (mainContainer) {
+                  mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              className="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white p-2 md:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+              aria-label="Create Post"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 md:h-5 md:w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
       
       {/* Reaction Users Popup */}
       <ReactionUsersModal 
