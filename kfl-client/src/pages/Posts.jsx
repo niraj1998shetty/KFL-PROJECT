@@ -36,6 +36,7 @@ const Posts = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
   const [error, setError] = useState("");
+  const [votingOptionId, setVotingOptionId] = useState(null);
   const [activeReactionPost, setActiveReactionPost] = useState(null);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -398,6 +399,7 @@ const Posts = () => {
 
   const handleVote = async (postId, optionId) => {
     try {
+      setVotingOptionId(optionId);
       const token = localStorage.getItem('token');
       
       const response = await axios.post(`${API_URL}/posts/${postId}/vote`, {
@@ -433,8 +435,14 @@ const Posts = () => {
           return post;
         })
       );
+      
+      setVotingOptionId(null);
     } catch (error) {
       console.error("Error voting on poll:", error);
+      setVotingOptionId(null);
+      setError(error.response?.data?.message || "Failed to vote on poll");
+      // Clear error after 3 seconds
+      setTimeout(() => setError(""), 3000);
     }
   };
 
@@ -765,18 +773,18 @@ const Posts = () => {
                 </div>
 
                 {/* Poll toggle */}
-                {/* <div className="flex items-center mb-4">
+                <div className="flex items-center mb-4 mt-4">
                   <input
                     type="checkbox"
                     id="isPoll"
                     checked={isCreatingPoll}
                     onChange={() => setIsCreatingPoll(!isCreatingPoll)}
-                    className="mr-2"
+                    className="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                   />
-                  <label htmlFor="isPoll" className="text-gray-700">
+                  <label htmlFor="isPoll" className="text-gray-700 cursor-pointer">
                     Create a poll
                   </label>
-                </div> */}
+                </div>
 
                 {/* Poll options */}
                 {isCreatingPoll && (
@@ -1056,12 +1064,12 @@ const Posts = () => {
                   {post.isPoll &&
                     post.pollOptions &&
                     post.pollOptions.length > 0 && (
-                      <div className="px-4 pb-3">
-                        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-                          <h4 className="font-medium text-gray-800 mb-3">
+                      <div className="px-4 pb-2">
+                        <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
+                          <h4 className="font-medium text-sm text-gray-800 mb-2">
                             Poll
                           </h4>
-                          <div className="space-y-2">
+                          <div className="space-y-1.5">
                             {post.pollOptions.map((option) => {
                               // Calculate percentage for this option
                               const totalVotes = post.pollOptions.reduce(
@@ -1078,6 +1086,7 @@ const Posts = () => {
 
                               // Check if user has voted for this option
                               const hasUserVoted = post.userVote === option._id;
+                              const isVoting = votingOptionId === option._id;
 
                               return (
                                 <div key={option._id} className="relative">
@@ -1085,7 +1094,9 @@ const Posts = () => {
                                   <div className="relative w-full overflow-hidden rounded-md">
                                     {/* Progress bar - absolute positioning with correct width */}
                                     <div
-                                      className="absolute top-0 left-0 h-full bg-blue-100"
+                                      className={`absolute top-0 left-0 h-full transition-all duration-300 ${
+                                        hasUserVoted ? 'bg-blue-200' : 'bg-blue-100'
+                                      }`}
                                       style={{
                                         width: `${votePercentage}%`,
                                         zIndex: 0,
@@ -1094,19 +1105,36 @@ const Posts = () => {
 
                                     {/* Option button - position relative to appear above progress bar */}
                                     <button
-                                      onClick={() =>
-                                        handleVote(post._id, option._id)
-                                      }
-                                      className={`w-full text-left p-2.5 border rounded-md transition-colors relative z-10
+                                      onClick={() => {
+                                        if (!post.userVote && !votingOptionId) {
+                                          handleVote(post._id, option._id);
+                                        }
+                                      }}
+                                      disabled={post.userVote !== null && post.userVote !== undefined || votingOptionId !== null}
+                                      className={`w-full text-left p-2 border rounded-md transition-all duration-300 relative z-10 text-sm
                                       ${
                                         hasUserVoted
-                                          ? "bg-blue-50 border-blue-300"
-                                          : "hover:bg-gray-100 bg-transparent"
+                                          ? "bg-gradient-to-r from-blue-50 to-blue-100 border-blue-400 border-2 font-medium shadow-sm"
+                                          : isVoting
+                                          ? "bg-blue-50 border-blue-300 cursor-wait"
+                                          : post.userVote
+                                          ? "bg-transparent cursor-not-allowed opacity-75"
+                                          : "hover:bg-gray-100 bg-transparent cursor-pointer hover:border-gray-400"
                                       }`}
                                     >
-                                      <div className="flex justify-between">
-                                        <span>{option.text}</span>
-                                        <span className="text-blue-600 font-medium">
+                                      <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-1.5">
+                                          {isVoting ? (
+                                            <svg className="animate-spin h-3.5 w-3.5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                          ) : hasUserVoted ? (
+                                            <span className="text-blue-600 text-xs font-bold">✓</span>
+                                          ) : null}
+                                          <span className={hasUserVoted ? "text-blue-800" : ""}>{option.text}</span>
+                                        </div>
+                                        <span className={`font-medium text-xs ${hasUserVoted ? "text-blue-700" : "text-blue-600"}`}>
                                           {votePercentage}%
                                         </span>
                                       </div>
@@ -1116,13 +1144,18 @@ const Posts = () => {
                               );
                             })}
                           </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            {post.pollOptions.reduce(
-                              (sum, opt) => sum + (opt.voteCount || 0),
-                              0,
-                            )}{" "}
-                            votes
-                          </p>
+                          <div className="mt-2 pt-1.5 border-t border-gray-200">
+                            <p className="text-xs text-gray-500">
+                              {post.pollOptions.reduce(
+                                (sum, opt) => sum + (opt.voteCount || 0),
+                                0,
+                              )}{" "}
+                              votes
+                            </p>
+                            <p className="text-[10px] text-gray-400 mt-0.5 italic">
+                              ℹ️ You can vote only once and cannot change your vote
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )}
