@@ -31,7 +31,7 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
   }, [currentUser, API_URL]);
 
   return (
-    <div className="fixed inset-0 backdrop-blur-sm  bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 backdrop-blur-sm  bg-opacity-50 flex items-center justify-center z-70 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full flex flex-col max-h-[90vh]">
         <div className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-4 rounded-t-lg flex-shrink-0">
           <h3 className="text-lg font-semibold">Semifinal Predictions</h3>
@@ -76,11 +76,11 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
                       key={index}
                       className={prediction.isCurrentUser ? "bg-blue-50" : ""}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs font-medium">
                         {prediction.user} {prediction.isCurrentUser && "(You)"}
                       </td>
                       {prediction.teams.map((team, idx) => (
-                        <td key={idx} className="px-6 py-4 whitespace-nowrap">
+                        <td key={idx} className="px-6 py-4 whitespace-nowrap text-xs">
                           <div className="flex items-center">
                             <span className="text-xs font-medium bg-gray-200 text-gray-800 px-2 py-1 rounded mr-2">
                               {team}
@@ -112,5 +112,6 @@ const SemifinalPredictionViewModal = ({ onClose, currentUser }) => {
     </div>
   );
 };
+
 
 export default SemifinalPredictionViewModal;
