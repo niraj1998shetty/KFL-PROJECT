@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSwipeable } from "react-swipeable";
 import { useAuth } from "../contexts/AuthContext";
 import axios from "axios";
 import TopBar from "../components/TopBar";
 import MatchPredictionModal from "../components/MatchPredictionModal";
-import { capitalizeFirstLetter, capitalizeEachWord } from "../helpers/functions";
+import { capitalizeEachWord } from "../helpers/functions";
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -20,6 +20,7 @@ const Dashboard = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [dateLoading, setDateLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const hasInitializedRef = useRef(false);
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [displayDate, setDisplayDate] = useState("");
@@ -115,22 +116,26 @@ const Dashboard = () => {
   // Helper functions to fetch
   const fetchPredictionsForMatches = async (matchesList) => {
     try {
-      //  all users' predictions for each macth
-      const allMatchPredictions = {};
-      for (const match of matchesList) {
+      //  all users' predictions for each match (parallel)
+      const predictionPromises = matchesList.map(async (match) => {
         try {
           const allPredictionsRes = await axios.get(
             `${API_URL}/predictions/match/${match._id}/all`
           );
-          allMatchPredictions[match._id] = allPredictionsRes.data;
+          return [match._id, allPredictionsRes.data];
         } catch (error) {
           console.error(
             `Error fetching predictions for match ${match._id}:`,
             error
           );
-          allMatchPredictions[match._id] = [];
+          return [match._id, []];
         }
-      }
+      });
+
+      const allMatchPredictionsEntries = await Promise.all(predictionPromises);
+      const allMatchPredictions = Object.fromEntries(
+        allMatchPredictionsEntries
+      );
 
       // Format
       const formattedPredictions = {};
@@ -241,17 +246,22 @@ const Dashboard = () => {
         const today = new Date();
         setDisplayDate(formatDate(today));
 
-        const playersRes = await axios.get(`${API_URL}/players`);
+        const [
+          playersRes,
+          predictionsRes,
+          usersRes,
+          todayMatchesRes,
+        ] = await Promise.all([
+          axios.get(`${API_URL}/players`),
+          axios.get(`${API_URL}/predictions/user`),
+          axios.get(`${API_URL}/auth/allUsers`),
+          axios.get(`${API_URL}/matches/today`),
+        ]);
+
         setPlayers(playersRes.data);
-
-        const predictionsRes = await axios.get(`${API_URL}/predictions/user`);
         setUserPredictions(predictionsRes.data);
-
-        const usersRes = await axios.get(`${API_URL}/auth/allUsers`);
         setAllUsers(usersRes.data);
-
-        const todayMatches = await axios.get(`${API_URL}/matches/today`);
-        setMatches(todayMatches.data);
+        setMatches(todayMatchesRes.data);
 
         const formattedPredictions = {};
         predictionsRes.data.forEach((pred) => {
@@ -270,32 +280,35 @@ const Dashboard = () => {
         setPredictions(formattedPredictions);
 
         // Fetch all users' predictions for each match
-        const allMatchPredictions = {};
-        for (const match of todayMatches.data) {
+        const predictionPromises = todayMatchesRes.data.map(async (match) => {
           try {
             const allPredictionsRes = await axios.get(
               `${API_URL}/predictions/match/${match._id}/all`
             );
-            allMatchPredictions[match._id] = allPredictionsRes.data;
+            return [match._id, allPredictionsRes.data];
           } catch (error) {
             if (error.response && error.response.status === 403) {
               // Predictions not visible yet
-              allMatchPredictions[match._id] = [];
-            } else {
-              console.error(
-                `Error fetching predictions for match ${match._id}:`,
-                error
-              );
-              allMatchPredictions[match._id] = [];
+              return [match._id, []];
             }
+            console.error(
+              `Error fetching predictions for match ${match._id}:`,
+              error
+            );
+            return [match._id, []];
           }
-        }
+        });
 
-        setAllPredictions(allMatchPredictions);
+        const allMatchPredictionsEntries = await Promise.all(
+          predictionPromises
+        );
+        setAllPredictions(Object.fromEntries(allMatchPredictionsEntries));
         setLoading(false);
       } catch (error) {
         console.error("Error fetching initial data:", error);
         setLoading(false);
+      } finally {
+        hasInitializedRef.current = true;
       }
     };
 
@@ -305,7 +318,9 @@ const Dashboard = () => {
   // Effect to fetch matches when the date changes
   useEffect(() => {
     if (currentUser) {
-      fetchMatchesForDate(currentDate);
+      if (hasInitializedRef.current) {
+        fetchMatchesForDate(currentDate);
+      }
     }
   }, [currentDate, currentUser]);
 
@@ -321,11 +336,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     const loadMatchStatuses = async () => {
-      const statuses = {};
-      for (const match of matches) {
-        statuses[match._id] = await fetchMatchStatus(match._id);
-      }
-      setMatchStatus(statuses);
+      const statusEntries = await Promise.all(
+        matches.map(async (match) => [
+          match._id,
+          await fetchMatchStatus(match._id),
+        ])
+      );
+      setMatchStatus(Object.fromEntries(statusEntries));
     };
 
     if (matches.length > 0) {
