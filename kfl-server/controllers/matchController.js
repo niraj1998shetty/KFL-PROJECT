@@ -14,11 +14,14 @@ const getMatches = asyncHandler(async (req, res) => {
 // @route   GET /api/matches/today
 // @access  Private
 const getTodayMatches = asyncHandler(async (req, res) => {
-  // Format today's date as DD/MM/YYYY to match your existing format
-  const today = new Date();
-  const day = String(today.getDate()).padStart(2, '0');
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const year = today.getFullYear();
+  // Get current time in IST (UTC + 5:30)
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC + 5:30
+  const istDate = new Date(now.getTime() + istOffset);
+  
+  const day = String(istDate.getUTCDate()).padStart(2, '0');
+  const month = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+  const year = istDate.getUTCFullYear();
   const formattedDate = `${day}/${month}/${year}`;
 
   const matches = await Match.find({ date: formattedDate }).sort({ time: 1 });
