@@ -9,7 +9,8 @@ const {
   getBatchMatchPredictions,
   getStatsData,
   getUserStats,
-  getRecentPerformance
+  getRecentPerformance,
+  getPredictionCounts
 } = require('../controllers/predictionController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -27,5 +28,6 @@ router.get('/matches/batch', getBatchMatchPredictions);
 router.get('/stats', getStatsData);
 router.get('/user-stats', getUserStats);
 router.get('/recent-performance', getRecentPerformance);
+router.post('/counts', getPredictionCounts);
 
 module.exports = router;
