@@ -87,7 +87,10 @@ postSchema.methods.getReactionCounts = function() {
   };
   
   this.reactions.forEach(reaction => {
-    counts[reaction.type]++;
+    // Only count reactions from users that still exist (not deleted)
+    if (reaction.user) {
+      counts[reaction.type]++;
+    }
   });
   
   return counts;
@@ -96,7 +99,7 @@ postSchema.methods.getReactionCounts = function() {
 // Methods for checking if a user has reacted with a specific type
 postSchema.methods.hasUserReacted = function(userId, type) {
   return this.reactions.some(reaction => 
-    reaction.user.toString() === userId.toString() && reaction.type === type
+    reaction.user && reaction.user.toString() === userId.toString() && reaction.type === type
   );
 };
 
