@@ -664,24 +664,35 @@ const Posts = () => {
   const renderContentWithMentions = (content) => {
     if (!content) return null;
     
-    // Split content by mentions (words starting with @)
-    const parts = content.split(/(@\S+)/g);
+    // Use regex to find and replace mentions
+    const mentionRegex = /@([A-Za-z\s]+?)(?=\s[^A-Za-z]|$|\s@|\s[a-z])/g;
     
-    return (
-      <>
-        {parts.map((part, index) => {
-          if (part.startsWith('@')) {
-            // This is a mention, render it in blue
-            return (
-              <span key={index} className="text-blue-600 font-semibold">
-                {part}
-              </span>
-            );
-          }
-          return <span key={index}>{part}</span>;
-        })}
-      </>
-    );
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+    
+    while ((match = mentionRegex.exec(content)) !== null) {
+      // Add text before the mention
+      if (match.index > lastIndex) {
+        parts.push(content.substring(lastIndex, match.index));
+      }
+      
+      // Add the mention
+      parts.push(
+        <span key={match.index} className="text-blue-600 font-semibold">
+          {match[0]}
+        </span>
+      );
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add remaining text after the last mention
+    if (lastIndex < content.length) {
+      parts.push(content.substring(lastIndex));
+    }
+    
+    return parts.length > 0 ? parts : content;
   };
 
   return (
