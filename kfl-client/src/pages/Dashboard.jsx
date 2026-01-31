@@ -500,7 +500,7 @@ const Dashboard = () => {
                         key={userPred.userId}
                         className={userPred.isCurrentUser ? "bg-gray-50" : ""}
                       >
-                        <td className="px-2 truncate max-w-[120px] md:px-6 py-2 md:py-4 text-sm">
+                        <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
                           {capitalizeEachWord(userPred.name || "Unknown")}
                           {userPred.isCurrentUser && (
                             <span className="ml-1 text-purple-700">(You)</span>
@@ -793,3 +793,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
