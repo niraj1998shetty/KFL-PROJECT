@@ -1217,8 +1217,11 @@ const Posts = () => {
                               )}{" "}
                               votes
                             </p>
-                            <p className="text-[10px] text-gray-400 mt-0.5 italic">
-                              ℹ️ You can vote only once and cannot change your vote
+                            <p className="text-[10px] mt-0.5 italic">
+                              {post.userVote 
+                                ? <span className="text-green-600 font-medium">✓ You have voted on this poll</span>
+                                : <span className="text-gray-400">ℹ️ You can vote only once and cannot change your vote</span>
+                              }
                             </p>
                           </div>
                         </div>
