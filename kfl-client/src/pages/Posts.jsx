@@ -1023,7 +1023,7 @@ const Posts = () => {
               posts.map((post) => (
                 <div
                   key={post._id}
-                  className="text-sm bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 relative"
+                  className="text-sm bg-white rounded-lg shadow-sm border border-gray-200 overflow-visible hover:shadow-md transition-shadow duration-200 relative"
                 >
                   {/* Post Header */}
                   <div className="p-4">
@@ -1095,7 +1095,7 @@ const Posts = () => {
                         {activeDropdownId === post._id && (
                           <div
                             ref={dropdownRef}
-                            className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200"
+                            className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200"
                           >
                             <div className="py-1">
                               {isPostEditable(post) && (
