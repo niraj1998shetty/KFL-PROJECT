@@ -96,7 +96,7 @@ postSchema.methods.getReactionCounts = function() {
 // Methods for checking if a user has reacted with a specific type
 postSchema.methods.hasUserReacted = function(userId, type) {
   return this.reactions.some(reaction => 
-    reaction.user.toString() === userId.toString() && reaction.type === type
+    reaction.user && reaction.user.toString() === userId.toString() && reaction.type === type
   );
 };
 
