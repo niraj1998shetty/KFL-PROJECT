@@ -165,7 +165,7 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
       </button>
 
       {showProfileMenu && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-[100]">
           <button
             onClick={() => {
               navigate("/profile");
@@ -194,7 +194,7 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-indigo-600 to-purple-700 text-white shadow-md">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             {showProfile || pageTitle || showBackButton ? (
@@ -260,7 +260,7 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
                     </button>
 
                     {showSemifinalOptions && (
-                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-10">
+                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-[100]">
                         {!hasSemifinalPrediction && editingAllowed && (
                           <button
                             onClick={() => {
