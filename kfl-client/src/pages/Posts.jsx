@@ -1155,9 +1155,6 @@ const Posts = () => {
                     post.pollOptions.length > 0 && (
                       <div className="px-4 pb-2">
                         <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
-                          <h4 className="font-medium text-sm text-gray-800 mb-2">
-                            Poll
-                          </h4>
                           <div className="space-y-1.5">
                             {post.pollOptions.map((option) => {
                               // Calculate percentage for this option
@@ -1203,7 +1200,7 @@ const Posts = () => {
                                       className={`w-full text-left p-2 border rounded-md transition-all duration-300 relative z-10 text-sm
                                       ${
                                         hasUserVoted
-                                          ? "bg-gradient-to-r from-blue-50 to-blue-100 border-blue-400 border-2 font-medium shadow-sm"
+                                          ? "bg-transparent border-blue-400 border-2 font-medium shadow-sm"
                                           : isVoting
                                           ? "bg-blue-50 border-blue-300 cursor-wait"
                                           : post.userVote
