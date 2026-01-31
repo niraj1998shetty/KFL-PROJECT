@@ -242,7 +242,7 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
                     <span className="hidden md:inline text-xl">
                       KattheGang Fantasy League
                     </span>
-                    <span className="md:hidden text-xl">KFL</span>
+                    <span className="md:hidden text-xl font-bold">KFL</span>
                   </div>
                 </div>
 
@@ -340,3 +340,4 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
 };
 
 export default TopBar;
+
