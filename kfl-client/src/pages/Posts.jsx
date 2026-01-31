@@ -977,8 +977,8 @@ const Posts = () => {
 
                       {/* Post Actions Dropdown (Edit/Delete) */}
                       <div className="relative post-actions-dropdown">
-                        {(post.author._id === currentUser?._id ||
-                          currentUser?.isAdmin) && (
+                        {(currentUser?.isAdmin || 
+                          (post.author._id === currentUser?._id && isPostEditable(post))) && (
                           <button
                             onClick={() => toggleDropdown(post._id)}
                             data-dropdown-toggle={true}
