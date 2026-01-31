@@ -124,6 +124,23 @@ const getPosts = asyncHandler(async (req, res) => {
         }));
     });
     postObj.hasRead = post.readBy && post.readBy.includes(req.user.id);
+    
+    // Add poll vote information
+    if (post.isPoll && post.pollOptions) {
+      // Find which option the user voted for
+      const votedOption = post.pollOptions.find(option => 
+        option.votes && option.votes.some(vote => vote.toString() === req.user.id)
+      );
+      postObj.userVote = votedOption ? votedOption._id : null;
+      
+      // Add vote counts to each option
+      postObj.pollOptions = post.pollOptions.map(option => ({
+        _id: option._id,
+        text: option.text,
+        voteCount: option.votes ? option.votes.length : 0
+      }));
+    }
+    
     return postObj;
   });
 
@@ -177,6 +194,22 @@ const getPostById = asyncHandler(async (req, res) => {
         username: r.user.name
       }));
   });
+  
+  // Add poll vote information
+  if (post.isPoll && post.pollOptions) {
+    // Find which option the user voted for
+    const votedOption = post.pollOptions.find(option => 
+      option.votes && option.votes.some(vote => vote.toString() === req.user.id)
+    );
+    postObj.userVote = votedOption ? votedOption._id : null;
+    
+    // Add vote counts to each option
+    postObj.pollOptions = post.pollOptions.map(option => ({
+      _id: option._id,
+      text: option.text,
+      voteCount: option.votes ? option.votes.length : 0
+    }));
+  }
 
   res.status(200).json(postObj);
 });
@@ -373,7 +406,6 @@ const voteOnPoll = asyncHandler(async (req, res) => {
 
   // Check if user has already voted on any option
   let hasVoted = false;
-  let previousVote = null;
 
   for (const opt of post.pollOptions) {
     const voteIndex = opt.votes.findIndex(
@@ -382,9 +414,9 @@ const voteOnPoll = asyncHandler(async (req, res) => {
     
     if (voteIndex !== -1) {
       hasVoted = true;
-      previousVote = opt;
-      // Remove previous vote
-      opt.votes.splice(voteIndex, 1);
+      // User has already voted, do not allow changing vote
+      res.status(400);
+      throw new Error('You have already voted on this poll');
     }
   }
 
@@ -400,7 +432,7 @@ const voteOnPoll = asyncHandler(async (req, res) => {
   }));
 
   res.status(200).json({
-    message: hasVoted ? 'Vote updated' : 'Vote recorded',
+    message: 'Vote recorded',
     pollResults
   });
 });

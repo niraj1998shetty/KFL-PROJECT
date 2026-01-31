@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [displayDate, setDisplayDate] = useState("");
   const [matchStatus, setMatchStatus] = useState({});
+  const [predictionCounts, setPredictionCounts] = useState({});
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -345,10 +346,38 @@ const Dashboard = () => {
       setMatchStatus(Object.fromEntries(statusEntries));
     };
 
+    const fetchPredictionCounts = async () => {
+      if (matches.length === 0) return;
+      
+      try {
+        const token = localStorage.getItem('token');
+        const matchIds = matches.map(m => m._id);
+        
+        const response = await axios.post(
+          `${API_URL}/predictions/counts`,
+          { matchIds },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        const countsMap = {};
+        response.data.forEach(item => {
+          countsMap[item.matchId] = {
+            predictionCount: item.predictionCount,
+            totalUsers: item.totalUsers
+          };
+        });
+        
+        setPredictionCounts(countsMap);
+      } catch (error) {
+        console.error('Error fetching prediction counts:', error);
+      }
+    };
+
     if (matches.length > 0) {
       loadMatchStatuses();
+      fetchPredictionCounts();
     }
-  }, [matches]);
+  }, [matches, API_URL]);
 
   const handlePredictionSubmit = async (matchId, winningTeam, potm) => {
     try {
@@ -433,6 +462,24 @@ const Dashboard = () => {
       }
       setUserPredictions(updatedUserPredictions);
 
+      // Update prediction count
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API_URL}/predictions/counts`,
+        { matchIds: [matchId] },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (response.data.length > 0) {
+        setPredictionCounts(prev => ({
+          ...prev,
+          [matchId]: {
+            predictionCount: response.data[0].predictionCount,
+            totalUsers: response.data[0].totalUsers
+          }
+        }));
+      }
+
       setActivePredictionModal(null);
       setIsEditing(false);
     } catch (error) {
@@ -500,7 +547,7 @@ const Dashboard = () => {
                         key={userPred.userId}
                         className={userPred.isCurrentUser ? "bg-gray-50" : ""}
                       >
-                        <td className="px-2 truncate max-w-[120px] md:px-6 py-2 md:py-4 text-sm">
+                        <td className="px-2 md:px-6 py-2 md:py-4 text-sm">
                           {capitalizeEachWord(userPred.name || "Unknown")}
                           {userPred.isCurrentUser && (
                             <span className="ml-1 text-purple-700">(You)</span>
@@ -655,9 +702,19 @@ const Dashboard = () => {
               (Match started)
             </span>
           ) : (
-            <span className="text-gray-500 text-xs md:ml-2 block md:inline mt-1 md:mt-0">
-              (You can't predict after {match.time})
-            </span>
+            <>
+              <span className="text-gray-500 text-xs md:ml-2 block md:inline mt-1 md:mt-0">
+                (You can't predict after {match.time})
+              </span>
+              {predictionCounts[match._id] && (
+                <span className="flex items-center gap-1 text-xs text-gray-500 mt-1 md:ml-2 md:inline-flex">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  {predictionCounts[match._id].predictionCount}/{predictionCounts[match._id].totalUsers} predicted
+                </span>
+              )}
+            </>
           )}
         </div>
 
@@ -793,3 +850,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

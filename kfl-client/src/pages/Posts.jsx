@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import axios from "axios";
 import TopBar from "../components/TopBar";
@@ -36,17 +36,19 @@ const Posts = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const emojiPickerRef = useRef(null);
   const [error, setError] = useState("");
+  const [votingOptionId, setVotingOptionId] = useState(null);
   const [activeReactionPost, setActiveReactionPost] = useState(null);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [postsPerPage, setPostsPerPage] = useState(10);
-  const [totalPosts, setTotalPosts] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [unreadPostsCount, setUnreadPostsCount] = useState(0);
   const [showReactionPopup, setShowReactionPopup] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null, postId: null, isMobileView: false });
   const [longPressTimer, setLongPressTimer] = useState(null);
   const [expandedPosts, setExpandedPosts] = useState({}); // Track which posts are expanded
+  const [showFloatingButton, setShowFloatingButton] = useState(false);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
 
   // Mention feature states
   const [allUsers, setAllUsers] = useState([]);
@@ -60,11 +62,12 @@ const Posts = () => {
   const dropdownRef = useRef(null);
   const reactionButtonsRef = useRef(null);
   const mentionModalRef = useRef(null);
+  const loaderRef = useRef(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
-    fetchPosts();
+    fetchPosts(true);
     fetchUnreadPostsCount();
     fetchAllUsers();
   }, []);
@@ -110,51 +113,127 @@ const Posts = () => {
       }
     };
 
-    const handleScroll = () => {
+    const handleScroll = (e) => {
       // Clear long press timer on scroll
       if (longPressTimer) {
         clearTimeout(longPressTimer);
         setLongPressTimer(null);
       }
+      
+      // Check scroll position - use the target that's actually scrolling
+      let scrollTop = 0;
+      if (e.target === document) {
+        scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      } else if (e.target.scrollTop !== undefined) {
+        scrollTop = e.target.scrollTop;
+      }
+      
+      // Show floating button after scrolling down 300px
+      if (scrollTop > 300) {
+        setShowFloatingButton(true);
+      } else {
+        setShowFloatingButton(false);
+      }
     };
     
     document.addEventListener("mousedown", handleClickOutside);
+    // Listen for scroll on both window and document with capture to catch all scroll events
     window.addEventListener("scroll", handleScroll, true);
+    document.addEventListener("scroll", handleScroll, true);
     
     // Clean up event listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("scroll", handleScroll, true);
+      document.removeEventListener("scroll", handleScroll, true);
     };
   }, [activeReactionPost, activeDropdownId, longPressTimer]);
 
   useEffect(() => {
   }, [allUsers]);
 
-  const fetchPosts = async () => {
+  const loadMorePosts = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    
     try {
-      setLoading(true);
+      setLoadingMore(true);
+      const nextPage = currentPage + 1;
       const token = localStorage.getItem('token');
       
       const postsRes = await axios.get(`${API_URL}/posts`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { page: currentPage, limit: postsPerPage, markAsRead: true }
+        params: { page: nextPage, limit: 10, markAsRead: true }
       });
       
-      setPosts(postsRes.data.posts);
-      setTotalPosts(postsRes.data.pagination.total);
-      setTotalPages(postsRes.data.pagination.totalPages);
+      setPosts(prev => [...prev, ...postsRes.data.posts]);
+      setCurrentPage(nextPage);
+      setHasMore(postsRes.data.pagination.hasNextPage);
+      setLoadingMore(false);
+    } catch (error) {
+      setLoadingMore(false);
+      console.error("Error loading more posts:", error);
+    }
+  }, [loadingMore, hasMore, currentPage, API_URL]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const currentLoaderRef = loaderRef.current;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (currentLoaderRef) {
+      observer.observe(currentLoaderRef);
+    }
+
+    return () => {
+      if (currentLoaderRef) {
+        observer.unobserve(currentLoaderRef);
+      }
+    };
+  }, [hasMore, loadingMore, loading, loadMorePosts]);
+
+  const fetchPosts = async (isInitial = false) => {
+    try {
+      if (isInitial) {
+        setLoading(true);
+        setCurrentPage(1);
+      }
+      
+      const token = localStorage.getItem('token');
+      
+      const postsRes = await axios.get(`${API_URL}/posts`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page: isInitial ? 1 : currentPage, limit: 10, markAsRead: true }
+      });
+      
+      if (isInitial) {
+        setPosts(postsRes.data.posts);
+      } else {
+        setPosts(prev => [...prev, ...postsRes.data.posts]);
+      }
+      
+      setHasMore(postsRes.data.pagination.hasNextPage);
       setLoading(false);
       
       // Reset unread count
-      setUnreadPostsCount(0);
-      
-      // Update other components
-      window.dispatchEvent(new CustomEvent('unreadPostsUpdate', { 
-        detail: { count: 0 } 
-      }));
+      if (isInitial) {
+        setUnreadPostsCount(0);
+        
+        // Update other components
+        window.dispatchEvent(new CustomEvent('unreadPostsUpdate', { 
+          detail: { count: 0 } 
+        }));
+      }
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching posts:", error);
     }
   };
 
@@ -266,26 +345,6 @@ const Posts = () => {
       }
     }
   };
-    
-    useEffect(() => {
-      fetchPosts();
-    }, [currentPage, postsPerPage]);
-
-    const handleNextPage = () => {
-      if (currentPage < totalPages) {
-        setCurrentPage((prevPage) => prevPage + 1);
-      }
-    };
-
-    const handlePrevPage = () => {
-      if (currentPage > 1) {
-        setCurrentPage((prevPage) => prevPage - 1);
-      }
-    };
-
-    const handlePageChange = (pageNumber) => {
-      setCurrentPage(pageNumber);
-    };
 
   const handleCreatePost = async () => {
     try {
@@ -295,6 +354,7 @@ const Posts = () => {
         return;
       }
       
+      setIsSubmittingPost(true);
       const token = localStorage.getItem('token');
       const postData = {
         content: newPostContent,
@@ -306,6 +366,7 @@ const Posts = () => {
         const validOptions = pollOptions.filter(opt => opt.trim() !== "");
         if (validOptions.length < 2) {
           setError("Please provide at least 2 options for the poll");
+          setIsSubmittingPost(false);
           return;
         }
         postData.pollOptions = validOptions;
@@ -320,9 +381,14 @@ const Posts = () => {
       setIsCreatingPoll(false);
       setPollOptions(["", ""]);
       setShowCreatePost(false);
-      fetchPosts();
+      // Refresh posts from the beginning
+      setCurrentPage(1);
+      setPosts([]);
+      fetchPosts(true);
     } catch (error) {
       setError(error.response?.data?.message || "Failed to create post");
+    } finally {
+      setIsSubmittingPost(false);
     }
   };
 
@@ -334,6 +400,7 @@ const Posts = () => {
         return;
       }
       
+      setIsSubmittingPost(true);
       const token = localStorage.getItem('token');
       
       await axios.put(`${API_URL}/posts/${editingPost._id}`, {
@@ -345,9 +412,14 @@ const Posts = () => {
       // Reset edit mode and fetch updated posts
       setEditingPost(null);
       setEditContent("");
-      fetchPosts();
+      // Refresh posts from the beginning
+      setCurrentPage(1);
+      setPosts([]);
+      fetchPosts(true);
     } catch (error) {
       setError(error.response?.data?.message || "Failed to update post");
+    } finally {
+      setIsSubmittingPost(false);
     }
   };
 
@@ -360,7 +432,9 @@ const Posts = () => {
       });
       
       // Refresh posts after deletion
-      fetchPosts();
+      setCurrentPage(1);
+      setPosts([]);
+      fetchPosts(true);
       // Close dropdown after action
       setActiveDropdownId(null);
     } catch (error) {
@@ -398,6 +472,7 @@ const Posts = () => {
 
   const handleVote = async (postId, optionId) => {
     try {
+      setVotingOptionId(optionId);
       const token = localStorage.getItem('token');
       
       const response = await axios.post(`${API_URL}/posts/${postId}/vote`, {
@@ -433,8 +508,14 @@ const Posts = () => {
           return post;
         })
       );
+      
+      setVotingOptionId(null);
     } catch (error) {
       console.error("Error voting on poll:", error);
+      setVotingOptionId(null);
+      setError(error.response?.data?.message || "Failed to vote on poll");
+      // Clear error after 3 seconds
+      setTimeout(() => setError(""), 3000);
     }
   };
 
@@ -765,18 +846,18 @@ const Posts = () => {
                 </div>
 
                 {/* Poll toggle */}
-                {/* <div className="flex items-center mb-4">
+                <div className="flex items-center mb-4 mt-4">
                   <input
                     type="checkbox"
                     id="isPoll"
                     checked={isCreatingPoll}
                     onChange={() => setIsCreatingPoll(!isCreatingPoll)}
-                    className="mr-2"
+                    className="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                   />
-                  <label htmlFor="isPoll" className="text-gray-700">
+                  <label htmlFor="isPoll" className="text-gray-700 cursor-pointer">
                     Create a poll
                   </label>
-                </div> */}
+                </div>
 
                 {/* Poll options */}
                 {isCreatingPoll && (
@@ -854,9 +935,17 @@ const Posts = () => {
                   </button>
                   <button
                     onClick={handleCreatePost}
-                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-md hover:from-indigo-700 hover:to-purple-800"
+                    disabled={isSubmittingPost}
+                    className="min-w-[100px] px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-md hover:from-indigo-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    Publish
+                    {isSubmittingPost ? (
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      "Publish"
+                    )}
                   </button>
                 </div>
               </div>
@@ -901,9 +990,17 @@ const Posts = () => {
                   </button>
                   <button
                     onClick={handleUpdatePost}
-                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-md hover:from-indigo-700 hover:to-purple-800"
+                    disabled={isSubmittingPost}
+                    className="min-w-[130px] px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-md hover:from-indigo-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
-                    Save Changes
+                    {isSubmittingPost ? (
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      "Save Changes"
+                    )}
                   </button>
                 </div>
               </div>
@@ -926,7 +1023,7 @@ const Posts = () => {
               posts.map((post) => (
                 <div
                   key={post._id}
-                  className="text-sm bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 relative"
+                  className="text-sm bg-white rounded-lg shadow-sm border border-gray-200 overflow-visible hover:shadow-md transition-shadow duration-200 relative"
                 >
                   {/* Post Header */}
                   <div className="p-4">
@@ -977,8 +1074,8 @@ const Posts = () => {
 
                       {/* Post Actions Dropdown (Edit/Delete) */}
                       <div className="relative post-actions-dropdown">
-                        {(post.author._id === currentUser?._id ||
-                          currentUser?.isAdmin) && (
+                        {(currentUser?.isAdmin || 
+                          (post.author._id === currentUser?._id && isPostEditable(post))) && (
                           <button
                             onClick={() => toggleDropdown(post._id)}
                             data-dropdown-toggle={true}
@@ -998,7 +1095,7 @@ const Posts = () => {
                         {activeDropdownId === post._id && (
                           <div
                             ref={dropdownRef}
-                            className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200"
+                            className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200"
                           >
                             <div className="py-1">
                               {isPostEditable(post) && (
@@ -1056,12 +1153,12 @@ const Posts = () => {
                   {post.isPoll &&
                     post.pollOptions &&
                     post.pollOptions.length > 0 && (
-                      <div className="px-4 pb-3">
-                        <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
-                          <h4 className="font-medium text-gray-800 mb-3">
+                      <div className="px-4 pb-2">
+                        <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
+                          <h4 className="font-medium text-sm text-gray-800 mb-2">
                             Poll
                           </h4>
-                          <div className="space-y-2">
+                          <div className="space-y-1.5">
                             {post.pollOptions.map((option) => {
                               // Calculate percentage for this option
                               const totalVotes = post.pollOptions.reduce(
@@ -1078,6 +1175,7 @@ const Posts = () => {
 
                               // Check if user has voted for this option
                               const hasUserVoted = post.userVote === option._id;
+                              const isVoting = votingOptionId === option._id;
 
                               return (
                                 <div key={option._id} className="relative">
@@ -1085,7 +1183,9 @@ const Posts = () => {
                                   <div className="relative w-full overflow-hidden rounded-md">
                                     {/* Progress bar - absolute positioning with correct width */}
                                     <div
-                                      className="absolute top-0 left-0 h-full bg-blue-100"
+                                      className={`absolute top-0 left-0 h-full transition-all duration-300 ${
+                                        hasUserVoted ? 'bg-blue-200' : 'bg-blue-100'
+                                      }`}
                                       style={{
                                         width: `${votePercentage}%`,
                                         zIndex: 0,
@@ -1094,19 +1194,36 @@ const Posts = () => {
 
                                     {/* Option button - position relative to appear above progress bar */}
                                     <button
-                                      onClick={() =>
-                                        handleVote(post._id, option._id)
-                                      }
-                                      className={`w-full text-left p-2.5 border rounded-md transition-colors relative z-10
+                                      onClick={() => {
+                                        if (!post.userVote && !votingOptionId) {
+                                          handleVote(post._id, option._id);
+                                        }
+                                      }}
+                                      disabled={post.userVote !== null && post.userVote !== undefined || votingOptionId !== null}
+                                      className={`w-full text-left p-2 border rounded-md transition-all duration-300 relative z-10 text-sm
                                       ${
                                         hasUserVoted
-                                          ? "bg-blue-50 border-blue-300"
-                                          : "hover:bg-gray-100 bg-transparent"
+                                          ? "bg-gradient-to-r from-blue-50 to-blue-100 border-blue-400 border-2 font-medium shadow-sm"
+                                          : isVoting
+                                          ? "bg-blue-50 border-blue-300 cursor-wait"
+                                          : post.userVote
+                                          ? "bg-transparent cursor-not-allowed opacity-75"
+                                          : "hover:bg-gray-100 bg-transparent cursor-pointer hover:border-gray-400"
                                       }`}
                                     >
-                                      <div className="flex justify-between">
-                                        <span>{option.text}</span>
-                                        <span className="text-blue-600 font-medium">
+                                      <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-1.5">
+                                          {isVoting ? (
+                                            <svg className="animate-spin h-3.5 w-3.5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                          ) : hasUserVoted ? (
+                                            <span className="text-blue-600 text-xs font-bold">✓</span>
+                                          ) : null}
+                                          <span className={hasUserVoted ? "text-blue-800" : ""}>{option.text}</span>
+                                        </div>
+                                        <span className={`font-medium text-xs ${hasUserVoted ? "text-blue-700" : "text-blue-600"}`}>
                                           {votePercentage}%
                                         </span>
                                       </div>
@@ -1116,13 +1233,21 @@ const Posts = () => {
                               );
                             })}
                           </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            {post.pollOptions.reduce(
-                              (sum, opt) => sum + (opt.voteCount || 0),
-                              0,
-                            )}{" "}
-                            votes
-                          </p>
+                          <div className="mt-2 pt-1.5 border-t border-gray-200">
+                            <p className="text-xs text-gray-500">
+                              {post.pollOptions.reduce(
+                                (sum, opt) => sum + (opt.voteCount || 0),
+                                0,
+                              )}{" "}
+                              votes
+                            </p>
+                            <p className="text-[10px] mt-0.5 italic">
+                              {post.userVote 
+                                ? <span className="text-green-600 font-medium">✓ You have voted on this poll</span>
+                                : <span className="text-gray-400">ℹ️ You can vote only once and cannot change your vote</span>
+                              }
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1196,102 +1321,92 @@ const Posts = () => {
               ))
             )}
 
-            {/* Pagination Controls */}
-            {!loading && totalPages > 1 && (
-              <div className="flex justify-center items-center mt-6 space-x-2">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-md ${
-                    currentPage === 1
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-700 text-white hover:from-indigo-700 hover:to-purple-800"
-                  }`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
+            {/* Infinite Scroll Loader */}
+            <div ref={loaderRef} className="flex justify-center items-center py-6">
+              {loadingMore && (
+                <div className="flex items-center gap-2 text-gray-600">
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                </button>
-
-                <div className="flex space-x-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((page) => {
-                      // Show current page, first, last, and pages close to current
-                      return (
-                        page === 1 ||
-                        page === totalPages ||
-                        (page >= currentPage - 1 && page <= currentPage + 1)
-                      );
-                    })
-                    .map((page, index, array) => {
-                      // Add ellipsis if there are gaps
-                      const showEllipsisBefore =
-                        index > 0 && array[index - 1] !== page - 1;
-                      const showEllipsisAfter =
-                        index < array.length - 1 &&
-                        array[index + 1] !== page + 1;
-
-                      return (
-                        <React.Fragment key={page}>
-                          {showEllipsisBefore && (
-                            <span className="px-3 py-1 text-gray-500">...</span>
-                          )}
-
-                          <button
-                            onClick={() => handlePageChange(page)}
-                            className={`px-3 py-1 rounded-md ${
-                              page === currentPage
-                                ? "bg-gradient-to-r from-indigo-600 to-purple-700 text-white"
-                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            }`}
-                          >
-                            {page}
-                          </button>
-
-                          {showEllipsisAfter && (
-                            <span className="px-3 py-1 text-gray-500">...</span>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
+                  <span className="text-sm">Loading more posts...</span>
                 </div>
-
-                <button
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-md ${
-                    currentPage === totalPages
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-700 text-white hover:from-indigo-700 hover:to-purple-800"
-                  }`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
+              )}
+              {!hasMore && posts.length > 0 && (
+                <p className="text-gray-500 text-sm">No more posts to load</p>
+              )}
+            </div>
           </div>
         </div>
       </main>
+      
+      {/* Floating Buttons */}
+      {showFloatingButton && (
+        <div className="fixed bottom-20 right-6 md:right-16 md:bottom-24 flex flex-col gap-3 z-50">
+          {/* Scroll to Top Button */}
+          <button
+            onClick={() => {
+              // Scroll both window and the scrolling container to top
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // Find and scroll the main content container
+              const mainContainer = document.querySelector('main.overflow-auto');
+              if (mainContainer) {
+                mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            className="bg-white hover:bg-gray-100 text-indigo-600 p-2 md:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-gray-200"
+            aria-label="Scroll to Top"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 md:h-5 md:w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 10l7-7m0 0l7 7m-7-7v18"
+              />
+            </svg>
+          </button>
+
+          {/* Create Post Button */}
+          {!showCreatePost && (
+            <button
+              onClick={() => {
+                setShowCreatePost(true);
+                // Scroll both window and the scrolling container to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Find and scroll the main content container
+                const mainContainer = document.querySelector('main.overflow-auto');
+                if (mainContainer) {
+                  mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              className="bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white p-2 md:p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+              aria-label="Create Post"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 md:h-5 md:w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
       
       {/* Reaction Users Popup */}
       <ReactionUsersModal 

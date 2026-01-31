@@ -28,20 +28,27 @@ const ReactionUsersModal = ({ isOpen, onClose, emoji, position, users, currentUs
       }
     };
 
+    const handleScroll = () => {
+      onClose();
+    };
+
     if (isOpen) {
       // Add a longer delay to prevent the opening click from immediately closing the modal
       const timer = setTimeout(() => {
         document.addEventListener('mousedown', handleClickOutside);
+        window.addEventListener('scroll', handleScroll, true);
       }, 100);
 
       return () => {
         clearTimeout(timer);
         document.removeEventListener('mousedown', handleClickOutside);
+        window.removeEventListener('scroll', handleScroll, true);
       };
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll, true);
     };
   }, [isOpen, onClose]);
 

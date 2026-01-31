@@ -589,6 +589,36 @@ const getRecentPerformance = asyncHandler(async (req, res) => {
   
   res.status(200).json({ recentMatches: processedMatches });
 });
+
+// @desc    Get prediction counts for matches
+// @route   POST /api/predictions/counts
+// @access  Private
+const getPredictionCounts = asyncHandler(async (req, res) => {
+  const { matchIds } = req.body;
+
+  if (!matchIds || !Array.isArray(matchIds)) {
+    res.status(400);
+    throw new Error('matchIds array is required');
+  }
+
+  // Get total user count
+  const totalUsers = await User.countDocuments();
+
+  // Get prediction counts for each match
+  const counts = await Promise.all(
+    matchIds.map(async (matchId) => {
+      const predictionCount = await Prediction.countDocuments({ match: matchId });
+      return {
+        matchId,
+        predictionCount,
+        totalUsers
+      };
+    })
+  );
+
+  res.status(200).json(counts);
+});
+
 module.exports = {
   createPrediction,
   getUserPredictions,
@@ -598,5 +628,6 @@ module.exports = {
   getBatchMatchPredictions,
   getStatsData,
   getUserStats,
-  getRecentPerformance
+  getRecentPerformance,
+  getPredictionCounts
 };
