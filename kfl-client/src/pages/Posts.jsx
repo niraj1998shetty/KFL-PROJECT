@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import axios from "axios";
 import TopBar from "../components/TopBar";
@@ -40,9 +40,8 @@ const Posts = () => {
   const [activeReactionPost, setActiveReactionPost] = useState(null);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [postsPerPage, setPostsPerPage] = useState(10);
-  const [totalPosts, setTotalPosts] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [unreadPostsCount, setUnreadPostsCount] = useState(0);
   const [showReactionPopup, setShowReactionPopup] = useState(false);
   const [selectedReaction, setSelectedReaction] = useState({ emoji: '', type: '', users: [], allUsers: [], position: null, postId: null, isMobileView: false });
@@ -61,11 +60,12 @@ const Posts = () => {
   const dropdownRef = useRef(null);
   const reactionButtonsRef = useRef(null);
   const mentionModalRef = useRef(null);
+  const loaderRef = useRef(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
-    fetchPosts();
+    fetchPosts(true);
     fetchUnreadPostsCount();
     fetchAllUsers();
   }, []);
@@ -132,30 +132,88 @@ const Posts = () => {
   useEffect(() => {
   }, [allUsers]);
 
-  const fetchPosts = async () => {
+  const loadMorePosts = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    
     try {
-      setLoading(true);
+      setLoadingMore(true);
+      const nextPage = currentPage + 1;
       const token = localStorage.getItem('token');
       
       const postsRes = await axios.get(`${API_URL}/posts`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { page: currentPage, limit: postsPerPage, markAsRead: true }
+        params: { page: nextPage, limit: 10, markAsRead: true }
       });
       
-      setPosts(postsRes.data.posts);
-      setTotalPosts(postsRes.data.pagination.total);
-      setTotalPages(postsRes.data.pagination.totalPages);
+      setPosts(prev => [...prev, ...postsRes.data.posts]);
+      setCurrentPage(nextPage);
+      setHasMore(postsRes.data.pagination.hasNextPage);
+      setLoadingMore(false);
+    } catch (error) {
+      setLoadingMore(false);
+      console.error("Error loading more posts:", error);
+    }
+  }, [loadingMore, hasMore, currentPage, API_URL]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const currentLoaderRef = loaderRef.current;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          loadMorePosts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (currentLoaderRef) {
+      observer.observe(currentLoaderRef);
+    }
+
+    return () => {
+      if (currentLoaderRef) {
+        observer.unobserve(currentLoaderRef);
+      }
+    };
+  }, [hasMore, loadingMore, loading, loadMorePosts]);
+
+  const fetchPosts = async (isInitial = false) => {
+    try {
+      if (isInitial) {
+        setLoading(true);
+        setCurrentPage(1);
+      }
+      
+      const token = localStorage.getItem('token');
+      
+      const postsRes = await axios.get(`${API_URL}/posts`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page: isInitial ? 1 : currentPage, limit: 10, markAsRead: true }
+      });
+      
+      if (isInitial) {
+        setPosts(postsRes.data.posts);
+      } else {
+        setPosts(prev => [...prev, ...postsRes.data.posts]);
+      }
+      
+      setHasMore(postsRes.data.pagination.hasNextPage);
       setLoading(false);
       
       // Reset unread count
-      setUnreadPostsCount(0);
-      
-      // Update other components
-      window.dispatchEvent(new CustomEvent('unreadPostsUpdate', { 
-        detail: { count: 0 } 
-      }));
+      if (isInitial) {
+        setUnreadPostsCount(0);
+        
+        // Update other components
+        window.dispatchEvent(new CustomEvent('unreadPostsUpdate', { 
+          detail: { count: 0 } 
+        }));
+      }
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching posts:", error);
     }
   };
 
@@ -267,26 +325,6 @@ const Posts = () => {
       }
     }
   };
-    
-    useEffect(() => {
-      fetchPosts();
-    }, [currentPage, postsPerPage]);
-
-    const handleNextPage = () => {
-      if (currentPage < totalPages) {
-        setCurrentPage((prevPage) => prevPage + 1);
-      }
-    };
-
-    const handlePrevPage = () => {
-      if (currentPage > 1) {
-        setCurrentPage((prevPage) => prevPage - 1);
-      }
-    };
-
-    const handlePageChange = (pageNumber) => {
-      setCurrentPage(pageNumber);
-    };
 
   const handleCreatePost = async () => {
     try {
@@ -321,7 +359,10 @@ const Posts = () => {
       setIsCreatingPoll(false);
       setPollOptions(["", ""]);
       setShowCreatePost(false);
-      fetchPosts();
+      // Refresh posts from the beginning
+      setCurrentPage(1);
+      setPosts([]);
+      fetchPosts(true);
     } catch (error) {
       setError(error.response?.data?.message || "Failed to create post");
     }
@@ -346,7 +387,10 @@ const Posts = () => {
       // Reset edit mode and fetch updated posts
       setEditingPost(null);
       setEditContent("");
-      fetchPosts();
+      // Refresh posts from the beginning
+      setCurrentPage(1);
+      setPosts([]);
+      fetchPosts(true);
     } catch (error) {
       setError(error.response?.data?.message || "Failed to update post");
     }
@@ -361,7 +405,9 @@ const Posts = () => {
       });
       
       // Refresh posts after deletion
-      fetchPosts();
+      setCurrentPage(1);
+      setPosts([]);
+      fetchPosts(true);
       // Close dropdown after action
       setActiveDropdownId(null);
     } catch (error) {
@@ -1229,99 +1275,21 @@ const Posts = () => {
               ))
             )}
 
-            {/* Pagination Controls */}
-            {!loading && totalPages > 1 && (
-              <div className="flex justify-center items-center mt-6 space-x-2">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-md ${
-                    currentPage === 1
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-700 text-white hover:from-indigo-700 hover:to-purple-800"
-                  }`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
+            {/* Infinite Scroll Loader */}
+            <div ref={loaderRef} className="flex justify-center items-center py-6">
+              {loadingMore && (
+                <div className="flex items-center gap-2 text-gray-600">
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                </button>
-
-                <div className="flex space-x-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((page) => {
-                      // Show current page, first, last, and pages close to current
-                      return (
-                        page === 1 ||
-                        page === totalPages ||
-                        (page >= currentPage - 1 && page <= currentPage + 1)
-                      );
-                    })
-                    .map((page, index, array) => {
-                      // Add ellipsis if there are gaps
-                      const showEllipsisBefore =
-                        index > 0 && array[index - 1] !== page - 1;
-                      const showEllipsisAfter =
-                        index < array.length - 1 &&
-                        array[index + 1] !== page + 1;
-
-                      return (
-                        <React.Fragment key={page}>
-                          {showEllipsisBefore && (
-                            <span className="px-3 py-1 text-gray-500">...</span>
-                          )}
-
-                          <button
-                            onClick={() => handlePageChange(page)}
-                            className={`px-3 py-1 rounded-md ${
-                              page === currentPage
-                                ? "bg-gradient-to-r from-indigo-600 to-purple-700 text-white"
-                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                            }`}
-                          >
-                            {page}
-                          </button>
-
-                          {showEllipsisAfter && (
-                            <span className="px-3 py-1 text-gray-500">...</span>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
+                  <span className="text-sm">Loading more posts...</span>
                 </div>
-
-                <button
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-md ${
-                    currentPage === totalPages
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-700 text-white hover:from-indigo-700 hover:to-purple-800"
-                  }`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
+              )}
+              {!hasMore && posts.length > 0 && (
+                <p className="text-gray-500 text-sm">No more posts to load</p>
+              )}
+            </div>
           </div>
         </div>
       </main>
