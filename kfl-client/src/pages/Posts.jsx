@@ -56,6 +56,7 @@ const Posts = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [mentionSearchQuery, setMentionSearchQuery] = useState("");
   const [mentionModalPosition, setMentionModalPosition] = useState({ top: 0, left: 0 });
+  const [mentions, setMentions] = useState([]);
   const textInputRef = useRef(null);
 
   // New refs for click outside detection
@@ -332,6 +333,17 @@ const Posts = () => {
       const afterCursor = value.substring(cursorPos);
       const newContent = `${beforeAt}@${user.name} ${afterCursor}`;
       
+      // Calculate the exact position of the mention in the new content
+      const mentionStart = beforeAt.length;
+      const mentionEnd = mentionStart + user.name.length + 1;
+      
+      // Add this mention to the mentions array
+      setMentions(prev => [...prev, {
+        start: mentionStart,
+        end: mentionEnd,
+        username: user.name
+      }]);
+      
       setNewPostContent(newContent);
       setShowMentionModal(false);
       
@@ -358,7 +370,8 @@ const Posts = () => {
       const token = localStorage.getItem('token');
       const postData = {
         content: newPostContent,
-        isPoll: isCreatingPoll
+        isPoll: isCreatingPoll,
+        mentions: mentions
       };
       
       if (isCreatingPoll) {
@@ -378,6 +391,7 @@ const Posts = () => {
       
       // Reset form and fetch updated posts
       setNewPostContent("");
+      setMentions([]);
       setIsCreatingPoll(false);
       setPollOptions(["", ""]);
       setShowCreatePost(false);
@@ -741,34 +755,96 @@ const Posts = () => {
     setActiveDropdownId(activeDropdownId === postId ? null : postId);
   };
 
-  // Function to parse and render mentions with blue styling
-  const renderContentWithMentions = (content) => {
+  // Function to render content - only styling actual selected mentions from modal
+  const renderContentWithMentions = (content, mentionsData = []) => {
     if (!content) return null;
     
-    // Use regex to find and replace mentions
-    const mentionRegex = /@([A-Za-z\s]+?)(?=\s[^A-Za-z]|$|\s@|\s[a-z])/g;
-    
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-    
-    while ((match = mentionRegex.exec(content)) !== null) {
-      // Add text before the mention
-      if (match.index > lastIndex) {
-        parts.push(content.substring(lastIndex, match.index));
+    // If mentions data provided (new posts), use it
+    if (mentionsData && mentionsData.length > 0) {
+      const parts = [];
+      let lastIndex = 0;
+      
+      // Sort mentions by start position
+      const sortedMentions = [...mentionsData].sort((a, b) => a.start - b.start);
+      
+      sortedMentions.forEach(mention => {
+        // Add text before the mention
+        if (mention.start > lastIndex) {
+          parts.push(content.substring(lastIndex, mention.start));
+        }
+        
+        // Add the styled mention
+        parts.push(
+          <span key={`mention-${mention.start}`} className="text-blue-600 font-semibold">
+            {content.substring(mention.start, mention.end)}
+          </span>
+        );
+        
+        lastIndex = mention.end;
+      });
+      
+      // Add remaining text after the last mention
+      if (lastIndex < content.length) {
+        parts.push(content.substring(lastIndex));
       }
       
-      // Add the mention
-      parts.push(
-        <span key={match.index} className="text-blue-600 font-semibold">
-          {match[0]}
-        </span>
-      );
-      
-      lastIndex = match.index + match[0].length;
+      return parts.length > 0 ? parts : content;
     }
     
-    // Add remaining text after the last mention
+    // Fallback: Parse mentions from content by matching against actual usernames
+    const parts = [];
+    let lastIndex = 0;
+    let i = 0;
+    
+    while (i < content.length) {
+      if (content[i] === '@') {
+        // Check if @ is preceded by space or at start
+        const charBefore = i > 0 ? content[i - 1] : ' ';
+        if (charBefore === ' ' || charBefore === '\n' || i === 0) {
+          // Add text before @
+          if (i > lastIndex) {
+            parts.push(content.substring(lastIndex, i));
+          }
+          
+          // Try to match against actual usernames
+          let matchedUsername = null;
+          let matchLength = 0;
+          
+          // Sort by length descending to match longest username first
+          const sortedUsers = [...allUsers].sort((a, b) => b.name.length - a.name.length);
+          
+          for (const user of sortedUsers) {
+            const candidateText = content.substring(i + 1, i + 1 + user.name.length);
+            if (candidateText === user.name) {
+              // Check that mention ends properly (followed by space, newline, or end of string)
+              const charAfter = i + 1 + user.name.length < content.length 
+                ? content[i + 1 + user.name.length] 
+                : ' ';
+              if (charAfter === ' ' || charAfter === '\n' || i + 1 + user.name.length === content.length) {
+                matchedUsername = user.name;
+                matchLength = user.name.length;
+                break;
+              }
+            }
+          }
+          
+          if (matchedUsername) {
+            // Add styled mention
+            parts.push(
+              <span key={`mention-${i}`} className="text-blue-600 font-semibold">
+                @{matchedUsername}
+              </span>
+            );
+            lastIndex = i + 1 + matchLength;
+            i = lastIndex;
+            continue;
+          }
+        }
+      }
+      i++;
+    }
+    
+    // Add remaining text
     if (lastIndex < content.length) {
       parts.push(content.substring(lastIndex));
     }
@@ -1056,8 +1132,8 @@ const Posts = () => {
                           <div className="mt-2">
                             <div className="text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
                               {expandedPosts[post._id] 
-                                ? renderContentWithMentions(post.content)
-                                : renderContentWithMentions(getTruncatedContent(post.content))
+                                ? renderContentWithMentions(post.content, post.mentions)
+                                : renderContentWithMentions(getTruncatedContent(post.content), post.mentions)
                               }
                             </div>
                             {isPostLong(post.content) && (
