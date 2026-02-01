@@ -120,7 +120,15 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
             </span>
           </div>
 
-          {/* Additional Info */}
+          {/* Additional Info - Always visible on mobile, hover on desktop */}
+          <div className="pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 block sm:hidden">
+            <div className="text-center">
+              <p className="text-[9px] text-gray-500">
+                MOM since 2025: <span className="font-bold text-gray-800">{player.momfrom25}</span>
+              </p>
+            </div>
+          </div>
+
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{
@@ -128,7 +136,7 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
               height: isHovered ? "auto" : 0,
             }}
             transition={{ duration: 0.2 }}
-            className="pt-0 sm:pt-3 border-t border-gray-200"
+            className="pt-0 sm:pt-3 border-t border-gray-200 hidden sm:block"
           >
             <div className="text-center">
               <p className="text-xs text-gray-500">
