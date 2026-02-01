@@ -30,27 +30,27 @@
   
   /* Make all text slightly bolder on Android mobile devices */
   body, h1, h2, h3, h4, h5, h6, p, span, div, th, td, button, input, select, textarea, label {
-    font-weight: 500 !important;
+    font-weight: 400 !important;
   }
   
   /* Ensure semibold appears even bolder */
   .font-semibold {
-    font-weight: 700 !important;
+    font-weight: 500 !important;
   }
   
   /* Ensure bold appears very bold */
   .font-bold {
-    font-weight: 800 !important;
+    font-weight: 700 !important;
   }
   
   /* Ensure medium weight appears stronger */
   .font-medium {
-    font-weight: 600 !important;
+    font-weight: 500 !important;
   }
   
   /* Make normal weight slightly bolder */
   .font-normal {
-    font-weight: 500 !important;
+    font-weight: 400 !important;
   }
   
   /* Enhanced styling for leaderboard table specifically */
@@ -65,7 +65,7 @@
   
   /* Extra bold for important text elements on Android */
   .font-semibold, h1, h2, h3 {
-    font-weight: 800 !important;
+    font-weight: 700 !important;
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
   }
 }
