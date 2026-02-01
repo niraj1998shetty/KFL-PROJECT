@@ -1,72 +1,56 @@
 @import "tailwindcss";
 
-/* Global font optimization for mobile devices */
+/* Global font optimization for all devices */
 * {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   font-kerning: auto;
 }
 
-/* iOS specific font enhancement */
-@supports (-webkit-touch-callout: none) {
+/* Enhanced font rendering for mobile devices (both iOS and Android) */
+@media screen and (max-width: 768px) {
+  /* Balanced font smoothing - works well on both platforms */
   * {
-    -webkit-text-stroke: 0.015em rgba(0, 0, 0, 0.15);
-  }
-}
-
-/* Android specific font enhancement */
-@media screen and (-webkit-min-device-pixel-ratio: 1) {
-  body {
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
-  }
-}
-
-/* Enhanced font rendering for ACTUAL mobile devices only */
-@media screen and (max-width: 768px) and (pointer: coarse) and (hover: none) {
-  * {
-    -webkit-text-stroke: 0.01em rgba(0, 0, 0, 0.1);
-    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
   }
   
-  /* Make all text slightly bolder on actual mobile devices */
-  body, h1, h2, h3, h4, h5, h6, p, span, div, th, td, button, input, select, textarea, label {
-    font-weight: 500 !important;
+  /* Moderate font-weight increase for better readability on mobile */
+  body, p, span, div, td, li {
+    font-weight: 450;
   }
   
-  /* Ensure semibold appears even bolder */
-  .font-semibold {
-    font-weight: 700 !important;
+  /* Headers and important text - slightly bolder */
+  h1, h2, h3, h4, h5, h6, th {
+    font-weight: 650;
   }
   
-  /* Ensure bold appears very bold */
-  .font-bold {
-    font-weight: 800 !important;
-  }
-  
-  /* Ensure medium weight appears stronger */
-  .font-medium {
-    font-weight: 600 !important;
-  }
-  
-  /* Make normal weight slightly bolder */
+  /* Tailwind utility classes - moderate increases */
   .font-normal {
-    font-weight: 500 !important;
+    font-weight: 450;
   }
   
-  /* Enhanced styling for leaderboard table specifically */
-  table th {
-    font-weight: 700 !important;
-    letter-spacing: 0.025em !important;
+  .font-medium {
+    font-weight: 550;
   }
   
-  table td .text-sm {
-    font-weight: 600 !important;
+  .font-semibold {
+    font-weight: 600;
   }
   
-  /* Extra bold for important text elements on mobile */
-  .font-semibold, h1, h2, h3 {
-    font-weight: 800 !important;
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+  .font-bold {
+    font-weight: 650;
+  }
+  
+  /* Button text */
+  button {
+    font-weight: 550;
+  }
+  
+  /* Subtle text shadow for Android to match iOS rendering */
+  @supports not (-webkit-touch-callout: none) {
+    body {
+      text-shadow: 0 0.3px 0.5px rgba(0, 0, 0, 0.1);
+    }
   }
 }
 

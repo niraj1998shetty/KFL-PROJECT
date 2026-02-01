@@ -29,6 +29,26 @@ const pollOptionSchema = new mongoose.Schema({
   }]
 });
 
+const mentionSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  username: {
+    type: String,
+    required: true
+  },
+  start: {
+    type: Number,
+    required: true
+  },
+  end: {
+    type: Number,
+    required: true
+  }
+});
+
 const postSchema = new mongoose.Schema({
   content: {
     type: String,
@@ -44,6 +64,7 @@ const postSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
+  mentions: [mentionSchema],
   isPoll: {
     type: Boolean,
     default: false

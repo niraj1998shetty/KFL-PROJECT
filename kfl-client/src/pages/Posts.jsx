@@ -56,9 +56,11 @@ const Posts = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [mentionSearchQuery, setMentionSearchQuery] = useState("");
   const [mentionModalPosition, setMentionModalPosition] = useState({ top: 0, left: 0 });
+  const [mentions, setMentions] = useState([]);
   const textInputRef = useRef(null);
 
-  // New refs for click outside detection
+  // New refs for edit textarea and other elements
+  const editTextareaRef = useRef(null);
   const dropdownRef = useRef(null);
   const reactionButtonsRef = useRef(null);
   const mentionModalRef = useRef(null);
@@ -266,25 +268,20 @@ const Posts = () => {
     const value = e.target.value;
     setNewPostContent(value);
 
-    // Get the textarea element and its properties
     const textarea = e.target;
     const cursorPos = textarea.selectionStart;
     
-    // Get text from last @ symbol to current cursor position
     const textBeforeCursor = value.substring(0, cursorPos);
     const lastAtIndex = textBeforeCursor.lastIndexOf('@');
 
     if (lastAtIndex !== -1) {
-      // Check if @ is preceded by a space or at the start (avoid matching email addresses)
       const charBeforeAt = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
       if (charBeforeAt === ' ' || charBeforeAt === '\n' || lastAtIndex === 0) {
         const searchQuery = textBeforeCursor.substring(lastAtIndex + 1);
         
-        // Show modal if @ is just typed or there's no space after it
         if (!searchQuery.includes(' ')) {
           setMentionSearchQuery(searchQuery);
           
-          // Filter users based on search query (show all if query is empty)
           let filtered = allUsers;
           if (searchQuery.length > 0) {
             filtered = allUsers.filter(user =>
@@ -293,11 +290,86 @@ const Posts = () => {
           }
           setFilteredUsers(filtered);
           
-          // Calculate modal position relative to the textarea
           const rect = textarea.getBoundingClientRect();
           const containerRect = textarea.parentElement.getBoundingClientRect();
           
-          // Calculate line number where cursor is
+          const lines = textBeforeCursor.split('\n').length - 1;
+          const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 24;
+          const paddingTop = parseInt(window.getComputedStyle(textarea).paddingTop) || 12;
+          
+          const top = paddingTop + (lines * lineHeight) + 30;
+          const left = 12;
+          
+          setMentionModalPosition({ top, left });
+          setShowMentionModal(true);
+        } else {
+          setShowMentionModal(false);
+        }
+      } else {
+        setShowMentionModal(false);
+      }
+    } else {
+      setShowMentionModal(false);
+    }
+  };
+
+  // Helper to handle mention selection in edit mode
+  const handleSelectMentionedUserInEdit = (user) => {
+    const value = editContent;
+    const textarea = editTextareaRef.current;
+    const cursorPos = textarea?.selectionStart || value.length;
+
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex !== -1) {
+      const beforeAt = value.substring(0, lastAtIndex);
+      const afterCursor = value.substring(cursorPos);
+      const newContent = `${beforeAt}@${user.name} ${afterCursor}`;
+      
+      setEditContent(newContent);
+      setShowMentionModal(false);
+      
+      if (textarea) {
+        setTimeout(() => {
+          textarea.focus();
+          const newCursorPos = beforeAt.length + user.name.length + 2;
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+        }, 0);
+      }
+    }
+  };
+
+  // Helper function to handle mention input for edit mode
+  const handleMentionInputForEdit = (e) => {
+    setEditContent(e.target.value);
+
+    const value = e.target.value;
+    const textarea = e.target;
+    const cursorPos = textarea.selectionStart;
+    
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex !== -1) {
+      const charBeforeAt = lastAtIndex > 0 ? textBeforeCursor[lastAtIndex - 1] : ' ';
+      if (charBeforeAt === ' ' || charBeforeAt === '\n' || lastAtIndex === 0) {
+        const searchQuery = textBeforeCursor.substring(lastAtIndex + 1);
+        
+        if (!searchQuery.includes(' ')) {
+          setMentionSearchQuery(searchQuery);
+          
+          let filtered = allUsers;
+          if (searchQuery.length > 0) {
+            filtered = allUsers.filter(user =>
+              user.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+          }
+          setFilteredUsers(filtered);
+          
+          const rect = textarea.getBoundingClientRect();
+          const containerRect = textarea.parentElement.getBoundingClientRect();
+          
           const lines = textBeforeCursor.split('\n').length - 1;
           const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 24;
           const paddingTop = parseInt(window.getComputedStyle(textarea).paddingTop) || 12;
@@ -332,6 +404,18 @@ const Posts = () => {
       const afterCursor = value.substring(cursorPos);
       const newContent = `${beforeAt}@${user.name} ${afterCursor}`;
       
+      // Calculate the exact position of the mention in the new content
+      const mentionStart = beforeAt.length;
+      const mentionEnd = mentionStart + user.name.length + 1;
+      
+      // Add this mention to the mentions array with user ID
+      setMentions(prev => [...prev, {
+        start: mentionStart,
+        end: mentionEnd,
+        userId: user._id,
+        username: user.name
+      }]);
+      
       setNewPostContent(newContent);
       setShowMentionModal(false);
       
@@ -358,7 +442,8 @@ const Posts = () => {
       const token = localStorage.getItem('token');
       const postData = {
         content: newPostContent,
-        isPoll: isCreatingPoll
+        isPoll: isCreatingPoll,
+        mentions: mentions
       };
       
       if (isCreatingPoll) {
@@ -378,6 +463,7 @@ const Posts = () => {
       
       // Reset form and fetch updated posts
       setNewPostContent("");
+      setMentions([]);
       setIsCreatingPoll(false);
       setPollOptions(["", ""]);
       setShowCreatePost(false);
@@ -658,6 +744,8 @@ const Posts = () => {
 
   const handleEditClick = (post) => {
     setEditingPost(post);
+    // Show original content as-is (don't reconstruct with current names)
+    // The mentions will be re-parsed from the edited content on save
     setEditContent(post.content);
     // Close dropdown after action
     setActiveDropdownId(null);
@@ -741,34 +829,158 @@ const Posts = () => {
     setActiveDropdownId(activeDropdownId === postId ? null : postId);
   };
 
-  // Function to parse and render mentions with blue styling
-  const renderContentWithMentions = (content) => {
+  // Function to render content - only styling actual selected mentions from modal
+  const renderContentWithMentions = (content, mentionsData = []) => {
     if (!content) return null;
     
-    // Use regex to find and replace mentions
-    const mentionRegex = /@([A-Za-z\s]+?)(?=\s[^A-Za-z]|$|\s@|\s[a-z])/g;
-    
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-    
-    while ((match = mentionRegex.exec(content)) !== null) {
-      // Add text before the mention
-      if (match.index > lastIndex) {
-        parts.push(content.substring(lastIndex, match.index));
+    // If mentions data provided, use it to render with current usernames
+    if (mentionsData && mentionsData.length > 0) {
+      const parts = [];
+      let lastIndex = 0;
+      
+      // Sort mentions by start position
+      const sortedMentions = [...mentionsData].sort((a, b) => a.start - b.start);
+      
+      sortedMentions.forEach(mention => {
+        // Add text before the mention
+        if (mention.start > lastIndex) {
+          parts.push(content.substring(lastIndex, mention.start));
+        }
+        
+        // Get current username - prefer userId match, fallback to stored username
+        let displayName = mention.username;
+        if (mention.userId) {
+          // Check if mention.userId is an object with name property (populated)
+          if (typeof mention.userId === 'object' && mention.userId.name) {
+            displayName = mention.userId.name;
+          } else {
+            // Try to find in allUsers
+            const user = allUsers.find(u => u._id === mention.userId || u._id === (mention.userId?._id));
+            if (user) {
+              displayName = user.name;
+            }
+          }
+        }
+        
+        // Add the styled mention with current username
+        parts.push(
+          <span key={`mention-${mention.start}`} className="text-blue-600 font-semibold">
+            @{displayName}
+          </span>
+        );
+        
+        lastIndex = mention.end;
+      });
+      
+      // Add remaining text after the last mention
+      if (lastIndex < content.length) {
+        parts.push(content.substring(lastIndex));
       }
       
-      // Add the mention
-      parts.push(
-        <span key={match.index} className="text-blue-600 font-semibold">
-          {match[0]}
-        </span>
-      );
-      
-      lastIndex = match.index + match[0].length;
+      return parts.length > 0 ? parts : content;
     }
     
-    // Add remaining text after the last mention
+    // Fallback: Parse mentions from content by matching against actual usernames
+    const parts = [];
+    let lastIndex = 0;
+    let i = 0;
+    
+    while (i < content.length) {
+      if (content[i] === '@') {
+        // Check if @ is preceded by space or at start
+        const charBefore = i > 0 ? content[i - 1] : ' ';
+        if (charBefore === ' ' || charBefore === '\n' || i === 0) {
+          // Add text before @
+          if (i > lastIndex) {
+            parts.push(content.substring(lastIndex, i));
+          }
+          
+          // Try to match against actual usernames - exact match first, then partial match
+          let matchedUsername = null;
+          let matchLength = 0;
+          let matchedUser = null;
+          
+          // Sort by length descending to match longest username first
+          const sortedUsers = [...allUsers].sort((a, b) => b.name.length - a.name.length);
+          
+          // First, try exact match
+          for (const user of sortedUsers) {
+            const candidateText = content.substring(i + 1, i + 1 + user.name.length);
+            if (candidateText === user.name) {
+              // Check that mention ends properly
+              const charAfter = i + 1 + user.name.length < content.length 
+                ? content[i + 1 + user.name.length] 
+                : ' ';
+              if (charAfter === ' ' || charAfter === '\n' || i + 1 + user.name.length === content.length) {
+                matchedUsername = user.name;
+                matchLength = user.name.length;
+                matchedUser = user;
+                break;
+              }
+            }
+          }
+          
+          // If no exact match, try partial match (extract full mentioned text up to punctuation/end)
+          if (!matchedUser) {
+            // Extract the full mentioned text (continue through spaces to get complete old name)
+            let j = i + 1;
+            let spaceCount = 0;
+            while (j < content.length) {
+              if (content[j] === ' ') {
+                spaceCount++;
+                // Stop after two spaces or if next chars look like sentence text
+                if (spaceCount > 1 || (j + 1 < content.length && /[a-z]/.test(content[j + 1]))) {
+                  break;
+                }
+                j++;
+                continue;
+              }
+              if (content[j] === '\n') break;
+              spaceCount = 0;
+              j++;
+            }
+            const mentionedText = content.substring(i + 1, j).trim();
+            
+            // First: Find a user whose name STARTS with the mentioned text
+            for (const user of sortedUsers) {
+              if (user.name.toLowerCase().startsWith(mentionedText.toLowerCase())) {
+                matchedUsername = user.name;
+                matchLength = mentionedText.length;
+                matchedUser = user;
+                break;
+              }
+            }
+            
+            // Second: If no start match, find a user whose name CONTAINS the mentioned text
+            if (!matchedUser) {
+              for (const user of sortedUsers) {
+                if (user.name.toLowerCase().includes(mentionedText.toLowerCase())) {
+                  matchedUsername = user.name;
+                  matchLength = mentionedText.length;
+                  matchedUser = user;
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (matchedUser) {
+            // Add styled mention with current user name
+            parts.push(
+              <span key={`mention-${i}`} className="text-blue-600 font-semibold">
+                @{matchedUsername}
+              </span>
+            );
+            lastIndex = i + 1 + matchLength;
+            i = lastIndex;
+            continue;
+          }
+        }
+      }
+      i++;
+    }
+    
+    // Add remaining text
     if (lastIndex < content.length) {
       parts.push(content.substring(lastIndex));
     }
@@ -972,10 +1184,22 @@ const Posts = () => {
                 )}
 
                 <textarea
+                  ref={editTextareaRef}
                   value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+                  onChange={handleMentionInputForEdit}
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 min-h-[120px]"
                 />
+                
+                {/* Mention Modal for Edit */}
+                <div className="overflow-visible">
+                  <MentionModal
+                    users={filteredUsers}
+                    onSelectUser={handleSelectMentionedUserInEdit}
+                    isOpen={showMentionModal}
+                    position={mentionModalPosition}
+                    searchQuery={mentionSearchQuery}
+                  />
+                </div>
 
                 <div className="flex justify-end space-x-2 mt-4">
                   <button
@@ -1056,8 +1280,8 @@ const Posts = () => {
                           <div className="mt-2">
                             <div className="text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
                               {expandedPosts[post._id] 
-                                ? renderContentWithMentions(post.content)
-                                : renderContentWithMentions(getTruncatedContent(post.content))
+                                ? renderContentWithMentions(post.content, post.mentions)
+                                : renderContentWithMentions(getTruncatedContent(post.content), post.mentions)
                               }
                             </div>
                             {isPostLong(post.content) && (
