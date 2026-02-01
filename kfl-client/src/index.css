@@ -30,7 +30,7 @@
   
   /* Make all text slightly bolder on Android mobile devices */
   body, h1, h2, h3, h4, h5, h6, p, span, div, th, td, button, input, select, textarea, label {
-    font-weight: 400 !important;
+    font-weight: 500 !important;
   }
   
   /* Ensure semibold appears even bolder */
