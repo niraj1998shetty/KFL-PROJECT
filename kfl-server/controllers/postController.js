@@ -14,11 +14,63 @@ const reactionEmojis = {
   highFive: "🙌"
 };
 
+// Helper function to extract and process mentions from content
+const extractMentionsFromContent = async (content) => {
+  const mentions = [];
+  const allUsers = await User.find({}, '_id name');
+  
+  // Sort users by name length descending to match longest names first
+  const sortedUsers = allUsers.sort((a, b) => b.name.length - a.name.length);
+  
+  let i = 0;
+  while (i < content.length) {
+    if (content[i] === '@') {
+      // Check if @ is preceded by space or at start
+      const charBefore = i > 0 ? content[i - 1] : ' ';
+      if (charBefore === ' ' || charBefore === '\n' || i === 0) {
+        // Try to match against usernames
+        let matched = false;
+        
+        for (const user of sortedUsers) {
+          const candidateText = content.substring(i + 1, i + 1 + user.name.length);
+          if (candidateText === user.name) {
+            // Check that mention ends properly
+            const charAfter = i + 1 + user.name.length < content.length 
+              ? content[i + 1 + user.name.length] 
+              : ' ';
+            if (charAfter === ' ' || charAfter === '\n' || i + 1 + user.name.length === content.length) {
+              mentions.push({
+                userId: user._id,
+                username: user.name,
+                start: i,
+                end: i + 1 + user.name.length
+              });
+              i = i + 1 + user.name.length;
+              matched = true;
+              break;
+            }
+          }
+        }
+        
+        if (!matched) {
+          i++;
+        }
+      } else {
+        i++;
+      }
+    } else {
+      i++;
+    }
+  }
+  
+  return mentions;
+};
+
 // @desc    Create a new post
 // @route   POST /api/posts
 // @access  Private
 const createPost = asyncHandler(async (req, res) => {
-  const { content, isPoll, pollOptions } = req.body;
+  const { content, isPoll, pollOptions, mentions } = req.body;
   
   if (!content || content.trim() === '') {
     res.status(400);
@@ -41,6 +93,17 @@ const createPost = asyncHandler(async (req, res) => {
     }
   }
 
+  // Process mentions from client with userId
+  let mentionsData = [];
+  if (mentions && Array.isArray(mentions)) {
+    mentionsData = mentions.map(mention => ({
+      userId: mention.userId,
+      username: mention.username,
+      start: mention.start,
+      end: mention.end
+    }));
+  }
+
   // Handle poll creation
   let pollData = [];
   if (isPoll && pollOptions && Array.isArray(pollOptions) && pollOptions.length > 0) {
@@ -55,6 +118,7 @@ const createPost = asyncHandler(async (req, res) => {
     content,
     author: req.user.id,
     tags,
+    mentions: mentionsData,
     isPoll: !!isPoll,
     pollOptions: pollData
   });
@@ -62,6 +126,7 @@ const createPost = asyncHandler(async (req, res) => {
   // Populate author info before sending response
   await post.populate('author', 'name');
   await post.populate('tags', 'name');
+  await post.populate('mentions.userId', 'name');
 
   res.status(201).json(post);
 });
@@ -97,6 +162,7 @@ const getPosts = asyncHandler(async (req, res) => {
     .limit(fetchLimit)
     .populate('author', 'name isAdmin')
     .populate('tags', 'name')
+    .populate('mentions.userId', 'name')
     .populate('reactions.user', 'name');
 
   // Filter out posts with deleted authors
@@ -110,8 +176,18 @@ const getPosts = asyncHandler(async (req, res) => {
   const total = totalPosts.filter(p => p.author).length;
 
   // Format posts to include reaction counts and editability
-  const formattedPosts = posts.map(post => {
+  const formattedPosts = await Promise.all(posts.map(async (post) => {
     try {
+      // If post doesn't have mentions, extract and save them
+      if (!post.mentions || post.mentions.length === 0) {
+        const extractedMentions = await extractMentionsFromContent(post.content);
+        post.mentions = extractedMentions;
+        // Save the extracted mentions to database
+        await Post.updateOne({ _id: post._id }, { mentions: extractedMentions });
+        // Populate the extracted mentions
+        await post.populate('mentions.userId', 'name');
+      }
+      
       const postObj = post.toObject({ virtuals: true });
       postObj.reactionCounts = post.getReactionCounts();
       postObj.userReactions = {
@@ -163,11 +239,14 @@ const getPosts = asyncHandler(async (req, res) => {
       // Skip posts that fail to format (usually due to data inconsistencies)
       return null;
     }
-  }).filter(post => post !== null);
+  }));
+  
+  // Filter out null entries
+  const filteredFormattedPosts = formattedPosts.filter(post => post !== null);
 
   // Return pagination metadata along with posts
   res.status(200).json({
-    posts: formattedPosts,
+    posts: filteredFormattedPosts,
     pagination: {
       page,
       limit,
@@ -288,9 +367,13 @@ const updatePost = asyncHandler(async (req, res) => {
     }
   }
 
+  // Extract mentions from updated content
+  const mentions = await extractMentionsFromContent(content);
+
   // Update post
   post.content = content;
   post.tags = tags;
+  post.mentions = mentions;
   post.updatedAt = Date.now();
   
   await post.save();
@@ -298,6 +381,7 @@ const updatePost = asyncHandler(async (req, res) => {
   // Populate fields before sending response
   await post.populate('author', 'name');
   await post.populate('tags', 'name');
+  await post.populate('mentions.userId', 'name');
 
   const postObj = post.toObject({ virtuals: true });
   postObj.reactionCounts = post.getReactionCounts();
