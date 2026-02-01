@@ -12,8 +12,23 @@
   * {
     -webkit-text-stroke: 0.015em rgba(0, 0, 0, 0.15);
   }
+}
+
+/* Android specific font enhancement */
+@media screen and (-webkit-min-device-pixel-ratio: 1) {
+  body {
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Enhanced font rendering for ACTUAL mobile devices only (Android) */
+@media screen and (max-width: 768px) and (pointer: coarse) and (hover: none) {
+  * {
+    -webkit-text-stroke: 0.01em rgba(0, 0, 0, 0.1);
+    text-rendering: optimizeLegibility;
+  }
   
-  /* Make all text slightly bolder on iPhone only */
+  /* Make all text slightly bolder on Android mobile devices */
   body, h1, h2, h3, h4, h5, h6, p, span, div, th, td, button, input, select, textarea, label {
     font-weight: 500 !important;
   }
@@ -48,25 +63,10 @@
     font-weight: 600 !important;
   }
   
-  /* Extra bold for important text elements on iPhone */
+  /* Extra bold for important text elements on Android */
   .font-semibold, h1, h2, h3 {
     font-weight: 800 !important;
     text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
-  }
-}
-
-/* Android specific font enhancement */
-@media screen and (-webkit-min-device-pixel-ratio: 1) {
-  body {
-    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
-  }
-}
-
-/* Enhanced font rendering for all mobile devices */
-@media screen and (max-width: 768px) and (pointer: coarse) and (hover: none) {
-  * {
-    -webkit-text-stroke: 0.01em rgba(0, 0, 0, 0.1);
-    text-rendering: optimizeLegibility;
   }
 }
 
