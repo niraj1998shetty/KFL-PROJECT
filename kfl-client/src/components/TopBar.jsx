@@ -217,7 +217,7 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
                   >
                     <ArrowLeft className="h-6 w-6" />
                   </button>
-                  <span className="text-xl font-bold">
+                  <span className="text-xl font-bold truncate max-w-[240px]">
                     {pageTitle || (showProfile ? "Profile" : "")}
                   </span>
                 </div>
@@ -340,4 +340,5 @@ const TopBar = ({ showProfile = false ,pageTitle=null,showBackButton=false,onBac
 };
 
 export default TopBar;
+
 
