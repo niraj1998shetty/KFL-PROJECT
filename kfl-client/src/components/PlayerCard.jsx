@@ -107,7 +107,7 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
               style={{
                 top: '4px',
                 right: '-28px',
-                width: '106px'
+                width: '105px'
               }}
             >
               <motion.span 
