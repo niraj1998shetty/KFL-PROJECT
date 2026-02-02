@@ -73,9 +73,9 @@ const TeamCard = ({ team, onSelect, colorGradient }) => {
         </div>
 
         {/* Content */}
-        <div className="relative h-55 p-6 flex flex-col justify-between text-white z-10">
+        <div className="relative p-3 sm:p-6 flex flex-col text-white z-10 min-h-[180px] sm:min-h-[220px]">
           {/* Team Icon/Avatar */}
-          <div className="flex items-center justify-center w-16 h-16  mb-2">
+          <div className="flex items-center justify-center w-10 h-10 sm:w-16 sm:h-16 mb-1 sm:mb-2">
             {teamLogo ? (
               <img
                 src={teamLogo}
@@ -83,28 +83,31 @@ const TeamCard = ({ team, onSelect, colorGradient }) => {
                 className="w-full h-full object-contain"
               />
             ) : (
-              <span className="text-2xl font-bold text-gray-700">
+              <span className="text-lg sm:text-2xl font-bold text-gray-700">
                 {team.code.substring(0, 2).toUpperCase()}
               </span>
             )}
            </div>
 
           {/* Team Info */}
-          <div className="flex-1 flex flex-col justify-end">
-            <h3 className="text-xl font-bold mb-1">{team.name}</h3>
-            <p className="text-sm text-white text-opacity-90">{team.code}</p>
+          <div className="mb-3 sm:mb-4">
+            <h3 className="text-sm sm:text-xl font-bold mb-0.5 sm:mb-1 leading-tight">{team.name}</h3>
+            <p className="text-xs sm:text-sm text-white text-opacity-90">{team.code}</p>
           </div>
+
+          {/* Spacer */}
+          <div className="flex-1"></div>
 
           {/* Player Count */}
-          <div className="flex items-center justify-between pt-4 border-t border-white border-opacity-20">
-            <span className="text-sm font-semibold">Players</span>
-            <span className="text-2xl font-bold">{team.playerCount}</span>
+          <div className="flex items-center justify-between pt-1 sm:pt-4 border-t border-white border-opacity-20 pb-2 sm:pb-6">
+            <span className="text-xs sm:text-sm font-semibold">Players</span>
+            <span className="text-lg sm:text-2xl font-bold">{team.playerCount}</span>
           </div>
-        </div>
 
-        {/* Click Indicator */}
-        <div className="absolute bottom-3 right-3 text-white text-opacity-70 text-xs font-medium">
-          Click to view →
+          {/* Click Indicator */}
+          <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 text-white text-opacity-70 text-[9px] sm:text-xs font-medium">
+            Click to view →
+          </div>
         </div>
       </div>
     </motion.div>
