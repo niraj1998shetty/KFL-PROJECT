@@ -20,6 +20,16 @@ import allround from "../assets/icons/all-rounder.png";
 
 const PlayerCard = ({ player, team, index, colorGradient }) => {
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Get MOM badge based on count
+  const getMOMBadge = (momCount) => {
+    if (momCount === 1) return { emoji: "⭐", label: "Rising Star", color: "from-blue-600 to-purple-700" };
+    if (momCount >= 2) return { emoji: "⭐⭐", label: "Superstar", color: "from-blue-600 to-purple-700" };
+    return null;
+  };
+
+  const momBadge = getMOMBadge(player.momfrom25);
+
   const getTeamLogo = (code) => {
        const teamLogos = {
          CSK: cskLogo,
@@ -80,7 +90,43 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="h-full rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 bg-white overflow-hidden">
+      <div className="h-full rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 bg-white overflow-hidden relative">
+        {/* Corner Ribbon Badge */}
+        {momBadge && (
+          <div className="absolute top-0 right-0 z-10 overflow-hidden w-20 h-20 sm:w-24 sm:h-24">
+            <motion.div
+              initial={{ x: 100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 200, 
+                damping: 20,
+                delay: index * 0.05 + 0.2 
+              }}
+              className={`absolute transform rotate-45 bg-gradient-to-r ${momBadge.color} text-white text-center font-bold py-1 px-8 shadow-lg`}
+              style={{
+                top: '4px',
+                right: '-28px',
+                width: '105px'
+              }}
+            >
+              <motion.span 
+                animate={{
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="text-sm sm:text-lg"
+              >
+                {momBadge.emoji}
+              </motion.span>
+            </motion.div>
+          </div>
+        )}
+        
         {/* Header */}
         <div
           className={`h-16 sm:h-24 bg-gradient-to-br ${colorGradient} relative flex items-end justify-center pb-3`}
@@ -124,7 +170,7 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
           <div className="pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 block sm:hidden">
             <div className="text-center">
               <p className="text-[9px] text-gray-500">
-                MOM since 2025: <span className="font-bold text-gray-800">{player.momfrom25}</span>
+                MOM since 2025: <span className="text-[11px] font-bold text-gray-800">{player.momfrom25}</span>
               </p>
             </div>
           </div>

@@ -3,8 +3,9 @@ import { useAuth } from "../contexts/AuthContext";
 import TopBar from "../components/TopBar";
 import WeekPointsModal from "../components/WeekPointsModal";
 import UserInfoModal from "../components/UserInfoModal";
+import ConfettiCelebration from "../components/ConfettiCelebration";
 import axios from "axios";
-import { capitalizeFirstLetter,capitalizeEachWord } from "../helpers/functions";
+import { capitalizeEachWord } from "../helpers/functions";
 import { fetchUserStats } from "../services/userStatsService";
 
 
@@ -18,6 +19,7 @@ const LeaderboardPage = () => {
   const [isWeekPointsModalOpen, setIsWeekPointsModalOpen] = useState(false);
   const [isUserInfoModalOpen, setIsUserInfoModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [matchLoading, setMatchLoading] = useState(false);
   const [updateError, setUpdateError] = useState("");
@@ -258,7 +260,12 @@ const LeaderboardPage = () => {
     }
   };
 
-  const handleUserClick = async (entry) => {
+  const handleUserClick = async (entry, rank) => {
+    // Trigger celebration for top 3 users
+    if (rank <= 3) {
+      setShowCelebration(true);
+    }
+    
     setIsUserInfoModalOpen(true);
     setModalLoading(true);
     try {
@@ -283,6 +290,7 @@ const LeaderboardPage = () => {
   const handleCloseUserModal = () => {
     setIsUserInfoModalOpen(false);
     setSelectedUser(null);
+    setShowCelebration(false);
   };
 
   const handleSubmit = async (e) => {
@@ -531,7 +539,7 @@ const LeaderboardPage = () => {
                           return (
                             <tr
                               key={entry.id}
-                              onClick={() => handleUserClick(entry)}
+                              onClick={() => handleUserClick(entry, rank)}
                               className={`${isInTop3 ? "bg-blue-50" : ""} cursor-pointer hover:bg-gray-100 transition-colors`}
                             >
                               <td className="px-4 sm:px-6 py-4">
@@ -870,6 +878,14 @@ const LeaderboardPage = () => {
         user={selectedUser}
         loading={modalLoading}
       />
+
+      {/* Celebration Confetti */}
+      {showCelebration && (
+        <ConfettiCelebration 
+          duration={3000}
+          onComplete={() => setShowCelebration(false)}
+        />
+      )}
     </>
   );
 };
