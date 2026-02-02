@@ -23,8 +23,8 @@ const PlayerCard = ({ player, team, index, colorGradient }) => {
   
   // Get MOM badge based on count
   const getMOMBadge = (momCount) => {
-    if (momCount === 1) return { emoji: "⭐", label: "Rising Star", color: "from-indigo-500 to-blue-600" };
-    if (momCount >= 2) return { emoji: "⭐⭐", label: "Superstar", color: "from-indigo-500 to-blue-600" };
+    if (momCount === 1) return { emoji: "⭐", label: "Rising Star", color: "from-blue-600 to-purple-700" };
+    if (momCount >= 2) return { emoji: "⭐⭐", label: "Superstar", color: "from-blue-600 to-purple-700" };
     return null;
   };
 
