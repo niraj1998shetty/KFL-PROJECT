@@ -1261,7 +1261,7 @@ const Posts = () => {
                             : "?"}
                         </div>
                         <div>
-                          <div className="flex items-center">
+                          <div className="flex items-center mt-1">
                             <h3 className="font-bold text-gray-900">
                               {post.author?.name
                                 ? formatNameMaxTwoWords(post.author.name)
