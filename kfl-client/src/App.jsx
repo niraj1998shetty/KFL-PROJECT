@@ -23,7 +23,7 @@ import UsersPage from './pages/UsersPage';
 // Layout component for authenticated pages
 const AppLayout = ({ children }) => {
   return (
-    <div className="flex flex-col h-screen">
+    <>
       <TopBar />
       <div className="flex flex-1 pt-16 overflow-hidden">
         <Sidebar />
@@ -32,7 +32,7 @@ const AppLayout = ({ children }) => {
         </main>
       </div>
       <Footer />
-    </div>
+    </>
   );
 };
 const PageLayout = ({ children, pageTitle, showProfile = false, showBackButton = false, onBackClick = null }) => {
