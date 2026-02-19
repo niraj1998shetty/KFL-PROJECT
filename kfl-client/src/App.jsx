@@ -109,9 +109,9 @@ const App = () => {
             path="/teams-players"
             element={
               <AuthGuard>
-                 <PageLayout pageTitle="Teams & Players" showBackButton={true}>
+                <AppLayout>
                   <TeamsPlayersPage />
-                 </PageLayout>
+                </AppLayout>
               </AuthGuard>
             }
           />

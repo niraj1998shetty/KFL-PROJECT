@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TeamCard from "../components/TeamCard";
 import PlayerCard from "../components/PlayerCard";
@@ -16,6 +17,9 @@ import gtLogo from "../assets/gt-logo.png";
 import lsgLogo from "../assets/lsg-logo.png";
 
 const TeamsPlayersPage = () => {
+  const navigate = useNavigate();
+
+
   const [teams, setTeams] = useState([]);
   const [players, setPlayers] = useState([]);
   const[filteredPlayers, setFilteredPlayers] = useState([]);
@@ -119,6 +123,28 @@ const TeamsPlayersPage = () => {
     };
   }, []);
 
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = () => {
+      // When browser back button is pressed, reset to teams view
+      const searchParams = new URLSearchParams(window.location.search);
+      const teamParam = searchParams.get("team");
+      
+      if (!teamParam) {
+        // Reset to teams view
+        setSelectedTeam(null);
+        setPlayers([]);
+        setFilteredPlayers([]);
+        setSelectedRole("All");
+        setPlayersError(null);
+        setPlayersLoading(false);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
 
   useEffect(() => {
     let filtered;
@@ -133,42 +159,85 @@ const TeamsPlayersPage = () => {
     setFilteredPlayers(sorted);
   }, [selectedRole, players]);
 
+  // Sync URL parameter with selectedTeam state on component mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const teamParam = searchParams.get("team");
+    
+    if (teamParam && teams.length > 0) {
+      const team = teams.find(t => t.code === teamParam);
+      if (team) {
+        setSelectedTeam(team);
+        setSelectedRole("All");
+        setPlayersLoading(true);
+        setPlayersError(null);
+        setPlayers([]);
+        setFilteredPlayers([]);
+
+        // Fetch players for this team
+        axios
+          .get(`${API_URL}/players/team/${team.code}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          })
+          .then((response) => {
+            const sortedPlayers = sortPlayersByRole(response.data);
+            setPlayers(sortedPlayers);
+            setPlayersLoading(false);
+          })
+          .catch((err) => {
+            setPlayersError(
+              err.response?.data?.message || "Failed to fetch players"
+            );
+            setPlayers([]);
+            setPlayersLoading(false);
+          });
+      }
+    }
+  }, [teams, API_URL]);
+
+
   // Fetch players for selected team
-  const handleTeamSelect = async (team) => {
+  const handleTeamSelect = (team) => {
+    // Use window.history.pushState to ensure history entry is created
+    window.history.pushState(
+      { team: team.code },
+      team.name,
+      `/teams-players?team=${team.code}`
+    );
+    // Manually trigger the navigation logic since we're using pushState
     setSelectedTeam(team);
     setSelectedRole("All");
     setPlayersLoading(true);
     setPlayersError(null);
+    setPlayers([]);
+    setFilteredPlayers([]);
 
-    try {
-      const response = await axios.get(
-        `${API_URL}/players/team/${team.code}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      const sortedPlayers = sortPlayersByRole(response.data);
-
-      setPlayers(sortedPlayers);
-      setPlayersLoading(false);
-    } catch (err) {
-      setPlayersError(
-        err.response?.data?.message || "Failed to fetch players"
-      );
-      setPlayers([]);
-      setPlayersLoading(false);
-    }
+    // Fetch players for this team
+    axios
+      .get(`${API_URL}/players/team/${team.code}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        const sortedPlayers = sortPlayersByRole(response.data);
+        setPlayers(sortedPlayers);
+        setPlayersLoading(false);
+      })
+      .catch((err) => {
+        setPlayersError(
+          err.response?.data?.message || "Failed to fetch players"
+        );
+        setPlayers([]);
+        setPlayersLoading(false);
+      });
   };
 
   // Close player view and return to teams
   const handleBackToTeams = () => {
-    setSelectedTeam(null);
-    setPlayers([]);
-    setFilteredPlayers([]);
-    setSelectedRole("All");
+    navigate("/teams-players");
   };
 
   // Map team codes to team names
